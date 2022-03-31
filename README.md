@@ -1,0 +1,2 @@
+# snap-opensearch
+OpenSearch Snap
