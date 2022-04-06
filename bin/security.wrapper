@@ -1,0 +1,15 @@
+#!/bin/sh
+
+if [ -f "$OPENSEARCH_PATH_CONF/root-ca.pem" ] &&  [ -f "$OPENSEARCH_PATH_CONF/admin.pem" ] \
+    && [ -f "$OPENSEARCH_PATH_CONF/admin-key.pem" ]; then
+    echo "Running security plugin"
+    $SNAP_DATA/plugins/opensearch-security/tools/securityadmin.sh -cd $SNAP_DATA/plugins/opensearch-security/securityconfig/ \
+        -icl -nhnv \
+        -cacert $OPENSEARCH_PATH_CONF/root-ca.pem \
+        -cert $OPENSEARCH_PATH_CONF/admin.pem \
+        -key $OPENSEARCH_PATH_CONF/admin-key.pem
+    exit 0
+else
+    echo "Certificates (root-ca.pem, admin.pem, admin-key.pem) not found on $OPENSEARCH_PATH_CONF"
+    exit 1
+fi

@@ -1,0 +1,37 @@
+#!/bin/sh
+
+for FOLDER in logs data dev/shm/performanceanalyzer;
+do
+    mkdir -p "$SNAP_COMMON/$FOLDER"
+    if [ $FOLDER = "data" ]; then
+        chmod -R 770 "$SNAP_COMMON/$FOLDER"
+    fi
+    chown -R snap_daemon:snap_daemon "$SNAP_COMMON/$FOLDER"
+
+done
+
+if [ ! -d "$SNAP_COMMON/config" ]; then
+    cp -R -n $SNAP/config $SNAP_COMMON
+    # replace default config files to use single-node and right log and data paths.
+    cp -f $SNAP/bin/helpers/config/jvm.options $SNAP_COMMON/config/jvm.options
+    cp -f $SNAP/bin/helpers/config/opensearch.yml $SNAP_COMMON/config/opensearch.yml
+    chown -R snap_daemon:snap_daemon "$SNAP_COMMON/config"
+fi
+
+for FOLDER in bin jdk plugins ;
+do
+    cp -R -n $SNAP/$FOLDER $SNAP_DATA
+    chmod -R 770 "$SNAP_DATA/$FOLDER"
+    if [ $FOLDER = "plugins" ]; then
+        # change performance analyzer plugin config to have access to a writable path
+        cp -f $SNAP/bin/helpers/config/performance-analyzer.properties \
+        $SNAP_DATA/plugins/opensearch-performance-analyzer/pa_config/performance-analyzer.properties
+    fi
+    chown -R snap_daemon:snap_daemon "$SNAP_DATA/$FOLDER"
+done
+
+for FOLDER in lib modules;
+do
+    cp -R -n $SNAP/$FOLDER $SNAP_DATA
+    chown -R snap_daemon:snap_daemon "$SNAP_DATA/$FOLDER"
+done

@@ -1,0 +1,64 @@
+name: opensearch
+base: core20
+version: '1.3.1'
+summary: OpenSearch makes it easy to ingest, search, visualize, and analyze your data.
+description: |
+  OpenSearch enables people to easily ingest, secure, search, aggregate, view, and
+  analyze data. These capabilities are popular for use cases such as application search,
+  log analytics, and more. With OpenSearch people benefit from having an open source product
+  they can use, modify, extend, monetize, and resell how they want. At the same time,
+  OpenSearch will continue to provide a secure, high-quality search and analytics suite
+  with a rich roadmap of new and innovative functionality.
+
+grade: stable
+confinement: strict
+assumes:
+  - snapd2.43
+
+system-usernames:
+  snap_daemon: shared
+
+plugs:
+  max-map-count:
+    interface: system-files
+    read:
+    - /proc/sys/vm/max_map_count
+
+apps:
+  daemon:
+    plugs: [network, network-bind, mount-observe, max-map-count]
+    command: usr/bin/setpriv --clear-groups --reuid snap_daemon --regid snap_daemon -- $SNAP/bin/opensearch.wrapper
+    daemon: simple
+    environment:
+      OPENSEARCH_HOME: $SNAP_DATA
+      OPENSEARCH_JAVA_HOME: $SNAP_DATA/jdk
+      OPENSEARCH_PATH_CONF: $SNAP_COMMON/config
+  security:
+    plugs: [network, network-bind]
+    command: usr/bin/setpriv --clear-groups --reuid snap_daemon --regid snap_daemon -- $SNAP/bin/security.wrapper
+    environment:
+      OPENSEARCH_PATH_CONF: $SNAP_COMMON/config
+      OPENSEARCH_HOME: $SNAP_DATA
+      OPENSEARCH_JAVA_HOME: $SNAP_DATA/jdk
+
+hooks:
+  configure:
+    plugs: []
+
+parts:
+  opensearch:
+    plugin: dump
+    source-type: tar
+    source: https://artifacts.opensearch.org/releases/bundle/opensearch/$SNAPCRAFT_PROJECT_VERSION/opensearch-$SNAPCRAFT_PROJECT_VERSION-linux-x64.tar.gz
+    source-checksum: md5/31222ee74b70cc5564f976524cc8f5c3
+    stage-packages:
+      - util-linux
+
+  scripts:
+    plugin: dump
+    source: ./bin
+    source-type: local
+    organize:
+      opensearch.wrapper: bin/opensearch.wrapper
+      helpers: bin/helpers
+      security.wrapper: bin/security.wrapper
