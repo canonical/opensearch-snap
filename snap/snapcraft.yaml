@@ -27,7 +27,7 @@ plugs:
 apps:
   daemon:
     plugs: [network, network-bind, mount-observe, max-map-count]
-    command: usr/bin/setpriv --clear-groups --reuid snap_daemon --regid snap_daemon -- $SNAP/bin/opensearch.wrapper
+    command: usr/bin/setpriv --clear-groups --reuid snap_daemon --regid snap_daemon -- $SNAP_DATA/bin/opensearch.wrapper
     daemon: simple
     environment:
       OPENSEARCH_HOME: $SNAP_DATA
@@ -35,7 +35,7 @@ apps:
       OPENSEARCH_PATH_CONF: $SNAP_COMMON/config
   security:
     plugs: [network, network-bind]
-    command: usr/bin/setpriv --clear-groups --reuid snap_daemon --regid snap_daemon -- $SNAP/bin/security.wrapper
+    command: usr/bin/setpriv --clear-groups --reuid snap_daemon --regid snap_daemon -- $SNAP_DATA/bin/security.wrapper
     environment:
       OPENSEARCH_PATH_CONF: $SNAP_COMMON/config
       OPENSEARCH_HOME: $SNAP_DATA
