@@ -14,6 +14,7 @@ grade: stable
 confinement: strict
 assumes:
   - snapd2.43
+  - command-chain
 
 system-usernames:
   snap_daemon: shared
@@ -22,12 +23,18 @@ plugs:
   max-map-count:
     interface: system-files
     read:
-    - /proc/sys/vm/max_map_count
+      - /proc/sys/vm/max_map_count
+  systemd-opensearch:
+    interface: system-files
+    write:
+      - /etc/systemd/system
 
 apps:
   daemon:
-    plugs: [network, network-bind, mount-observe, max-map-count]
+    plugs: [network, network-bind, mount-observe, max-map-count, systemd-opensearch]
     command: usr/bin/setpriv --clear-groups --reuid snap_daemon --regid snap_daemon -- $SNAP_DATA/bin/opensearch.wrapper
+    command-chain:
+      - bin/systemd.wrapper
     daemon: simple
     environment:
       OPENSEARCH_HOME: $SNAP_DATA
@@ -61,4 +68,5 @@ parts:
     organize:
       opensearch.wrapper: bin/opensearch.wrapper
       helpers: bin/helpers
+      systemd.wrapper: bin/systemd.wrapper
       security.wrapper: bin/security.wrapper

@@ -1,0 +1,17 @@
+#!/bin/sh
+
+# customize opensearch systemd service for memlock, nproc and nofile
+
+if snapctl is-connected systemd-opensearch; then
+    mkdir -p "/etc/systemd/system/snap.opensearch.daemon.service.d"
+    if [ ! -f "/etc/systemd/system/snap.opensearch.daemon.service.d/override.conf" ]; then
+        echo "[Service]\nLimitMEMLOCK=infinity\nLimitNPROC=4096\nLimitNOFILE=65536" > \
+        /etc/systemd/system/snap.opensearch.daemon.service.d/override.conf
+    fi
+else
+    echo "systemd-opensearch interface it's not be connected. OpenSearch needs access /etc/systemd/system/snap.opensearch.daemon.service.d."
+    echo "Please, run the command: 'snap connect $SNAP_NAME:systemd-opensearch'"
+    echo "After connecting the interface, restart the service with: 'systemctl restart snap.opensearch.daemon'"
+fi
+
+exec "$@"
