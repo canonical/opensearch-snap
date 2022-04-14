@@ -1,0 +1,13 @@
+#!/bin/sh
+
+if snapctl is-connected mount-observe && snapctl is-connected max-map-count; then
+    echo "Running Opensearch cluster"
+    OPENSEARCH_PATH_CONF=$OPENSEARCH_PATH_CONF $SNAP_DATA/bin/opensearch
+else
+    echo "mount-observe interface might not be connected. OpenSearch needs access to the mount filesystem."
+    echo "Please, run the command: 'snap connect $SNAP_NAME:mount-observe'"
+    echo "max-map-count interface might not be connected. OpenSearch needs access to read /proc/sys/vm/max_map_count"
+    echo "Please, run the command: 'snap connect $SNAP_NAME:max-map-count'"
+    echo "After connecting the interfaces, restart the service with: 'systemctl restart snap.opensearch.daemon'"
+    exit 1
+fi
