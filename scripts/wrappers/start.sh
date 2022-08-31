@@ -14,44 +14,17 @@ To be ran / setup once per cluster.
 EOF
 }
 
-# TODO: change defaults and register the service arguments in an arguments file
-
 
 # Args
 init_security=""
-admin_password="admin1234"
+admin_password=""
 
 
 # Args handling
 function parse_args () {
-    local LONG_OPTS_LIST=(
-        "init-security"
-        "admin-password"
-        "help"
-    )
-    # shellcheck disable=SC2155
-    local opts=$(getopt \
-      --longoptions "$(printf "%s:," "${LONG_OPTS_LIST[@]}")" \
-      --name "$(readlink -f "${BASH_SOURCE}")" \
-      --options "" \
-      -- "$@"
-    )
-    eval set -- "${opts}"
-
-    while [ $# -gt 0 ]; do
-        case $1 in
-            --init-security) shift
-                init_security=$1
-                ;;
-            --admin-password) shift
-                admin_password=$1
-                ;;
-            --help) usage
-                exit
-                ;;
-        esac
-        shift
-    done
+    # init-security boolean - from the charm, this should be based on a flag on the app data bag.
+    init_security="$(snapctl get init-security)"
+    admin_password="$(snapctl get admin-password)"
 }
 
 function set_defaults () {
@@ -84,9 +57,7 @@ fi
 # give it some time to bootstrap
 sleep 30s
 
-# run security_admin tool if security enabled
-# How to set passphrases
-# TODO only run once per cluster
+
 if [ "${init_security}" == "yes" ]; then
     sec_args=(
         "-cd" "${OPENSEARCH_PATH_CONF}/opensearch-security/"
