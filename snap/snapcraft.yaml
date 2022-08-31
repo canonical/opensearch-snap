@@ -29,7 +29,7 @@ plugs:
   systemd-write:
     interface: system-files
     write:
-      - /etc/systemd/system/snap.opensearch.daemon.d/
+      - /etc/systemd/system/snap.opensearch.daemon.d
 
 hooks:
   configure:
@@ -59,7 +59,7 @@ apps:
     daemon: simple
     install-mode: disable
     command: ops/start.sh
-    # reload-command: ops/start.sh
+    reload-command: ops/start.sh
     plugs:
       - network
       - network-bind
