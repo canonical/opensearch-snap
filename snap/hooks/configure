@@ -2,21 +2,8 @@
 
 set -eux
 
-
-function snap_logging () {
-    mkdir -p "${SNAP_LOG_DIR}"
-
-    LOG_FILE_PATH="${SNAP_LOG_DIR}/${1}.log"
-
-    function log() {
-        while read -r
-        do
-            echo "$(date) $REPLY" >> "${LOG_FILE_PATH}"
-        done
-    }
-
-    exec 3>&1 1>> >(log) 2>&1
-}
+source "${OPS_ROOT}"/helpers/snap-logger.sh "hook-configure"
+source "${OPS_ROOT}"/helpers/set-conf.sh
 
 # ----------------------------
 
@@ -88,22 +75,11 @@ function file_copy () {
     fi
 }
 
-function set_yaml_property () {
-    if grep -q "^#\?\s*$2" "$1";
-    then
-        sed -i "s@.*$2.*@$3@" "$1"
-    else
-        echo "$3" >> "$1"
-    fi
-}
-
 function set_property () {
     sed -i "s@$2@$3@" "$1"
 }
 
 # -------------------------------
-
-snap_logging "hook-configure"
 
 systemd_override
 system_conf_override
@@ -123,14 +99,14 @@ dir_copy_if_not_exists "modules" "${SNAP_DATA}" 550
 dir_copy_if_not_exists "plugins" "${SNAP_DATA}" 770
 
 dir_copy_if_not_exists "config" "${SNAP_COMMON}" 770
-add_folder "${SNAP_COMMON}/config/certificates" 660
+add_folder "${SNAP_COMMON}/config/certificates" 770
 
 add_folder "${SNAP_COMMON}/data" 770
 add_folder "${SNAP_COMMON}/logs" 774
 add_folder "${SNAP_COMMON}/tmp" 770
 
 # Change conf to set log and data paths for both opensearch.yaml and jvm.options
-set_yaml_property "${SNAP_COMMON}/config/opensearch.yml" "path.data:" "path.data: ${SNAP_COMMON}/data"
-set_yaml_property "${SNAP_COMMON}/config/opensearch.yml" "path.logs:" "path.logs: ${SNAP_COMMON}/logs"
+set_yaml_prop "${SNAP_COMMON}/config/opensearch.yml" "path.data" "${SNAP_COMMON}/data"
+set_yaml_prop "${SNAP_COMMON}/config/opensearch.yml" "path.logs" "${SNAP_COMMON}/logs"
 
 set_property "${SNAP_COMMON}/config/jvm.options" "=logs/" "=${SNAP_COMMON}/logs/"
