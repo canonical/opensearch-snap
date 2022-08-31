@@ -12,11 +12,17 @@ sudo snap connect opensearch:systemd-write
 
 sudo snap run opensearch.setup \
     --node-name master0 \
-    --node-roles cluster_manager \
+    --node-roles cluster_manager,data \
     --tls-root-password root1234 \
     --tls-admin-password admin1234 \
     --tls-node-password node1234 \
-    --tls-init-setup yes 
+    --tls-init-setup yes                 # this creates the root and admin certs as well.
+
+    
+sudo snap set opensearch admin-password=admin1234
+
+# only in the first cluster setup, or for rebuilding the security index
+sudo snap set opensearch init-security=yes
 
 sudo snap restart opensearch.daemon
 ```
