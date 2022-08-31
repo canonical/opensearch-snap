@@ -151,6 +151,7 @@ function create_root_certificate () {
         -x509 \
         -sha256 \
         -passin pass:"${password}" \
+        -passout pass:"${password}" \
         -key "${target_dir}/root-ca-key.pem" \
         -out "${target_dir}/root-ca.pem" \
         -subj "${subject}" \
@@ -172,19 +173,21 @@ function create_certificate () {
         -outform PEM \
         -in "${target_dir}/${res_name}-key-temp.pem" \
         -topk8 \
-        -nocrypt \
         -v1 PBE-SHA1-3DES \
+        -passout pass:"${password}" \
         -passin pass:"${password}" \
         -out "${target_dir}/${res_name}-key.pem"
 
     # create a CSR
     openssl req \
         -new \
+        -passout pass:"${password}" \
+        -passin pass:"${password}" \
         -key "${target_dir}/${res_name}-key.pem" \
         -subj "${subject}" \
         -out "${target_dir}/${res_name}.csr"
 
-    # generate the admin certificate
+    # generate the certificate
     openssl x509 \
         -req \
         -in "${target_dir}/${res_name}.csr" \

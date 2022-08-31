@@ -19,7 +19,7 @@ EOF
 
 # Args
 init_security=""
-admin_password=""
+admin_password="admin1234"
 
 
 # Args handling
@@ -79,8 +79,10 @@ fi
     --clear-groups \
     --reuid snap_daemon \
     --regid snap_daemon -- \
-    "${OPENSEARCH_HOME}"/bin/opensearch
+    "${OPENSEARCH_HOME}"/bin/opensearch &
 
+# give it some time to bootstrap
+sleep 30s
 
 # run security_admin tool if security enabled
 # How to set passphrases

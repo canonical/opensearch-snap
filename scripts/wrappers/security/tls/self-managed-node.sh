@@ -117,9 +117,9 @@ if [ -n "${node_password}" ]; then
 fi
 
 if [ "${rest_with_tls}" == "yes" ]; then
-    set_yaml_prop "${opensearch_yaml}" "plugins.security.http.transport.pemtrustedcas_filepath" "${target_dir}/root-ca.pem"
-    set_yaml_prop "${opensearch_yaml}" "plugins.security.http.transport.pemcert_filepath" "${target_dir}/node-${name}.pem"
-    set_yaml_prop "${opensearch_yaml}" "plugins.security.http.transport.pemkey_filepath" "${target_dir}/node-${name}-key.pem"
+    set_yaml_prop "${opensearch_yaml}" "plugins.security.ssl.http.pemtrustedcas_filepath" "${target_dir}/root-ca.pem"
+    set_yaml_prop "${opensearch_yaml}" "plugins.security.ssl.http.pemcert_filepath" "${target_dir}/node-${name}.pem"
+    set_yaml_prop "${opensearch_yaml}" "plugins.security.ssl.http.pemkey_filepath" "${target_dir}/node-${name}-key.pem"
     if [ -n "${node_password}" ]; then
         set_yaml_prop "${opensearch_yaml}" "plugins.security.ssl.http.pemkey_password" "${node_password}"
     fi

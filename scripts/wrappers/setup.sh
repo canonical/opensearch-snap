@@ -2,6 +2,8 @@
 
 set -eux
 
+source "${OPS_ROOT}"/helpers/snap-logger.sh "setup"
+source "${OPS_ROOT}"/helpers/set-conf.sh
 
 usage() {
 cat << EOF
@@ -25,9 +27,6 @@ To be ran / setup once per cluster.
 --help                                Shows help menu
 EOF
 }
-
-source "${OPS_ROOT}"/helpers/snap-logger.sh "setup"
-source "${OPS_ROOT}"/helpers/set-conf.sh
 
 
 # Args
@@ -231,5 +230,5 @@ if [ "${tls_self_managed}" ]; then
 fi
 
 
-chmod -R 774 "${OPENSEARCH_PATH_CERTS}"
+chmod -R 770 "${OPENSEARCH_PATH_CERTS}"
 chown -R snap_daemon:snap_daemon "${OPENSEARCH_PATH_CERTS}"
