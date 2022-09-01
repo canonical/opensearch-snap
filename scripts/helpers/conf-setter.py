@@ -88,6 +88,13 @@ def add_or_update(target_file: str, key_path: str, val: object, sep="/",
 
 
 def parse_args():
+
+    def single_char_arg(input: str) -> str:
+        clean_input = input.strip()
+        if len(clean_input) == 1:
+            return clean_input
+        raise ValueError('Expected single character.')
+
     parser = ArgumentParser(description='Utility script for editing YAML conf files.')
 
     parser.add_argument('-f', '--file',
@@ -96,6 +103,7 @@ def parse_args():
                         help='Path of the source/target YAML file.')
 
     parser.add_argument('-k', '--key',
+                        type=str,
                         required=True,
                         help='Key of the element to target.')
 
@@ -104,7 +112,7 @@ def parse_args():
                         help='New value to set - for complex data types, this should be formatted as list / dict.')
 
     parser.add_argument('-s', '--sep',
-                        type=lambda x: len(x) == 1,
+                        type=single_char_arg,
                         default='/',
                         required=False,
                         help='Separator character for traversal.')
@@ -135,10 +143,11 @@ if __name__ == "__main__":
                   args.key,
                   args.value,
                   sep=args.sep,
-                  output_type=args.output_type)
+                  output_type=args.out)
 
     # update(path, 'cluster.name', 'new_name')
 
     # update(path, 'cluster.core/target.obj/key3/key3.a/obj', {'a': 'new_name_1', 'b': ['hello', 'world']})
 
+    # update(path, 'cluster.core/target.arr.simple/[0]', 'hello')
     # update(path, 'cluster.core/target.arr.complex/[name:complex3]', {'a': 'new_name_1', 'b': ['hello', 'world']})
