@@ -1,16 +1,19 @@
 #!/usr/bin/python
+import ast
+import json
 import sys
 from argparse import ArgumentParser
 from collections.abc import Mapping
 from enum import Enum
 
+import ruamel.yaml.nodes
 from ruamel.yaml import YAML
 
 """Utilities for editing yaml configuration files at any level of nestedness."""
 
 
 class OutputType(Enum):
-    persist = 'persist'
+    file = 'file'
     console = 'console'
     all = 'all'
 
@@ -69,68 +72,126 @@ def __deep_update(source, node_keys: list[str], val: object):
     return source
 
 
-def add_or_update(target_file: str, key_path: str, val: object, sep="/",
-                  output_type: OutputType = OutputType.all):
+def __inline_array_format(data, node_keys: list[str], val: object):
+
+    def __flow_style():
+        ret = ruamel.yaml.CommentedSeq()
+        ret.fa.set_flow_style()
+        return ret
+
+    def __leaf_node(current, node_names: list[str]):
+        if len(node_names) == 1:
+            return current
+
+        return __leaf_node(current[node_names.pop(0)], node_names)
+
+    leaf_k = node_keys[-1]
+    leaf_n = __leaf_node(data, node_keys)
+    leaf_n[leaf_k] = __flow_style()
+    leaf_n[leaf_k].extend(val)
+
+    return data
+
+
+def add_or_update(target_file: str, key_path: str, val: object, sep='/',
+                  output_type: OutputType = OutputType.all,
+                  inline_array: bool = False):
 
     yaml = YAML()
 
     with open(target_file, mode='r') as f:
         data = yaml.load(f)
 
-    __deep_update(data, key_path.split(sep), val)
+    data = __deep_update(data, key_path.split(sep), val)
+
+    if inline_array:
+        data = __inline_array_format(data, key_path.split(sep), val)
 
     if output_type in [OutputType.all, OutputType.console]:
         yaml.dump(data, sys.stdout)
 
-    if output_type in [OutputType.all, OutputType.persist]:
+    if output_type in [OutputType.all, OutputType.file]:
         with open(target_file, mode='w') as f:
             yaml.dump(data, f)
 
 
 def parse_args():
 
-    def single_char_arg(input: str) -> str:
-        clean_input = input.strip()
+    def __single_char_arg(input_val: str) -> str:
+        clean_input = input_val.strip()
         if len(clean_input) == 1:
             return clean_input
+
         raise ValueError('Expected single character.')
 
-    parser = ArgumentParser(description='Utility script for editing YAML conf files.')
+    def __body_value_arg(input_val):
+        if input_val.isnumeric():
+            return int(input_val)
 
-    parser.add_argument('-f', '--file',
-                        type=str,
-                        required=True,
-                        help='Path of the source/target YAML file.')
+        if input_val.startswith('{') and input_val.endswith('}'):
+            return json.loads(input_val)
 
-    parser.add_argument('-k', '--key',
-                        type=str,
-                        required=True,
-                        help='Key of the element to target.')
+        if input_val.startswith('[') and input_val.endswith(']'):
+            return ast.literal_eval(input_val)
 
-    parser.add_argument('-v', '--value',
-                        required=False,
-                        help='New value to set - for complex data types, this should be formatted as list / dict.')
+        return input_val
 
-    parser.add_argument('-s', '--sep',
-                        type=single_char_arg,
-                        default='/',
-                        required=False,
-                        help='Separator character for traversal.')
+    def __parse():
+        parser = ArgumentParser(description='Utility script for editing YAML conf files.')
 
-    parser.add_argument('-o', '--out',
-                        type=OutputType,
-                        choices=list(OutputType),
-                        default=OutputType.all,
-                        required=False,
-                        help='Output type of the transformation.')
+        parser.add_argument('-f', '--file',
+                            type=str,
+                            required=True,
+                            help='Path of the source/target YAML file.')
 
-    parser.add_argument('-d', '--delete',
-                        type=bool,
-                        default=False,
-                        required=False,
-                        help='Delete node (Not implemented).')
+        parser.add_argument('-k', '--key',
+                            type=str,
+                            required=True,
+                            help='Key of the element to target.')
 
-    return parser.parse_args()
+        parser.add_argument('-v', '--value',
+                            type=__body_value_arg,
+                            required=False,
+                            help='New value to set - for complex data types, this should be formatted as list / dict.')
+
+        parser.add_argument('-i', '--inline-array',
+                            type=bool,
+                            required=False,
+                            default=False,
+                            help='If value is an array of simple values (str, int etc.), whether to write it between '
+                                 'square brackets on the same line or as a multiline yaml list.')
+
+        parser.add_argument('-r', '--set-on-comment-if-exists',
+                            type=bool,
+                            required=False,
+                            default=False,
+                            help='Whether to replace the an existing commented line with the same key, '
+                                 'For now, only handles if the mapping is at the first level of the document, and the '
+                                 'value is of simple type, or an array of simple values (str, int etc.).'
+                                 '(Not implemented)')
+
+        parser.add_argument('-s', '--sep',
+                            type=__single_char_arg,
+                            default='/',
+                            required=False,
+                            help='Separator character for traversal.')
+
+        parser.add_argument('-o', '--out',
+                            type=OutputType,
+                            choices=list(OutputType),
+                            default=OutputType.all,
+                            required=False,
+                            help='Output type of the transformation.')
+
+        parser.add_argument('-d', '--delete',
+                            type=bool,
+                            default=False,
+                            required=False,
+                            help='Delete node (Not implemented).')
+
+        return parser.parse_args()
+
+    return __parse()
 
 
 if __name__ == "__main__":
@@ -143,7 +204,8 @@ if __name__ == "__main__":
                   args.key,
                   args.value,
                   sep=args.sep,
-                  output_type=args.out)
+                  output_type=args.out,
+                  inline_array=args.inline_array)
 
     # update(path, 'cluster.name', 'new_name')
 
