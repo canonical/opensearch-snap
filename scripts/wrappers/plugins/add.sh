@@ -5,7 +5,7 @@ usage() {
 cat << EOF
 usage: snap run opensearch.plugins-add --name [opensearch.]security --location https://..plugin.zip
 To be ran / setup once per cluster.
---name        (Required)    Name of the plugin, can be prefixed by "opensearch." or not.
+--name        (Required)    Name of the plugin, will be prefixed by "opensearch-" if not set.
 --location    (Required)    Location of the zip plugin, served through https:// or file:///
 --help                      Shows help menu
 EOF
