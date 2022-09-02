@@ -41,35 +41,73 @@ def __deep_update(source, node_keys: list[str], val: object):
 
     # handling the insert / update on arrays
     if isinstance(source, list):
-        str_index = current_key[1:-1].strip()
-
-        index = None
-
-        # where user provides a key [key:val] or [key]
-        if str_index and not str_index.isnumeric():
-            key = str_index.split(':')
-            if len(key) == 1:
-                index = source.index(str_index)
-            else:
-                index = -1
-                for elt, i in zip(source, range(len(source))):
-                    if elt.get(key[0], None) == key[1]:
-                        index = i
-                        break
-
-                if index == -1:
-                    raise ValueError(f'{str_index} not found in the object.')
-
-        to_append = index is None and (not str_index or (int(str_index) > len(source)))
-        if to_append:
+        target_index = __target_array_index(source, current_key)
+        if target_index == -1:
             source.append(__deep_update(None, node_keys, val))
         else:
-            index = int(str_index) if index is None else index
-            source[index] = __deep_update(source[index], node_keys, val)
+            source[target_index] = __deep_update(source[target_index], node_keys, val)
 
         return source
 
     return source
+
+
+def __deep_delete(source, node_keys: list[str]):
+    if not node_keys:
+        return
+
+    if source is None:
+        return
+
+    leaf_level = __leaf_level(source, node_keys)
+    leaf_key = node_keys.pop(0)
+
+    if leaf_key in leaf_level and (isinstance(leaf_level[leaf_key], Mapping) or not leaf_key.startswith('[')):
+        del leaf_level[leaf_key]
+        return
+
+    # list
+    target_index = __target_array_index(leaf_level, leaf_key)
+    del leaf_level[target_index]
+
+
+def __leaf_level(current, node_names: list[str]):
+    if len(node_names) == 1:
+        return current
+
+    current_key = node_names.pop(0)
+    if current_key.startswith('[') and current_key.endswith(']'):
+        target_index = __target_array_index(current, current_key)
+        return __leaf_level(current[target_index], node_names)
+
+    return __leaf_level(current[current_key], node_names)
+
+
+def __target_array_index(source: list, node_key: str) -> int:
+    str_index = node_key[1:-1].strip()
+
+    index = None
+
+    # where user provides a key [key:val] or [key]
+    if str_index and not str_index.isnumeric():
+        key = str_index.split(':')
+        if len(key) == 1:
+            index = source.index(str_index)
+        else:
+            index = -1
+            for elt, i in zip(source, range(len(source))):
+                if elt.get(key[0], None) == key[1]:
+                    index = i
+                    break
+
+            if index == -1:
+                raise ValueError(f'{str_index} not found in the object.')
+
+    exists = index is not None or (str_index and (int(str_index) < len(source)))
+    if not exists:
+        return -1
+
+    return int(str_index) if index is None else index
 
 
 def __inline_array_format(data, node_keys: list[str], val: object):
@@ -79,23 +117,16 @@ def __inline_array_format(data, node_keys: list[str], val: object):
         ret.fa.set_flow_style()
         return ret
 
-    def __leaf_node(current, node_names: list[str]):
-        if len(node_names) == 1:
-            return current
-
-        return __leaf_node(current[node_names.pop(0)], node_names)
-
     leaf_k = node_keys[-1]
-    leaf_n = __leaf_node(data, node_keys)
-    leaf_n[leaf_k] = __flow_style()
-    leaf_n[leaf_k].extend(val)
+    leaf_l = __leaf_level(data, node_keys)
+    leaf_l[leaf_k] = __flow_style()
+    leaf_l[leaf_k].extend(val)
 
     return data
 
 
-def add_or_update(target_file: str, key_path: str, val: object, sep='/',
-                  output_type: OutputType = OutputType.all,
-                  inline_array: bool = False):
+def put(target_file: str, key_path: str, val: object, sep='/',
+        output_type: OutputType = OutputType.all, inline_array: bool = False):
 
     yaml = YAML()
 
@@ -106,6 +137,24 @@ def add_or_update(target_file: str, key_path: str, val: object, sep='/',
 
     if inline_array:
         data = __inline_array_format(data, key_path.split(sep), val)
+
+    if output_type in [OutputType.all, OutputType.console]:
+        yaml.dump(data, sys.stdout)
+
+    if output_type in [OutputType.all, OutputType.file]:
+        with open(target_file, mode='w') as f:
+            yaml.dump(data, f)
+
+
+def delete(target_file: str, key_path: str, sep='/',
+           output_type: OutputType = OutputType.all):
+
+    yaml = YAML()
+
+    with open(target_file, mode='r') as f:
+        data = yaml.load(f)
+
+    __deep_delete(data, key_path.split(sep))
 
     if output_type in [OutputType.all, OutputType.console]:
         yaml.dump(data, sys.stdout)
@@ -161,15 +210,6 @@ def parse_args():
                             help='If value is an array of simple values (str, int etc.), whether to write it between '
                                  'square brackets on the same line or as a multiline yaml list.')
 
-        parser.add_argument('-r', '--set-on-comment-if-exists',
-                            type=bool,
-                            required=False,
-                            default=False,
-                            help='Whether to replace the an existing commented line with the same key, '
-                                 'For now, only handles if the mapping is at the first level of the document, and the '
-                                 'value is of simple type, or an array of simple values (str, int etc.).'
-                                 '(Not implemented)')
-
         parser.add_argument('-s', '--sep',
                             type=__single_char_arg,
                             default='/',
@@ -198,18 +238,23 @@ if __name__ == "__main__":
     args = parse_args()
 
     if args.delete:
-        raise ValueError('Delete operation not implemented yet.')
+        delete(args.file,
+               args.key,
+               sep=args.sep,
+               output_type=args.out)
+    else:
+        put(args.file,
+            args.key,
+            args.value,
+            sep=args.sep,
+            output_type=args.out,
+            inline_array=args.inline_array)
 
-    add_or_update(args.file,
-                  args.key,
-                  args.value,
-                  sep=args.sep,
-                  output_type=args.out,
-                  inline_array=args.inline_array)
-
-    # update(path, 'cluster.name', 'new_name')
-
-    # update(path, 'cluster.core/target.obj/key3/key3.a/obj', {'a': 'new_name_1', 'b': ['hello', 'world']})
-
-    # update(path, 'cluster.core/target.arr.simple/[0]', 'hello')
-    # update(path, 'cluster.core/target.arr.complex/[name:complex3]', {'a': 'new_name_1', 'b': ['hello', 'world']})
+    # path = 'opensearch_put.yml'
+    # put(path, 'cluster.name', 'new_name')
+    # put(path, 'cluster.core/target.obj/key3/key3.a/obj', {'a': 'new_name_1', 'b': ['hello', 'world']})
+    # put(path, 'cluster.core/target.arr.simple/[0]', 'hello')
+    # put(path, 'cluster.core/target.arr.complex/[name:complex3]', {'a': 'new_name_1', 'b': ['hello', 'world']})
+    # put(path, 'cluster.core/target.arr.complex/[name:complex5]/val/key', 'new_val25')
+    # put(path, 'cluster.core/target.arr.complex/[0]/val', 'complex2_updated')
+    # put(path, 'cluster.core/target.arr.complex/[0]/new_val/new_sub_key', 'updated')
