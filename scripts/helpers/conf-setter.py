@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 import ast
 import json
 import sys
@@ -6,14 +6,15 @@ from argparse import ArgumentParser
 from collections.abc import Mapping
 from enum import Enum
 
-import ruamel.yaml.nodes
-from ruamel.yaml import YAML
+from ruamel.yaml import YAML, CommentedSeq
 
-"""Utilities for editing yaml configuration files at any level of nestedness."""
+
+"""Utilities for editing yaml configuration files at any level of nestedness while maintaining comments"""
 
 
 class OutputType(Enum):
     file = 'file'
+    obj = 'obj'
     console = 'console'
     all = 'all'
 
@@ -21,147 +22,158 @@ class OutputType(Enum):
         return self.value
 
 
-def __deep_update(source, node_keys: list[str], val: object):
-    if not node_keys:
-        return val
+class ConfigSetter:
 
-    if source is None:
-        if node_keys[0].startswith('['):
-            source = []
-        else:
-            source = {}
+    def __init__(self):
+        self.yaml = YAML()
 
-    current_key: str = node_keys.pop(0)
+    def load(self, config_file: str) -> dict[str, any]:
+        with open(config_file, mode='r') as f:
+            data = self.yaml.load(f)
 
-    # handling the insert / update on json objects
-    if isinstance(source, Mapping):
-        current_val = source.get(current_key, None)
-        source[current_key] = __deep_update(current_val, node_keys, val)
+        return data
+
+    def put(self, config_file: str, key_path: str, val: any, sep='/',
+            output_type: OutputType = OutputType.file, inline_array: bool = False,
+            output_file: str = None) -> dict[str, any]:
+
+        with open(config_file, mode='r') as f:
+            data = self.yaml.load(f)
+
+        self.__deep_update(data, key_path.split(sep), val)
+
+        if inline_array:
+            data = self.__inline_array_format(data, key_path.split(sep), val)
+
+        self.__dump(data,
+                    output_type,
+                    config_file if output_file is None else output_file)
+
+        return data
+
+    def delete(self, config_file: str, key_path: str, sep='/',
+               output_type: OutputType = OutputType.file,
+               output_file: str = None) -> dict[str, any]:
+
+        with open(config_file, mode='r') as f:
+            data = self.yaml.load(f)
+
+        self.__deep_delete(data, key_path.split(sep))
+
+        self.__dump(data,
+                    output_type,
+                    config_file if output_file is None else output_file)
+
+        return data
+
+    def __dump(self, data: dict[str, any], output_type: OutputType, target_file: str):
+        if output_type in [OutputType.console, OutputType.all]:
+            self.yaml.dump(data, sys.stdout)
+
+        if output_type in [OutputType.file, OutputType.all]:
+            with open(target_file, mode='w') as f:
+                self.yaml.dump(data, f)
+
+    def __deep_update(self, source, node_keys: list[str], val: any):
+        if not node_keys:
+            return val
+
+        if source is None:
+            if node_keys[0].startswith('['):
+                source = []
+            else:
+                source = {}
+
+        current_key: str = node_keys.pop(0)
+
+        # handling the insert / update on json objects
+        if isinstance(source, Mapping):
+            current_val = source.get(current_key, None)
+            source[current_key] = self.__deep_update(current_val, node_keys, val)
+            return source
+
+        # handling the insert / update on arrays
+        if isinstance(source, list):
+            target_index = self.__target_array_index(source, current_key)
+            if target_index == -1:
+                source.append(self.__deep_update(None, node_keys, val))
+            else:
+                source[target_index] = self.__deep_update(source[target_index], node_keys, val)
+
+            return source
+
         return source
 
-    # handling the insert / update on arrays
-    if isinstance(source, list):
-        target_index = __target_array_index(source, current_key)
-        if target_index == -1:
-            source.append(__deep_update(None, node_keys, val))
-        else:
-            source[target_index] = __deep_update(source[target_index], node_keys, val)
+    def __deep_delete(self, source, node_keys: list[str]):
+        if not node_keys:
+            return
 
-        return source
+        if source is None:
+            return
 
-    return source
+        leaf_level = self.__leaf_level(source, node_keys)
+        leaf_key = node_keys.pop(0)
 
+        if leaf_key in leaf_level and (isinstance(leaf_level[leaf_key], Mapping) or not leaf_key.startswith('[')):
+            del leaf_level[leaf_key]
+            return
 
-def __deep_delete(source, node_keys: list[str]):
-    if not node_keys:
-        return
+        # list
+        target_index = self.__target_array_index(leaf_level, leaf_key)
+        del leaf_level[target_index]
 
-    if source is None:
-        return
+    def __leaf_level(self, current, node_names: list[str]):
+        if len(node_names) == 1:
+            return current
 
-    leaf_level = __leaf_level(source, node_keys)
-    leaf_key = node_keys.pop(0)
+        current_key = node_names.pop(0)
+        if current_key.startswith('[') and current_key.endswith(']'):
+            target_index = self.__target_array_index(current, current_key)
+            return self.__leaf_level(current[target_index], node_names)
 
-    if leaf_key in leaf_level and (isinstance(leaf_level[leaf_key], Mapping) or not leaf_key.startswith('[')):
-        del leaf_level[leaf_key]
-        return
+        return self.__leaf_level(current[current_key], node_names)
 
-    # list
-    target_index = __target_array_index(leaf_level, leaf_key)
-    del leaf_level[target_index]
+    @staticmethod
+    def __target_array_index(source: list, node_key: str) -> int:
+        str_index = node_key[1:-1].strip()
 
+        index = None
 
-def __leaf_level(current, node_names: list[str]):
-    if len(node_names) == 1:
-        return current
+        # where user provides a key [key:val] or [key]
+        if str_index and not str_index.isnumeric():
+            key = str_index.split(':')
+            if len(key) == 1:
+                index = source.index(str_index)
+            else:
+                index = -1
+                for elt, i in zip(source, range(len(source))):
+                    if elt.get(key[0], None) == key[1]:
+                        index = i
+                        break
 
-    current_key = node_names.pop(0)
-    if current_key.startswith('[') and current_key.endswith(']'):
-        target_index = __target_array_index(current, current_key)
-        return __leaf_level(current[target_index], node_names)
+                if index == -1:
+                    raise ValueError(f'{str_index} not found in the object.')
 
-    return __leaf_level(current[current_key], node_names)
+        exists = index is not None or (str_index and (int(str_index) < len(source)))
+        if not exists:
+            return -1
 
+        return int(str_index) if index is None else index
 
-def __target_array_index(source: list, node_key: str) -> int:
-    str_index = node_key[1:-1].strip()
+    def __inline_array_format(self, data, node_keys: list[str], val: list[any]) -> dict[str, any]:
+        leaf_k = node_keys[-1]
 
-    index = None
+        leaf_l = self.__leaf_level(data, node_keys)
+        leaf_l[leaf_k] = self.__flow_style()
+        leaf_l[leaf_k].extend(val)
 
-    # where user provides a key [key:val] or [key]
-    if str_index and not str_index.isnumeric():
-        key = str_index.split(':')
-        if len(key) == 1:
-            index = source.index(str_index)
-        else:
-            index = -1
-            for elt, i in zip(source, range(len(source))):
-                if elt.get(key[0], None) == key[1]:
-                    index = i
-                    break
+        return data
 
-            if index == -1:
-                raise ValueError(f'{str_index} not found in the object.')
-
-    exists = index is not None or (str_index and (int(str_index) < len(source)))
-    if not exists:
-        return -1
-
-    return int(str_index) if index is None else index
-
-
-def __inline_array_format(data, node_keys: list[str], val: object):
-
-    def __flow_style():
-        ret = ruamel.yaml.CommentedSeq()
+    @staticmethod
+    def __flow_style() -> CommentedSeq:
+        ret = CommentedSeq()
         ret.fa.set_flow_style()
         return ret
-
-    leaf_k = node_keys[-1]
-    leaf_l = __leaf_level(data, node_keys)
-    leaf_l[leaf_k] = __flow_style()
-    leaf_l[leaf_k].extend(val)
-
-    return data
-
-
-def put(target_file: str, key_path: str, val: object, sep='/',
-        output_type: OutputType = OutputType.all, inline_array: bool = False):
-
-    yaml = YAML()
-
-    with open(target_file, mode='r') as f:
-        data = yaml.load(f)
-
-    data = __deep_update(data, key_path.split(sep), val)
-
-    if inline_array:
-        data = __inline_array_format(data, key_path.split(sep), val)
-
-    if output_type in [OutputType.all, OutputType.console]:
-        yaml.dump(data, sys.stdout)
-
-    if output_type in [OutputType.all, OutputType.file]:
-        with open(target_file, mode='w') as f:
-            yaml.dump(data, f)
-
-
-def delete(target_file: str, key_path: str, sep='/',
-           output_type: OutputType = OutputType.all):
-
-    yaml = YAML()
-
-    with open(target_file, mode='r') as f:
-        data = yaml.load(f)
-
-    __deep_delete(data, key_path.split(sep))
-
-    if output_type in [OutputType.all, OutputType.console]:
-        yaml.dump(data, sys.stdout)
-
-    if output_type in [OutputType.all, OutputType.file]:
-        with open(target_file, mode='w') as f:
-            yaml.dump(data, f)
 
 
 def parse_args():
@@ -237,18 +249,14 @@ def parse_args():
 if __name__ == "__main__":
     args = parse_args()
 
+    conf_setter = ConfigSetter()
     if args.delete:
-        delete(args.file,
-               args.key,
-               sep=args.sep,
-               output_type=args.out)
+        conf_setter.delete(args.file, args.key,
+                           sep=args.sep, output_type=args.out)
     else:
-        put(args.file,
-            args.key,
-            args.value,
-            sep=args.sep,
-            output_type=args.out,
-            inline_array=args.inline_array)
+        conf_setter.put(args.file, args.key, args.value,
+                        sep=args.sep, output_type=args.out,
+                        inline_array=args.inline_array)
 
     # path = 'opensearch_put.yml'
     # put(path, 'cluster.name', 'new_name')

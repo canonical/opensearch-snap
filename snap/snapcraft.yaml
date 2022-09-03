@@ -31,20 +31,25 @@ plugs:
     write:
       - /etc/systemd/system/snap.opensearch.daemon.d
 
+  proc-write:
+    interface: system-files
+    write:
+      - /proc/sys/vm/swappiness
+      - /proc/sys/vm/max_map_count
+      - /proc/sys/net/ipv4/tcp_retries2
+
 hooks:
-  configure:
+  install:
     plugs:
       - network
       - network-bind
       - systemd-write
+      - proc-write
     environment:
       OPS_ROOT: ${SNAP}/ops
 
 
 environment:
-  PROJECT_NAME: ${SNAPCRAFT_PROJECT_NAME}
-  PROJECT_VERSION: ${SNAPCRAFT_PROJECT_VERSION}
-
   SNAP_LOG_DIR: ${SNAP_COMMON}/ops/snap/logs
 
   OPENSEARCH_HOME: ${SNAP_DATA}
@@ -59,12 +64,13 @@ apps:
     daemon: simple
     install-mode: disable
     command: ops/start.sh
-    reload-command: ops/start.sh
+    # reload-command: ops/start.sh
     plugs:
       - network
       - network-bind
-      - systemd-write
       - mount-observe
+      - systemd-write
+      - proc-write
     environment:
       OPS_ROOT: ${SNAP}/ops
 
@@ -84,41 +90,16 @@ apps:
     command: ops/plugins/remove.sh
 
 parts:
-  python-requirements:
-    plugin: python
-    python-packages:
-      - ruamel.yaml
+#  python-requirements:
+#    plugin: python
+#    source: ./scripts
+#    python-packages:
+#      - ruamel.yaml
 
-  wrapper-scripts:
+  dependencies:
     plugin: nil
-    source: ./scripts
-    source-type: local
-    override-build: |
-      target_dir="${SNAPCRAFT_PART_INSTALL}/ops"
-      
-      rm -rf "${target_dir}"
-      
-      mkdir -p "${target_dir}"/logs/
-      
-      cp -r wrappers/. "${target_dir}"
-      cp -r helpers/ "${target_dir}/helpers"
-    build-packages:
-      - libcrypt1
-      - libexpat-dev
-      - zlib1g
     stage-snaps:
       - yq
-
-  wrapper-configs:
-    plugin: dump
-    source: snap/local
-    organize:
-      systemd/override.conf: /ops/sys/etc/systemd/override.conf
-
-  opensearch:
-    plugin: dump
-    source: https://opensearch-builds.s3.eu-west-1.amazonaws.com/core/opensearch-${SNAPCRAFT_PROJECT_VERSION}-linux.tar.gz
-    source-type: tar
     stage-packages:
       - util-linux
       - libfreetype6
@@ -132,3 +113,29 @@ parts:
       - libboost-all-dev
       - libasound2
       - libpsm2-2-compat
+      - libcrypt1
+      - libexpat1
+      - zlib1g
+
+  wrapper-scripts:
+    plugin: nil
+    source: ./scripts
+    source-type: local
+    override-build: |
+      target_dir="${SNAPCRAFT_PART_INSTALL}/ops"
+      
+      rm -rf "${target_dir}"
+      
+      cp -r wrappers/. "${target_dir}"
+      cp -r helpers/ "${target_dir}/helpers"
+
+  wrapper-configs:
+    plugin: dump
+    source: ./assets
+    organize:
+      systemd/override.conf: /ops/sys/etc/systemd/override.conf
+
+  opensearch:
+    plugin: dump
+    source: https://opensearch-builds.s3.eu-west-1.amazonaws.com/core/opensearch-${SNAPCRAFT_PROJECT_VERSION}-linux.tar.gz
+    source-type: tar
