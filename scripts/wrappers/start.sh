@@ -50,7 +50,7 @@ function system_proc_override () {
 
     # 1. Set the number of open file handles
     # ulimit -n 1024 -- default in local machine
-    # ulimit -n 65535
+    ulimit -n 65535
 
     # 2. Allow the opensearch user to Disable all swap files:
     # swapon -a -- default in local machine
