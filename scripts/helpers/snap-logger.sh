@@ -15,7 +15,7 @@ function log() {
     done
 }
 
-mkdir -p "${SNAP_LOG_DIR}/"
+[ -d "${SNAP_LOG_DIR}" ] || mkdir -p "${SNAP_LOG_DIR}/"
 
 LOG_FILE_PATH="${SNAP_LOG_DIR}/${1}.log"
 rm -f "${LOG_FILE_PATH}"

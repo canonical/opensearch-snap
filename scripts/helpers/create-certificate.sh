@@ -188,16 +188,33 @@ function create_certificate () {
         -out "${target_dir}/${res_name}.csr"
 
     # generate the certificate
-    openssl x509 \
-        -req \
-        -in "${target_dir}/${res_name}.csr" \
-        -CA "${target_dir}/root-ca.pem" \
-        -CAkey "${target_dir}/root-ca-key.pem" \
-        -CAcreateserial \
-        -sha256 \
-        -passin pass:"${root_password}" \
-        -out "${target_dir}/${res_name}.pem" \
-        -days ${LIFESPAN_DAYS}
+    gen_cert_args=(
+        "x509"
+        "-req"
+        "-in" "${target_dir}/${res_name}.csr"
+        "-CA" "${target_dir}/root-ca.pem"
+        "-CAkey" "${target_dir}/root-ca-key.pem"
+        "-CAcreateserial"
+        "-sha256"
+        "-passin" "pass:${root_password}"
+        "-out" "${target_dir}/${res_name}.pem"
+        "-days" "${LIFESPAN_DAYS}"
+    )
+
+    if [ "${type}" == "node" ] || [ "${type}" == "client" ]; then
+        CN="${subject##*'CN='}"
+        echo "subjectAltName=DNS:${CN}" > "${res_name}.ext"
+        gen_cert_args+=(
+            "-extfile" "${res_name}.ext"
+        )
+    fi
+
+    openssl "${gen_cert_args[@]}"
+
+    # cleanup
+    rm "${res_name}-key-temp.pem"
+    rm "${res_name}.csr"
+    [ -f "${res_name}.ext" ] || rm "${res_name}.ext"
 }
 
 
@@ -205,7 +222,7 @@ parse_args "$@"
 set_defaults
 validate_args
 
-mkdir -p "${target_dir}"
+[ -d "${target_dir}" ] || mkdir -p "${target_dir}"
 
 if [[ "${type}" == "root" ]]; then
     create_root_certificate
