@@ -134,4 +134,4 @@ inverted_node_subject=$(
         -passin pass:"${node_password}"
 )
 inverted_node_subject="${inverted_node_subject##subject=}"
-set_yaml_prop "${opensearch_yaml}" "plugins.security.nodes_dn" "[\"${inverted_node_subject}\"]"
+set_yaml_prop "${opensearch_yaml}" "plugins.security.nodes_dn" "[\"${inverted_node_subject}\"]" "yes"

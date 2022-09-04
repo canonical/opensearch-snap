@@ -229,4 +229,3 @@ if [[ "${type}" == "root" ]]; then
 else
     create_certificate
 fi
-
