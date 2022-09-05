@@ -2,7 +2,8 @@
 
 
 function replace_in_file () {
-    sed -i "s@${2}@${3}@" "${1}"
+    "${SNAP}"/usr/bin/setpriv \
+        --reuid snap_daemon -- sed -i "s@${2}@${3}@" "${1}"
 }
 
 
@@ -34,11 +35,29 @@ function set_yaml_prop() {
         expression="${expression}${prefix}${key}${suffix}"
     done
 
-    # yq fails serializing values starting with "/" must be escaped
-    if [[ "${value}" == /* ]]; then
-        value="\"${value}\""
+    # yq fails serializing values starting with or containing special characters so they must be wrapped in double quotes
+    # so, wrap any non number
+    if [[ "${value}" == [* ]]; then
+        value=${value:1:-1}
+
+        IFS=',' read -r -a arr_elts <<< "${value}"
+
+        value=""
+        for key in "${arr_elts[@]}"
+        do
+            key=$(echo -e "${key}" | tr -d '[:space:]')
+            if ! [[ ${key} =~ ^[0-9]+$ ]] ; then
+                key="\"${key}\""
+            fi
+            value="${value}${key},"
+        done
+        value="[${value:0:-1}]"
+    elif ! [[ "${value}" =~ ^[0-9]+$ ]] ; then
+       value="\"${value}\""
     fi
 
+
+    # "${SNAP}"/bin/
     yq -i "${expression} ${operator} ${value}" "${target_file}"
 }
 

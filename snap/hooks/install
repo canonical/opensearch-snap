@@ -3,7 +3,7 @@
 set -eux
 
 
-source "${OPS_ROOT}"/helpers/snap-logger.sh "hook-configure"
+source "${OPS_ROOT}"/helpers/snap-logger.sh "hook-install"
 source "${OPS_ROOT}"/helpers/io.sh
 source "${OPS_ROOT}"/helpers/set-conf.sh
 

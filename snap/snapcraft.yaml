@@ -30,7 +30,6 @@ plugs:
     interface: system-files
     write:
       - /etc/systemd/system/snap.opensearch.daemon.d
-
   proc-write:
     interface: system-files
     write:
