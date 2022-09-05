@@ -46,19 +46,17 @@ function set_yaml_prop() {
         for key in "${arr_elts[@]}"
         do
             key=$(echo -e "${key}" | tr -d '[:space:]')
-            if ! [[ ${key} =~ ^[0-9]+$ ]] ; then
+            if ! [[ ${key} =~ ^[0-9]+$ ]] && ! [[ ${key} =~ ^\".*\"$ ]]; then
                 key="\"${key}\""
             fi
             value="${value}${key},"
         done
         value="[${value:0:-1}]"
-    elif ! [[ "${value}" =~ ^[0-9]+$ ]] ; then
+    elif ! [[ "${value}" =~ ^[0-9]+$ ]]  && ! [[ ${value} =~ ^\".*\"$ ]]; then
        value="\"${value}\""
     fi
 
-
-    # "${SNAP}"/bin/
-    yq -i "${expression} ${operator} ${value}" "${target_file}"
+    "${SNAP}"/bin/yq -i "${expression} ${operator} ${value}" "${target_file}"
 }
 
 

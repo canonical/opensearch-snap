@@ -229,6 +229,6 @@ if [ "${tls_self_managed}" ]; then
             --target-dir "${OPENSEARCH_PATH_CERTS}"
 fi
 
+chown -R snap_daemon "${OPENSEARCH_PATH_CERTS}"
+chgrp root "${OPENSEARCH_PATH_CERTS}"
 
-chmod -R 770 "${OPENSEARCH_PATH_CERTS}"
-chown -R snap_daemon:snap_daemon "${OPENSEARCH_PATH_CERTS}"

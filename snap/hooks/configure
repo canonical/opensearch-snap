@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+set -eux
+
+
+init_security="$(snapctl get init-security)"
+if [ -z "${init_security}" ] || [ "${init_security}" != "no" ]; then
+    init_security="yes"
+fi
+snapctl set init-security="${init_security}"
+
+admin_password="$(snapctl get admin-pasword)"
+if [ -n "${admin_password}" ]; then
+    snapctl set admin-password="${admin_password}"
+fi

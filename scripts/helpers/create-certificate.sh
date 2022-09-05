@@ -203,18 +203,18 @@ function create_certificate () {
 
     if [ "${type}" == "node" ] || [ "${type}" == "client" ]; then
         CN="${subject##*'CN='}"
-        echo "subjectAltName=DNS:${CN}" > "${res_name}.ext"
+        echo "subjectAltName=DNS:${CN}" > "${target_dir}/${res_name}.ext"
         gen_cert_args+=(
-            "-extfile" "${res_name}.ext"
+            "-extfile" "${target_dir}/${res_name}.ext"
         )
     fi
 
     openssl "${gen_cert_args[@]}"
 
     # cleanup
-    rm "${res_name}-key-temp.pem"
-    rm "${res_name}.csr"
-    [ -f "${res_name}.ext" ] || rm "${res_name}.ext"
+    rm "${target_dir}/${res_name}-key-temp.pem"
+    rm "${target_dir}/${res_name}.csr"
+    rm -f "${target_dir}/${res_name}.ext"
 }
 
 
