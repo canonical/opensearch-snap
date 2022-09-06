@@ -26,9 +26,63 @@ plugs:
   procsys-read:
     interface: system-files
     read:
+      - /proc/cgroups
+      - /proc/self/coredump_filter
       - /proc/sys/vm/max_map_count
       - /proc/sys/vm/swappiness
       - /proc/sys/net/ipv4/tcp_retries2
+      - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service/cgroup.controllers
+      - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service/cgroup.events
+      - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service/cgroup.freeze
+      - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service/cgroup.max.depth
+      - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service/cgroup.max.descendants
+      - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service/cgroup.procs
+      - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service/cgroup.stat
+      - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service/cgroup.subtree_control
+      - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service/cgroup.threads
+      - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service/cgroup.type
+      - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service/cpu.idle
+      - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service/cpu.max
+      - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service/cpu.max.burst
+      - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service/cpu.pressure
+      - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service/cpuset.cpus
+      - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service/cpuset.cpus.effective
+      - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service/cpuset.cpus.partition
+      - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service/cpuset.mems
+      - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service/cpuset.mems.effective
+      - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service/cpu.stat
+      - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service/cpu.uclamp.max
+      - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service/cpu.uclamp.min
+      - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service/cpu.weight
+      - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service/cpu.weight.nice
+      - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service/io.max
+      - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service/io.pressure
+      - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service/io.prio.class
+      - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service/io.stat
+      - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service/io.weight
+      - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service/memory.current
+      - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service/memory.events
+      - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service/memory.events.local
+      - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service/memory.high
+      - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service/memory.low
+      - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service/memory.max
+      - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service/memory.min
+      - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service/memory.numa_stat
+      - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service/memory.oom.group
+      - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service/memory.pressure
+      - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service/memory.stat
+      - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service/memory.swap.current
+      - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service/memory.swap.events
+      - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service/memory.swap.high
+      - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service/memory.swap.max
+      - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service/pids.current
+      - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service/pids.events
+      - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service/pids.max
+
+  procsys-write:
+    interface: system-files
+    write:
+      - /proc/self/coredump_filter
 
 hooks:
   install:
@@ -66,6 +120,8 @@ apps:
       - mount-observe
       - process-control
       - procsys-read
+      - procsys-write
+      - system-observe
     environment:
       OPS_ROOT: ${SNAP}/ops
 

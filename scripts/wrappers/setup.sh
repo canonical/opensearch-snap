@@ -35,6 +35,7 @@ node_name=""
 node_roles=""
 node_host=""
 seed_hosts=""
+initial_cluster_manager_nodes=""
 
 security_disabled=""
 
@@ -146,6 +147,15 @@ function set_defaults () {
         seed_hosts="[ \"127.0.0.1\", \"[::1]\" ]", # ${node_name}]
     fi
 
+    IFS=',' read -r -a roles <<< "${node_roles}"
+    for role in "${roles[@]}"; do
+        role=$(echo -e "${role}" | tr -d '[:space:]')
+        if [ "${role}" == "cluster_manager" ]; then
+            initial_cluster_manager_nodes="[ ${node_name} ]"
+            break
+        fi
+    done
+
     node_roles="[ ${node_roles} ]"
 
     if [ -z "${security_disabled}" ] || [ "${security_disabled}" != "yes" ]; then
@@ -163,6 +173,10 @@ function set_defaults () {
     if [ -z "${tls_for_rest}" ] || [ "${tls_for_rest}" != "no" ]; then
         tls_for_rest="yes"
     fi
+
+
+
+    # [discovery.seed_hosts, discovery.seed_providers, cluster.initial_cluster_manager_nodes / cluster.initial_master_nodes]
 }
 
 
@@ -196,6 +210,10 @@ set_yaml_prop "${opensearch_yaml}" "node.name" "${node_name}"
 set_yaml_prop "${opensearch_yaml}" "node.roles" "${node_roles}"
 set_yaml_prop "${opensearch_yaml}" "network.host" "${node_host}"
 set_yaml_prop "${opensearch_yaml}" "discovery.seed_hosts" "${seed_hosts}"
+
+if [ -n "${initial_cluster_manager_nodes}" ]; then
+    set_yaml_prop "${opensearch_yaml}" "cluster.initial_cluster_manager_nodes" "${initial_cluster_manager_nodes}"
+fi
 
 if [ "${security_disabled}" == "yes" ]; then
     set_yaml_prop "${opensearch_yaml}" "plugins.security.disabled" "true"

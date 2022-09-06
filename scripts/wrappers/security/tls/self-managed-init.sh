@@ -135,4 +135,4 @@ inverted_admin_subject=$(
         -passin pass:"${admin_password}"
 )
 inverted_admin_subject="${inverted_admin_subject##subject=}"
-set_yaml_prop "${opensearch_yaml}" "plugins.security.authcz.admin_dn" "[${inverted_admin_subject}]"
+set_yaml_prop "${opensearch_yaml}" "plugins.security.authcz.admin_dn" "[ \"${inverted_admin_subject}\" ]" "no" "no"

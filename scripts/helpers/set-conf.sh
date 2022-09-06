@@ -12,6 +12,7 @@ function set_yaml_prop() {
     local full_key_path="${2}"
     local value="${3}"
     local append="${4:-"no"}"
+    local split_array_content="${5:-"yes"}"
 
     operator="="
 
@@ -40,18 +41,22 @@ function set_yaml_prop() {
     if [[ "${value}" == [* ]]; then
         value=${value:1:-1}
 
-        IFS=',' read -r -a arr_elts <<< "${value}"
+        if [ "${split_array_content}" == "yes" ]; then
+            IFS=',' read -r -a arr_elts <<< "${value}"
 
-        value=""
-        for key in "${arr_elts[@]}"
-        do
-            key=$(echo -e "${key}" | tr -d '[:space:]')
-            if ! [[ ${key} =~ ^[0-9]+$ ]] && ! [[ ${key} =~ ^\".*\"$ ]]; then
-                key="\"${key}\""
-            fi
-            value="${value}${key},"
-        done
-        value="[${value:0:-1}]"
+            value=""
+            for key in "${arr_elts[@]}"
+            do
+                key=$(echo -e "${key}" | tr -d '[:space:]')
+                if ! [[ ${key} =~ ^[0-9]+$ ]] && ! [[ ${key} =~ ^\".*\"$ ]]; then
+                    key="\"${key}\""
+                fi
+                value="${value}${key},"
+            done
+            value="[${value:0:-1}]"
+        else
+            value="[${value}]"
+        fi
     elif ! [[ "${value}" =~ ^[0-9]+$ ]]  && ! [[ ${value} =~ ^\".*\"$ ]]; then
        value="\"${value}\""
     fi
