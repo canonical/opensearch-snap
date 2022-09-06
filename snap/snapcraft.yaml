@@ -26,15 +26,11 @@ system-usernames:
 
 
 plugs:
-  systemd-write:
+  procsys-read:
     interface: system-files
-    write:
-      - /etc/systemd/system/snap.opensearch.daemon.d
-  proc-write:
-    interface: system-files
-    write:
-      - /proc/sys/vm/swappiness
+    read:
       - /proc/sys/vm/max_map_count
+      - /proc/sys/vm/swappiness
       - /proc/sys/net/ipv4/tcp_retries2
 
 hooks:
@@ -42,8 +38,6 @@ hooks:
     plugs:
       - network
       - network-bind
-      - systemd-write
-      - proc-write
     environment:
       OPS_ROOT: ${SNAP}/ops
 
@@ -62,14 +56,17 @@ apps:
   daemon:
     daemon: simple
     install-mode: disable
+    command-chain:
+      - ops/sys/set-sys-config.sh
     command: ops/start.sh
-    # reload-command: ops/start.sh
+    reload-command: ops/start.sh
     plugs:
       - network
       - network-bind
+      - log-observe
       - mount-observe
-      - systemd-write
-      - proc-write
+      - process-control
+      - procsys-read
     environment:
       OPS_ROOT: ${SNAP}/ops
 
@@ -101,6 +98,7 @@ parts:
       - yq
     stage-packages:
       - util-linux
+      - procps
       - libfreetype6
       - libpng16-16
       - libxrender1
@@ -127,12 +125,6 @@ parts:
       
       cp -r wrappers/. "${target_dir}"
       cp -r helpers/ "${target_dir}/helpers"
-
-  wrapper-configs:
-    plugin: dump
-    source: ./assets
-    organize:
-      systemd/override.conf: /ops/sys/etc/systemd/override.conf
 
   opensearch:
     plugin: dump
