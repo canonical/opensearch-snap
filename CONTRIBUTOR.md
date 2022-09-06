@@ -31,10 +31,14 @@ sudo snap set opensearch admin-password=admin1234
 # only in the first cluster setup, or for rebuilding the security index
 sudo snap set opensearch init-security=yes
 
-# system configs required by opensearch
-sysctl -w vm.swappiness=0
-sysctl -w vm.max_map_count=262144
-sysctl -w net.ipv4.tcp_retries2=5
+# system configs required by opensearch, can set one of the following ways:
+    # 1- by users in local machines, adjust values if needed
+        sysctl -w vm.swappiness=0
+        sysctl -w vm.max_map_count=262144
+        sysctl -w net.ipv4.tcp_retries2=5
+        
+    # 2- by juju or cloud deployments:
+        sudo snap set set-sysctl-props=yes
 
 # start opensearch
 sudo snap start opensearch.daemon

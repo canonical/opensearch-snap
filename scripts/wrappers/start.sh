@@ -36,9 +36,9 @@ function set_defaults () {
 }
 
 function start_opensearch () {
+    exit_if_missing_perm "log-observe"
     exit_if_missing_perm "mount-observe"
     exit_if_missing_perm "procsys-read"
-    exit_if_missing_perm "log-observe"
 
     # start
     "${SNAP}"/usr/bin/setpriv \
