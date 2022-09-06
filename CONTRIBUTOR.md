@@ -11,10 +11,12 @@ snapcraft --debug
 sudo snap install opensearch_2.2.0_amd64.snap --dangerous --jailmode
 
 # connect interfaces
-sudo snap connect opensearch:log-observe                                                                                                            ✔  20s  Python3.10   22:31:09 
-sudo snap connect opensearch:mount-observe                                                                                                                ✔  Python3.10   22:31:34 
-sudo snap connect opensearch:process-control                                                                                                              ✔  Python3.10   22:31:41 
+sudo snap connect opensearch:log-observe
+sudo snap connect opensearch:mount-observe
+sudo snap connect opensearch:process-control
 sudo snap connect opensearch:procsys-read
+sudo snap connect opensearch:procsys-write
+sudo snap connect opensearch:system-observe
 
 # create the certificates
 sudo snap run opensearch.setup \
