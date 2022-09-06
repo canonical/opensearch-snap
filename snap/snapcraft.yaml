@@ -15,12 +15,6 @@ grade: devel # must be 'stable' to release into candidate/stable channels
 confinement: strict # use 'strict' once you have the right plugs and slots
 
 
-assumes:
-  - command-chain
-  - snap-env
-  - snapd2.56
-
-
 system-usernames:
   snap_daemon: shared
 
@@ -41,6 +35,10 @@ hooks:
     environment:
       OPS_ROOT: ${SNAP}/ops
 
+  configure:
+    environment:
+      OPS_ROOT: ${SNAP}/ops
+
 
 environment:
   SNAP_LOG_DIR: ${SNAP_COMMON}/ops/snap/logs
@@ -56,8 +54,6 @@ apps:
   daemon:
     daemon: simple
     install-mode: disable
-    command-chain:
-      - ops/sys/set-sys-config.sh
     command: ops/start.sh
     reload-command: ops/start.sh
     plugs:

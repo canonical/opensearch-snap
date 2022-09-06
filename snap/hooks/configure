@@ -2,6 +2,7 @@
 
 set -eux
 
+source "${OPS_ROOT}"/helpers/snap-logger.sh "hook-configure"
 
 init_security="$(snapctl get init-security)"
 if [ -z "${init_security}" ] || [ "${init_security}" != "no" ]; then

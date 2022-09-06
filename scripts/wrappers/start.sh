@@ -2,8 +2,10 @@
 
 set -eux
 
+
 source "${OPS_ROOT}"/helpers/snap-logger.sh "daemon"
 source "${OPS_ROOT}"/helpers/snap-interfaces.sh
+source "${OPS_ROOT}"/sys/set-sys-config.sh
 
 
 usage() {
@@ -70,7 +72,7 @@ function init_security_plugin () {
 }
 
 
-parse_args "$@"
+parse_args
 set_defaults
 
 start_opensearch

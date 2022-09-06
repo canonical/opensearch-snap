@@ -143,7 +143,7 @@ function set_defaults () {
     fi
 
     if [ -z "${seed_hosts}" ]; then
-        seed_hosts="[\"127.0.0.1\", \"[::1]\"]"
+        seed_hosts="[ \"127.0.0.1\", \"[::1]\" ]", # ${node_name}]
     fi
 
     node_roles="[ ${node_roles} ]"

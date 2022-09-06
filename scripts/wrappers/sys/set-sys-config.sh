@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
+set -eux
 
-source "${OPS_ROOT}"/helpers/snap-logger.sh "set-sys-config"
+source "${OPS_ROOT}"/helpers/snap-interfaces.sh
 
 
 # Args
@@ -54,7 +55,7 @@ function set_proc_conf () {
 }
 
 
-parse_args "$@"
+parse_args
 set_defaults
 
 set_ulimits
