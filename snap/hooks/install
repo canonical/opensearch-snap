@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+
+set -eux
+
+
+source "${OPS_ROOT}"/helpers/snap-logger.sh "hook-install"
+source "${OPS_ROOT}"/helpers/io.sh
+source "${OPS_ROOT}"/helpers/set-conf.sh
+
+
+function create_file_structure () {
+    add_folder "${SNAP_COMMON}/backups" 774
+    ls -la "${SNAP_COMMON}"
+    ls -la "${SNAP_COMMON}/backups"
+    dir_copy_if_not_exists "config" "${SNAP_COMMON}/backups" 774
+
+    # -------------------------------
+
+    # Opensearch install folders and set config
+    dir_copy_if_not_exists "bin" "${SNAP_DATA}" 770
+    dir_copy_if_not_exists "jdk" "${SNAP_DATA}" 770
+    dir_copy_if_not_exists "lib" "${SNAP_DATA}" 550
+    dir_copy_if_not_exists "modules" "${SNAP_DATA}" 550
+    dir_copy_if_not_exists "plugins" "${SNAP_DATA}" 770
+
+    dir_copy_if_not_exists "config" "${SNAP_COMMON}" 770
+    add_folder "${SNAP_COMMON}/config/certificates" 770
+
+    add_folder "${SNAP_COMMON}/data" 770
+    add_folder "${SNAP_COMMON}/logs" 774
+    add_folder "${SNAP_COMMON}/tmp" 770
+}
+
+
+function set_base_config_props () {
+    # Change conf to set log and data paths for both opensearch.yaml and jvm.options
+    set_yaml_prop "${SNAP_COMMON}/config/opensearch.yml" "path.data" "${SNAP_COMMON}/data"
+    set_yaml_prop "${SNAP_COMMON}/config/opensearch.yml" "path.logs" "${SNAP_COMMON}/logs"
+
+    replace_in_file "${SNAP_COMMON}/config/jvm.options" "=logs/" "=${SNAP_COMMON}/logs/"
+}
+
+
+create_file_structure
+set_base_config_props
