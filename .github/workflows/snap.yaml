@@ -20,7 +20,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
         with:
-          ref: edge
+          ref: ci_cd-pipeline
 
       - name: List checked out files
         run: |
@@ -35,7 +35,6 @@ jobs:
         uses: snapcore/action-build@v1
         with:
           snapcraft-channel: 7.x/candidate
-          path: ${{github.workspace}}
 
       - name: Upload built snap job artifact
         uses: actions/upload-artifact@v3
