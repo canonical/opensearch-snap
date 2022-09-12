@@ -22,14 +22,6 @@ jobs:
         with:
           ref: ci_cd-pipeline
 
-      - name: List checked out files
-        run: |
-          pwd
-          ls -la
-          echo "--- github.workspace ----"
-          ls -la ${{github.workspace}}
-          
-
       - id: build-snap
         name: Build snap
         uses: snapcore/action-build@v1

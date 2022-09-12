@@ -121,7 +121,7 @@ apps:
       OPENSEARCH_PATH_CERTS: ${OPENSEARCH_PATH_CONF}/certificates
 
   security-init:
-    command: ops/security-config.sh
+    command: ops/security-init.sh
     plugs:
       - network
       - network-bind
