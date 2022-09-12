@@ -22,12 +22,20 @@ jobs:
         with:
           ref: edge
 
+      - name: List checked out files
+        run: |
+          pwd
+          ls -la
+          echo "--- github.workspace ----"
+          ls -la ${{github.workspace}}
+          
+
       - id: build-snap
         name: Build snap
         uses: snapcore/action-build@v1
         with:
           snapcraft-channel: 7.x/candidate
-          path: ${{ github.workspace }}
+          path: ${{github.workspace}}
 
       - name: Upload built snap job artifact
         uses: actions/upload-artifact@v3
