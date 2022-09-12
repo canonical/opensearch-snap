@@ -1,7 +1,7 @@
 name: opensearch # you probably want to 'snapcraft register <name>'
 base: core22 # the base snap is the execution environment for this snap
 
-version: '2.2.0' # just for humans, typically '1.2+git' or '1.3.2'
+version: '2.2.1' # just for humans, typically '1.2+git' or '1.3.2'
 
 summary: 'OpenSearch: community-driven, Apache 2.0-licensed search and analytics suite.'
 description: |
@@ -79,11 +79,6 @@ plugs:
       - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service/pids.events
       - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service/pids.max
 
-  procsys-write:
-    interface: system-files
-    write:
-      - /proc/self/coredump_filter
-
 hooks:
   install:
     plugs:
@@ -106,13 +101,12 @@ environment:
   OPENSEARCH_TMPDIR: ${SNAP_COMMON}/tmp
   OPENSEARCH_PLUGINS: ${SNAP_DATA}/plugins
 
-
 apps:
   daemon:
     daemon: simple
     install-mode: disable
     command: ops/start.sh
-    reload-command: ops/start.sh
+    # reload-command: ops/start.sh
     plugs:
       - network
       - network-bind
@@ -124,6 +118,17 @@ apps:
       - system-observe
     environment:
       OPS_ROOT: ${SNAP}/ops
+      OPENSEARCH_PATH_CERTS: ${OPENSEARCH_PATH_CONF}/certificates
+
+  security-init:
+    command: ops/security-config.sh
+    plugs:
+      - network
+      - network-bind
+    environment:
+      OPS_ROOT: ${SNAP}/ops
+      OPENSEARCH_PATH_CERTS: ${OPENSEARCH_PATH_CONF}/certificates
+      JAVA_OPTS: ""
 
   setup:
     command: ops/setup.sh
@@ -141,12 +146,6 @@ apps:
     command: ops/plugins/remove.sh
 
 parts:
-#  python-requirements:
-#    plugin: python
-#    source: ./scripts
-#    python-packages:
-#      - ruamel.yaml
-
   dependencies:
     plugin: nil
     stage-snaps:
@@ -185,8 +184,7 @@ parts:
     plugin: nil
     override-build: |
         version="$(craftctl get version)"
-        echo $version
-        archive_name="opensearch-${version}-linux.tar.gz"
+        archive="opensearch-${version}-linux-x64.tar.gz"
       
-        curl -o "${archive_name}" https://opensearch-builds.s3.eu-west-1.amazonaws.com/core/"${archive_name}"
-        tar -xzvf "${archive_name}" -C "${CRAFT_PART_INSTALL}/" --strip-components=1
+        curl -o "${archive}" "https://artifacts.opensearch.org/releases/bundle/opensearch/${version}/${archive}"
+        tar -xzvf "${archive}" -C "${CRAFT_PART_INSTALL}/" --strip-components=1

@@ -3,7 +3,7 @@
 set -eux
 
 
-source "${OPS_ROOT}"/helpers/snap-logger.sh "daemon"
+# source "${OPS_ROOT}"/helpers/snap-logger.sh "daemon"
 source "${OPS_ROOT}"/helpers/snap-interfaces.sh
 source "${OPS_ROOT}"/sys/set-sys-config.sh
 
@@ -40,35 +40,16 @@ function set_defaults () {
 function start_opensearch () {
     exit_if_missing_perm "log-observe"
     exit_if_missing_perm "mount-observe"
+    exit_if_missing_perm "process-control"
     exit_if_missing_perm "procsys-read"
+    exit_if_missing_perm "system-observe"
 
     # start
     "${SNAP}"/usr/bin/setpriv \
         --clear-groups \
         --reuid snap_daemon \
         --regid snap_daemon -- \
-        "${OPENSEARCH_HOME}"/bin/opensearch &
-
-    # give it some time to bootstrap
-    sleep 30s
-}
-
-function init_security_plugin () {
-    sec_args=(
-        "-cd" "${OPENSEARCH_PATH_CONF}/opensearch-security/"
-        "-icl" "-nhnv"
-        "-cacert" "${OPENSEARCH_PATH_CERTS}/root-ca.pem"
-        "-cert" "${OPENSEARCH_PATH_CERTS}/admin.pem"
-        "-key" "${OPENSEARCH_PATH_CERTS}/admin-key.pem"
-    )
-
-    if [ -n "${admin_password}" ]; then
-        sec_args+=("-keypass" "${admin_password}")
-    fi
-
-    source \
-        "${OPENSEARCH_PLUGINS}/opensearch-security/tools/securityadmin.sh" \
-        "${sec_args[@]}"
+        "${OPENSEARCH_HOME}"/bin/opensearch
 }
 
 
@@ -76,7 +57,3 @@ parse_args
 set_defaults
 
 start_opensearch
-
-if [ "${init_security}" == "yes" ]; then
-    init_security_plugin
-fi

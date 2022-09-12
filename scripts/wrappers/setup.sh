@@ -4,6 +4,8 @@ set -eux
 
 source "${OPS_ROOT}"/helpers/snap-logger.sh "setup"
 source "${OPS_ROOT}"/helpers/set-conf.sh
+source "${OPS_ROOT}"/helpers/io.sh
+
 
 usage() {
 cat << EOF
@@ -173,10 +175,6 @@ function set_defaults () {
     if [ -z "${tls_for_rest}" ] || [ "${tls_for_rest}" != "no" ]; then
         tls_for_rest="yes"
     fi
-
-
-
-    # [discovery.seed_hosts, discovery.seed_providers, cluster.initial_cluster_manager_nodes / cluster.initial_master_nodes]
 }
 
 
@@ -234,6 +232,11 @@ if [ "${tls_self_managed}" ]; then
                 --admin-subject "${tls_admin_subject}" \
                 --rest-with-tls "${tls_for_rest}" \
                 --target-dir "${OPENSEARCH_PATH_CERTS}"
+
+        keys=("root-ca" "root-ca-key" "admin" "admin-key")
+        for key in "${keys[@]}"; do
+            set_access_restrictions "${OPENSEARCH_PATH_CERTS}/${key}.pem" 660
+        done
     fi
 
     # create node cert
@@ -245,8 +248,9 @@ if [ "${tls_self_managed}" ]; then
             --node-subject "${tls_node_subject}" \
             --rest-with-tls "${tls_for_rest}" \
             --target-dir "${OPENSEARCH_PATH_CERTS}"
+
+    keys=("node-${node_name}" "node-${node_name}-key")
+    for key in "${keys[@]}"; do
+        set_access_restrictions "${OPENSEARCH_PATH_CERTS}/${key}.pem" 660
+    done
 fi
-
-chown -R snap_daemon "${OPENSEARCH_PATH_CERTS}"
-chgrp root "${OPENSEARCH_PATH_CERTS}"
-
