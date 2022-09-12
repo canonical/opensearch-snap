@@ -8,7 +8,6 @@ on:
   push:
     branches:
       - edge
-      - ci_cd-pipeline
 
 jobs:
   build:
@@ -20,7 +19,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
         with:
-          ref: ci_cd-pipeline
+          ref: edge
 
       - id: build-snap
         name: Build snap

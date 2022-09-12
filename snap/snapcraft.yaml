@@ -114,7 +114,6 @@ apps:
       - mount-observe
       - process-control
       - procsys-read
-      - procsys-write
       - system-observe
     environment:
       OPS_ROOT: ${SNAP}/ops
