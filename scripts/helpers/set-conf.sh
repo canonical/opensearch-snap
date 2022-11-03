@@ -1,9 +1,20 @@
 #!/usr/bin/env bash
 
 
-function replace_in_file () {
+function replace_in_file() {
     "${SNAP}"/usr/bin/setpriv \
         --reuid snap_daemon -- sed -i "s@${2}@${3}@" "${1}"
+}
+
+function remove_yaml_prop() {
+    local target_file="${1}"
+    local key_path="${2}"
+
+    if [[ ${key_path} != ^.* ]]; then
+        key_path=".${key_path}"
+    fi
+
+    "${SNAP}"/bin/yq -i "del(${key_path})" "${target_file}"
 }
 
 

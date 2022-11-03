@@ -8,14 +8,14 @@ Steps to install it locally:
 snapcraft --debug
 
 # install the snap
-sudo snap install opensearch_2.2.0_amd64.snap --dangerous --jailmode
+sudo snap install opensearch_2.3.0_amd64.snap --dangerous --jailmode
 
 # connect interfaces
 sudo snap connect opensearch:log-observe
 sudo snap connect opensearch:mount-observe
 sudo snap connect opensearch:process-control
-sudo snap connect opensearch:procsys-read
 sudo snap connect opensearch:system-observe
+sudo snap connect opensearch:cgroup-service-read
 
 # create the certificates
 sudo snap run opensearch.setup \
