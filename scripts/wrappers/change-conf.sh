@@ -62,7 +62,7 @@ function parse_args() {
                 val=$1
                 ;;
             --append) shift
-                val="${1,,}"
+                append="${1,,}"
                 ;;
             --help) usage
                 exit
