@@ -22,7 +22,7 @@ function set_defaults () {
 }
 
 function set_ulimits () {
-    exit_if_missing_perm "procsys-read"
+    exit_if_missing_perm "cgroup-service-read"
 
     # 1. Set the number of open file handles
     # ulimit -n 1024 -- default in local machine
