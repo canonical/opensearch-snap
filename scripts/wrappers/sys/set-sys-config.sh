@@ -22,11 +22,13 @@ function set_defaults () {
 }
 
 function set_ulimits () {
-    exit_if_missing_perm "cgroup-service-read"
+    exit_if_missing_perm "sys-fs-cgroup-service-read"
 
     # 1. Set the number of open file handles
     # ulimit -n 1024 -- default in local machine
-    ulimit -n 65535
+    if [ "$(ulimit -n)" -lt 65535 ]; then
+        ulimit -n 65535
+    fi
 
     # 2. Set the number of threads Opensearch can create, should be configured automatically if opensearch ran as a service
     # ulimit -u 60921 -- default in local machine

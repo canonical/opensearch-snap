@@ -23,7 +23,7 @@ system-usernames:
 
 
 plugs:
-  cgroup-service-read:
+  sys-fs-cgroup-service-read:
     interface: system-files
     read:
       - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service
@@ -63,7 +63,7 @@ apps:
       - mount-observe
       - process-control
       - system-observe
-      - cgroup-service-read
+      - sys-fs-cgroup-service-read
     environment:
       OPS_ROOT: ${SNAP}/ops
       OPENSEARCH_PATH_CERTS: ${OPENSEARCH_PATH_CONF}/certificates
@@ -98,6 +98,24 @@ apps:
   plugins-remove:
     command: ops/plugins/remove.sh
 
+  test-cluster-health-green:
+    command: ops/tests/test-cluster-health-green.sh
+    plugs:
+      - network
+      - network-bind
+
+  test-node-up:
+    command: ops/tests/test-node-up.sh
+    plugs:
+      - network
+      - network-bind
+
+  test-security-index-created:
+    command: ops/tests/test-security-index-created.sh
+    plugs:
+      - network
+      - network-bind
+
 parts:
   dependencies:
     plugin: nil
@@ -105,6 +123,7 @@ parts:
       - yq
     stage-packages:
       - util-linux
+      - curl
       - procps
       - libfreetype6
       - libpng16-16
