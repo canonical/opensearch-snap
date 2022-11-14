@@ -1,9 +1,11 @@
 # OpenSearch-Snap
 
-<h1 align="center">
-  <img src="https://opensearch.org/assets/brand/PNG/Logo/opensearch_logo_default.png" alt="OpenSearch" />
-  <br />
-</h1>
+[//]: # (<h1 align="center">)
+[//]: # (  <a href="https://opensearch.org/">)
+[//]: # (    <img src="https://opensearch.org/assets/brand/PNG/Logo/opensearch_logo_default.png" alt="OpenSearch" />)
+[//]: # (  </a>)
+[//]: # (  <br />)
+[//]: # (</h1>)
 
 This is the snap for [OpenSearch](https://opensearch.org), a community-driven, Apache 2.0-licensed open source search and
 analytics suite that makes it easy to ingest, search, visualize, and analyze data.
