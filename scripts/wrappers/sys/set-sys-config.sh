@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -eux
+set -eu
 
 source "${OPS_ROOT}"/helpers/snap-interfaces.sh
 
@@ -22,7 +22,8 @@ function set_defaults () {
 }
 
 function set_ulimits () {
-    exit_if_missing_perm "sys-fs-cgroup-service-read"
+    exit_if_missing_perm "process-control"
+    exit_if_missing_perm "sys-fs-cgroup-service"
 
     # 1. Set the number of open file handles
     # ulimit -n 1024 -- default in local machine
