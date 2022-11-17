@@ -22,7 +22,6 @@ function set_defaults () {
 }
 
 function set_ulimits () {
-    exit_if_missing_perm "process-control"
     exit_if_missing_perm "sys-fs-cgroup-service"
 
     # 1. Set the number of open file handles
@@ -39,7 +38,9 @@ function set_ulimits () {
 
     # 3. Set the locked-in memory size to unlimited
     # ulimit -l 1964328 -- default in local machine
-    ulimit -l unlimited
+    if snapctl is-connected "process-control"; then
+        ulimit -l unlimited
+    fi
 }
 
 

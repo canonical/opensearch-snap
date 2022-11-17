@@ -40,7 +40,6 @@ function set_defaults () {
 function start_opensearch () {
     exit_if_missing_perm "log-observe"
     exit_if_missing_perm "mount-observe"
-    exit_if_missing_perm "process-control"
     exit_if_missing_perm "sys-fs-cgroup-service"
     exit_if_missing_perm "system-observe"
 
