@@ -1,7 +1,7 @@
 name: opensearch # you probably want to 'snapcraft register <name>'
 base: core22 # the base snap is the execution environment for this snap
 
-version: '2.3.0' # just for humans, typically '1.2+git' or '1.3.2'
+version: '2.4.0' # just for humans, typically '1.2+git' or '1.3.2'
 
 summary: 'OpenSearch: community-driven, Apache 2.0-licensed search and analytics suite.'
 description: |
@@ -23,7 +23,7 @@ system-usernames:
 
 
 plugs:
-  sys-fs-cgroup-service-read:
+  sys-fs-cgroup-service:
     interface: system-files
     read:
       - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service
@@ -63,7 +63,7 @@ apps:
       - mount-observe
       - process-control
       - system-observe
-      - sys-fs-cgroup-service-read
+      - sys-fs-cgroup-service
     environment:
       OPS_ROOT: ${SNAP}/ops
       OPENSEARCH_PATH_CERTS: ${OPENSEARCH_PATH_CONF}/certificates

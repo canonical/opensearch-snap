@@ -8,7 +8,7 @@ Steps to install it locally:
 snapcraft --debug
 
 # install the snap
-sudo snap install opensearch_2.3.0_amd64.snap --dangerous --jailmode
+sudo snap install opensearch_2.4.0_amd64.snap --dangerous --jailmode
 ```
 
 ### Environment configuration:
@@ -25,12 +25,12 @@ Now, configuring the required system settings along with connecting the interfac
     sudo snap connect opensearch:mount-observe
     sudo snap connect opensearch:process-control
     sudo snap connect opensearch:system-observe
-    sudo snap connect opensearch:sys-fs-cgroup-service-read
+    sudo snap connect opensearch:sys-fs-cgroup-service
    
     # system configs required by opensearch, should be set using the following way:
-    sysctl -w vm.swappiness=0
-    sysctl -w vm.max_map_count=262144
-    sysctl -w net.ipv4.tcp_retries2=5
+    sudo sysctl -w vm.swappiness=0
+    sudo sysctl -w vm.max_map_count=262144
+    sudo sysctl -w net.ipv4.tcp_retries2=5
     ```
 
 ### Set-up an OpenSearch cluster:

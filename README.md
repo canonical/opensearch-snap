@@ -13,8 +13,8 @@ analytics suite that makes it easy to ingest, search, visualize, and analyze dat
 
 ### Installation:
 ```
-sudo snap install opensearch --channel=2.3.0/edge
-sudo snap connect opensearch:sys-fs-cgroup-service-read
+sudo snap install opensearch --channel=2.4.0/edge
+sudo snap connect opensearch:process-control
 ```
 
 ### Environment configuration:

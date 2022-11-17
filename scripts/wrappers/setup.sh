@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -eux
+set -eu
 
 source "${OPS_ROOT}"/helpers/snap-logger.sh "setup"
 source "${OPS_ROOT}"/helpers/set-conf.sh
