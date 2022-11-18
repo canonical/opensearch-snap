@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+set -eux
+
+source "${OPS_ROOT}"/helpers/snap-logger.sh "hook-configure"
+
+init_security="$(snapctl get init-security)"
+if [ -z "${init_security}" ] || [ "${init_security}" != "no" ]; then
+    init_security="yes"
+fi
+snapctl set init-security="${init_security}"
+
+admin_password="$(snapctl get admin-pasword)"
+if [ -n "${admin_password}" ]; then
+    snapctl set admin-password="${admin_password}"
+fi
+
+set_sysctl_props="$(snapctl get set-sysctl-props)"
+if [ -z "${set_sysctl_props}" ] || [ "${set_sysctl_props}" != "yes" ]; then
+    set_sysctl_props="no"
+fi
+snapctl set set-sysctl-props="${set_sysctl_props}"
