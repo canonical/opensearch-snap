@@ -65,8 +65,8 @@ jobs:
               --tls-node-password node1234 \
               --tls-init-setup yes                 # this creates the root and admin certs as well.
           
-          # system configs required by opensearch, can set one of the following ways:
-          sysctl -w vm.max_map_count=262144
+          # system configs required by opensearch
+          sudo sysctl -w vm.max_map_count=262144
           
           # start opensearch
           sudo snap start opensearch.daemon
