@@ -6,7 +6,7 @@ on:
 jobs:
   build:
     name: Build Snap
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     outputs:
       snap-file: ${{ steps.build-snap.outputs.snap }}
     steps:
@@ -27,7 +27,7 @@ jobs:
 
   test:
     name: Test Snap
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     needs:
       - build
     steps:
