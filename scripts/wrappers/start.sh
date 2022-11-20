@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -eu
+set -eux
 
 
 # source "${OPS_ROOT}"/helpers/snap-logger.sh "daemon"
