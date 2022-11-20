@@ -77,7 +77,7 @@ jobs:
           sleep 30s
           
           # print the logs
-          sudo cat /var/snap/opensearch/common/logs/opensearch-cluster.log
+          sudo find / -name "opensearch-cluster.log" 2>/dev/null | sudo xargs cat
 
           # create the security index
           sudo snap run opensearch.security-init --admin-password=admin1234
