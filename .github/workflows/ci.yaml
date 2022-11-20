@@ -75,6 +75,9 @@ jobs:
 
           # start opensearch
           sudo snap start opensearch.daemon
+          
+          ls -la
+          cat scripts/wrappers/start.sh
 
           # wait a bit for it to fully initialize
           sleep 30s
