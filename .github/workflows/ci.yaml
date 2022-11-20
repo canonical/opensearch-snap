@@ -45,7 +45,8 @@ jobs:
 
       - name: Install snap file
         run: |
-          sudo snap install opensearch_${{env.VERSION}}_amd64.snap --dangerous
+          sudo snap remove --purge opensearch
+          sudo snap install opensearch_${{env.VERSION}}_amd64.snap --dangerous --jailmode
 
       - name: Setup the required system configs
         run: |
