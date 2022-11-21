@@ -19,13 +19,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: LS
-        run: |
-          ls -la
-          cat opensearch-operator/scripts/wrappers/start.sh || true
-          cat opensearch-operator/opensearch-operator/scripts/wrappers/start.sh || true
-          cat scripts/wrappers/start.sh || true
-
       - id: build-snap
         name: Build snap
         uses: snapcore/action-build@v1
@@ -84,10 +77,7 @@ jobs:
           sudo snap start opensearch.daemon
 
           # wait a bit for it to fully initialize
-          sleep 30s
-          
-          # print the logs
-          sudo find / -name "opensearch-cluster.log" 2>/dev/null | sudo xargs cat
+          sleep 15s
 
           # create the security index
           sudo snap run opensearch.security-init --admin-password=admin1234
