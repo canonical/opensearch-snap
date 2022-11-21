@@ -92,6 +92,10 @@ jobs:
           # create the security index
           sudo snap run opensearch.security-init --admin-password=admin1234
 
+      - name: Setup tmate session
+        if: ${{ failure() }}
+        uses: mxschmitt/action-tmate@v3
+
       - name: Ensure the cluster is reachable and node created
         run: |
           sudo snap install yq
