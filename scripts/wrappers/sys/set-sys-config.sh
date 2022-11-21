@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -eux
+set -eu
 
 source "${OPS_ROOT}"/helpers/snap-interfaces.sh
 
@@ -22,7 +22,6 @@ function set_defaults () {
 }
 
 function set_ulimits () {
-    echo -e "\n\nSetting ULIMITS\n\n"
     exit_if_missing_perm "sys-fs-cgroup-service"
 
     # 1. Set the number of open file handles
@@ -39,11 +38,9 @@ function set_ulimits () {
 
     # 3. Set the locked-in memory size to unlimited
     # ulimit -l 1964328 -- default in local machine
-    echo -e "\n\n process control test \n\n"
     if snapctl is-connected "process-control"; then
         ulimit -l unlimited
     fi
-    echo -e "\n\n ULIMITS DONE \n\n"
 }
 
 
