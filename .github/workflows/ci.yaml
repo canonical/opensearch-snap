@@ -1,13 +1,11 @@
-name: Build OpenSearch from source and run tests
+name: Build and Test
 
 env:
   VERSION: 2.4.0
-  RELEASE: edge
 
 on:
-  push:
-    branches:
-      - main
+  workflow_call:
+  pull_request:
 
 jobs:
   build:
@@ -18,6 +16,8 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - id: build-snap
         name: Build snap
@@ -45,17 +45,25 @@ jobs:
 
       - name: Install snap file
         run: |
-          sudo snap install opensearch_${{env.VERSION}}_amd64.snap --dangerous
+          sudo snap remove --purge opensearch
+          sudo snap install opensearch_${{env.VERSION}}_amd64.snap --dangerous --jailmode
 
-      - name: Setup and Start OpenSearch
+      - name: Setup the required system configs
         run: |
-          # connect interfaces
+          sudo sysctl -w vm.swappiness=0
+          sudo sysctl -w vm.max_map_count=262144
+          sudo sysctl -w net.ipv4.tcp_retries2=5
+
+      - name: Connect required interfaces
+        run: |
           sudo snap connect opensearch:log-observe
           sudo snap connect opensearch:mount-observe
           sudo snap connect opensearch:process-control
           sudo snap connect opensearch:system-observe
           sudo snap connect opensearch:sys-fs-cgroup-service
-          
+
+      - name: Setup and Start OpenSearch
+        run: |
           # create the certificates
           sudo snap run opensearch.setup \
               --node-name cm0 \
@@ -64,23 +72,24 @@ jobs:
               --tls-admin-password admin1234 \
               --tls-node-password node1234 \
               --tls-init-setup yes                 # this creates the root and admin certs as well.
-          
-          # system configs required by opensearch
-          sudo sysctl -w vm.max_map_count=262144
-          
+
           # start opensearch
           sudo snap start opensearch.daemon
-          
+
           # wait a bit for it to fully initialize
-          sleep 5s
-          
+          sleep 15s
+
           # create the security index
           sudo snap run opensearch.security-init --admin-password=admin1234
+
+      - name: Setup tmate session
+        if: ${{ failure() }}
+        uses: mxschmitt/action-tmate@v3
 
       - name: Ensure the cluster is reachable and node created
         run: |
           sudo snap install yq
-          
+
           # Check node name
           cluster_resp=$(curl -k -XGET https://localhost:9200 -u 'admin:admin')
           echo -e "Cluster Response: \n ${cluster_resp}"
@@ -88,7 +97,7 @@ jobs:
           if [ "${node_name}" != "cm0" ]; then
               exit 1
           fi
-          
+
           # Check cluster health
           health_resp=$(curl -k -XGET https://localhost:9200/_cluster/health -u 'admin:admin')
           echo -e "Cluster Health Response: \n ${health_resp}"
@@ -96,23 +105,3 @@ jobs:
           if [ "${cluster_status}" != "green" ]; then
               exit 1
           fi
-
-  publish:
-    name: publish
-    runs-on: ubuntu-latest
-    needs:
-      - test
-    steps:
-      - name: Download snap file
-        uses: actions/download-artifact@v3
-        with:
-          name: opensearch_snap_amd64
-          path: .
-
-      - name: Publish snap to Store
-        uses: snapcore/action-publish@v1
-        env:
-          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.STORE_LOGIN }}
-        with:
-          snap: opensearch_${{env.VERSION}}_amd64.snap
-          release: ${{env.RELEASE}}
