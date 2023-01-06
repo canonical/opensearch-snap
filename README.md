@@ -13,7 +13,7 @@ analytics suite that makes it easy to ingest, search, visualize, and analyze dat
 
 ### Installation:
 ```
-sudo snap install opensearch --channel=2.4.0/edge
+sudo snap install opensearch --channel=2.4.1/edge
 sudo snap connect opensearch:process-control
 ```
 

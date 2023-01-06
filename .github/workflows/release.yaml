@@ -1,7 +1,7 @@
 name: Build OpenSearch from source, run tests and release.
 
 env:
-  VERSION: 2.4.0
+  VERSION: 2.4.1
   RELEASE: edge
 
 on:
