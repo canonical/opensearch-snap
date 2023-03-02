@@ -1,7 +1,7 @@
 name: Build and Test
 
 env:
-  VERSION: 2.5.0
+  VERSION: 2.6.0
 
 on:
   workflow_call:
