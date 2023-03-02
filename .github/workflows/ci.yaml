@@ -1,7 +1,7 @@
 name: Build and Test
 
 env:
-  VERSION: 2.4.1
+  VERSION: 2.5.0
 
 on:
   workflow_call:
@@ -22,7 +22,15 @@ jobs:
       - name: Upgrade linux deps
         run: |
           sudo apt-get update
-          sudo apt-get upgrade --yes
+          
+          # install security updates
+          sudo apt-get -s dist-upgrade \
+            | grep "^Inst" \
+            | grep -i securi \
+            | awk -F " " {'print $2'} \
+            | xargs sudo apt-get install -y
+          
+          sudo apt-get autoremove -y
 
       - id: build-snap
         name: Build snap
