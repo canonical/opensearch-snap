@@ -26,7 +26,8 @@ function set_ulimits () {
 
     # 1. Set the number of open file handles
     # ulimit -n 1024 -- default in local machine
-    if [ "$(ulimit -n)" -lt 65535 ]; then
+    max_open_files="$(ulimit -n)"
+    if [ "${max_open_files}" != "unlimited" ] && [ "${max_open_files}" -lt 65535 ]; then
         ulimit -n 65535
     fi
 
