@@ -34,7 +34,7 @@ function set_ulimits () {
     # 2. Set the number of threads Opensearch can create, should be configured automatically if opensearch ran as a service
     # ulimit -u 60921 -- default in local machine
     max_threads="$(ulimit -u)"
-    if [ "${max_threads}" != "unlimited" ] || [ "${max_threads}" -lt 4096 ]; then
+    if [ "${max_threads}" != "unlimited" ] && [ "${max_threads}" -lt 4096 ]; then
         ulimit -u 4096
     fi
 
