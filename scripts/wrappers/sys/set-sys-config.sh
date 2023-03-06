@@ -26,21 +26,23 @@ function set_ulimits () {
 
     # 1. Set the number of open file handles
     # ulimit -n 1024 -- default in local machine
-    if [ "$(ulimit -n)" -lt 65535 ]; then
+    max_open_files="$(ulimit -n)"
+    if [ "${max_open_files}" != "unlimited" ] && [ "${max_open_files}" -lt 65535 ]; then
         ulimit -n 65535
     fi
 
     # 2. Set the number of threads Opensearch can create, should be configured automatically if opensearch ran as a service
     # ulimit -u 60921 -- default in local machine
-    if [ "$(ulimit -u)" -lt 4096 ]; then
+    max_threads="$(ulimit -u)"
+    if [ "${max_threads}" != "unlimited" ] && [ "${max_threads}" -lt 4096 ]; then
         ulimit -u 4096
     fi
 
     # 3. Set the locked-in memory size to unlimited
     # ulimit -l 1964328 -- default in local machine
-    if snapctl is-connected "process-control"; then
-        ulimit -l unlimited
-    fi
+    # if snapctl is-connected "process-control"; then
+    # ulimit -l unlimited
+    # fi
 }
 
 
