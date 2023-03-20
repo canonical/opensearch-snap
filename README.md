@@ -60,3 +60,9 @@ sudo snap run opensearch.test-node-up
 # Check if the security index is well initialised:
 sudo snap run opensearch.test-security-index-created
 ```
+
+## License
+The Opensearch Snap is free software, distributed under the Apache
+Software License, version 2.0. See
+[LICENSE](https://github.com/canonical/opensearch-snap/blob/main/licenses/LICENSE-snap)
+for more information.
