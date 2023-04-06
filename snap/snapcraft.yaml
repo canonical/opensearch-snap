@@ -55,6 +55,8 @@ apps:
     daemon: simple
     install-mode: disable
     command: ops/start.sh
+    restart-condition: always
+    restart-delay: 20s
     # reload-command: ops/start.sh
     plugs:
       - network
