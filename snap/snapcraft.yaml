@@ -73,6 +73,7 @@ apps:
       - process-control
       - system-observe
       - sys-fs-cgroup-service
+      - performance-analyzer
     environment:
       OPS_ROOT: ${SNAP}/ops
       OPENSEARCH_PATH_CERTS: ${OPENSEARCH_PATH_CONF}/certificates
