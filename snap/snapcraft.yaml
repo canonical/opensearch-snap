@@ -23,6 +23,13 @@ system-usernames:
 
 
 plugs:
+  performance-analyzer:
+    interface: system-files
+    read:
+      - /dev/shm/performanceanalyzer
+    write:
+      - /dev/shm/performanceanalyzer
+
   sys-fs-cgroup-service:
     interface: system-files
     read:
