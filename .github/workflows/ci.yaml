@@ -99,7 +99,7 @@ jobs:
           sleep 15s
 
           # create the security index
-          sudo snap run opensearch.security-init --admin-password=admin1234
+          sudo snap run opensearch.security-init --tls-admin-password=admin1234
 
       - name: Setup tmate session
         if: ${{ failure() }}
@@ -108,9 +108,11 @@ jobs:
       - name: Ensure the cluster is reachable and node created
         run: |
           sudo snap install yq
+          
+          cert=/var/snap/opensearch/current/config/certificates/node-cm0.pem
 
           # Check node name
-          cluster_resp=$(curl -k -XGET https://localhost:9200 -u 'admin:admin')
+          cluster_resp=$(curl --cacert -XGET https://localhost:9200 -u 'admin:admin')
           echo -e "Cluster Response: \n ${cluster_resp}"
           node_name=$(echo "${cluster_resp}" | yq -r .name)
           if [ "${node_name}" != "cm0" ]; then
