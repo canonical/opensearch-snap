@@ -5,7 +5,7 @@ set -eu
 
 usage() {
 cat << EOF
-usage: start.sh --init-security yes --admin-password ...
+usage: start.sh --init-security yes --tls-admin-password ...
 To be ran / setup once per cluster - or when wanting to rebuild the security index.
 --tls-admin-password  (Optional)    Passphrase of the admin key
 --help                          Shows help menu
