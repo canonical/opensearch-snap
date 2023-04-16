@@ -109,10 +109,11 @@ jobs:
         run: |
           sudo snap install yq
           
-          cert=/var/snap/opensearch/current/config/certificates/node-cm0.pem
-
+          sudo cp /var/snap/opensearch/current/config/certificates/node-cm0.pem ./
+          cert=./node-cm0.pem
+          
           # Check node name
-          cluster_resp=$(curl --cacert -XGET https://localhost:9200 -u 'admin:admin')
+          cluster_resp=$(curl --cacert ${cert} -XGET https://localhost:9200 -u 'admin:admin')
           echo -e "Cluster Response: \n ${cluster_resp}"
           node_name=$(echo "${cluster_resp}" | yq -r .name)
           if [ "${node_name}" != "cm0" ]; then
@@ -120,7 +121,7 @@ jobs:
           fi
 
           # Check cluster health
-          health_resp=$(curl -k -XGET https://localhost:9200/_cluster/health -u 'admin:admin')
+          health_resp=$(curl --cacert ${cert} -XGET https://localhost:9200/_cluster/health -u 'admin:admin')
           echo -e "Cluster Health Response: \n ${health_resp}"
           cluster_status=$(echo "${health_resp}" | yq -r .status)
           if [ "${cluster_status}" != "green" ]; then
