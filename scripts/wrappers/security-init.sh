@@ -7,21 +7,21 @@ usage() {
 cat << EOF
 usage: start.sh --init-security yes --admin-password ...
 To be ran / setup once per cluster - or when wanting to rebuild the security index.
---admin-password  (Optional)    Passphrase of the admin key
+--tls-admin-password  (Optional)    Passphrase of the admin key
 --help                          Shows help menu
 EOF
 }
 
 
 # Args
-admin_password=""
+tls_admin_password=""
 
 
 # Args handling
 function parse_args () {
     # init-security boolean - from the charm, this should be based on a flag on the app data bag.
     local LONG_OPTS_LIST=(
-        "admin-password"
+        "tls-admin-password"
         "help"
     )
     local opts=$(getopt \
@@ -34,8 +34,8 @@ function parse_args () {
 
     while [ $# -gt 0 ]; do
         case $1 in
-            --admin-password) shift
-                admin_password=$1
+            --tls-admin-password) shift
+                tls_admin_password=$1
                 ;;
             --help) usage
                 exit
@@ -59,7 +59,7 @@ function init_security_plugin () {
     )
 
     if [ -n "${admin_password}" ]; then
-        sec_args+=("-keypass" "${admin_password}")
+        sec_args+=("-keypass" "${tls_admin_password}")
     fi
 
     source \

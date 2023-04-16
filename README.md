@@ -45,7 +45,7 @@ sudo snap start opensearch.daemon
 
 #### Creating the Security Index:
 ```
-sudo snap run opensearch.security-init --admin-password=admin1234
+sudo snap run opensearch.security-init --tls-admin-password=admin1234
 ```
 
 ### Testing the OpenSearch setup:

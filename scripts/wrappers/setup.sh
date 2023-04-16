@@ -235,7 +235,7 @@ if [ "${tls_self_managed}" ]; then
 
         keys=("root-ca" "root-ca-key" "admin" "admin-key")
         for key in "${keys[@]}"; do
-            set_access_restrictions "${OPENSEARCH_PATH_CERTS}/${key}.pem" 660
+            set_access_restrictions "${OPENSEARCH_PATH_CERTS}/${key}.pem" 664
         done
     fi
 
@@ -251,6 +251,6 @@ if [ "${tls_self_managed}" ]; then
 
     keys=("node-${node_name}" "node-${node_name}-key")
     for key in "${keys[@]}"; do
-        set_access_restrictions "${OPENSEARCH_PATH_CERTS}/${key}.pem" 660
+        set_access_restrictions "${OPENSEARCH_PATH_CERTS}/${key}.pem" 664
     done
 fi
