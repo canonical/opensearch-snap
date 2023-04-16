@@ -58,7 +58,7 @@ function init_security_plugin () {
         "-key" "${OPENSEARCH_PATH_CERTS}/admin-key.pem"
     )
 
-    if [ -n "${admin_password}" ]; then
+    if [ -n "${tls_admin_password}" ]; then
         sec_args+=("-keypass" "${tls_admin_password}")
     fi
 
