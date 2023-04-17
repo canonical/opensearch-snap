@@ -99,7 +99,7 @@ jobs:
           sleep 15s
 
           # create the security index
-          sudo snap run opensearch.security-init --tls-admin-password=admin1234
+          sudo snap run opensearch.security-init --tls-priv-key-admin-pass=admin1234
 
       - name: Setup tmate session
         if: ${{ failure() }}
