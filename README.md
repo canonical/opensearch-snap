@@ -29,12 +29,12 @@ sudo sysctl -w net.ipv4.tcp_retries2=5
 #### Creating certificates:
 ```
 # create the certificates
-sudo snap run opensearch.setup         \
-    --node-name cm0                    \
-    --node-roles cluster_manager,data  \
-    --tls-root-password root1234       \
-    --tls-admin-password admin1234     \
-    --tls-node-password node1234       \
+sudo snap run opensearch.setup          \
+    --node-name cm0                     \
+    --node-roles cluster_manager,data   \
+    --tls-priv-key-root-pass root1234   \
+    --tls-priv-key-admin-pass admin1234 \
+    --tls-priv-key-node-pass node1234   \
     --tls-init-setup yes    # this creates the root and admin certs as well.
 ```
 

@@ -11,21 +11,21 @@ usage() {
 cat << EOF
 usage: init.sh --root-password password ...
 To be ran / setup once per cluster.
---cluster-name        (Required)      Name of the cluster
---node-name           (Required)      Name of the current node
---node-roles          (Required)      Type of the node, array combination of: [cluster_manager, data, voting_only, ..]
---node-host           (Required)      IP address used to bind the node, default: [ _local_, _site_ ]
---seed-hosts          (Required)      Private IP of all the cluster-manager eligible nodes, default: ["127.0.0.1", "[::1]"]
---security-disabled   (Optional)      Enum of either yes, no (default). Enables or disables the security plugin.
---tls-self-managed    (Optional)      Enum of either yes (default), no. Generates and self-signs the certificates.
---tls-init-setup      (Optional)      Enum of either yes, no (default). Creates a root and admin certs if set to yes.
---tls-root-password   (Optional)      Password for encrypting the root key
---tls-root-subject    (Optional)      Subject for the root
---tls-admin-password  (Optional)      Password for encrypting the admin key
---tls-admin-subject   (Optional)      Subject for the admin certificate
---tls-node-password   (Optional)      Password for encrypting the node key
---tls-node-subject    (Optional)      Subject for the node certificate
---tls-for-rest        (Optional)      Enum of either: yes (default), no. Enables the certificate for both the transport and rest layers or just the former
+--cluster-name            (Required)  Name of the cluster
+--node-name               (Required)  Name of the current node
+--node-roles              (Required)  Type of the node, array combination of: [cluster_manager, data, voting_only, ..]
+--node-host               (Required)  IP address used to bind the node, default: [ _local_, _site_ ]
+--seed-hosts              (Required)  Private IP of all the cluster-manager eligible nodes, default: ["127.0.0.1", "[::1]"]
+--security-disabled       (Optional)  Enum of either yes, no (default). Enables or disables the security plugin.
+--tls-self-managed        (Optional)  Enum of either yes (default), no. Generates and self-signs the certificates.
+--tls-init-setup          (Optional)  Enum of either yes, no (default). Creates a root and admin certs if set to yes.
+--tls-priv-key-root-pass  (Optional)  Password for encrypting the root key
+--tls-root-subject        (Optional)  Subject for the root
+--tls-priv-key-admin-pass (Optional)  Password for encrypting the admin key
+--tls-admin-subject       (Optional)  Subject for the admin certificate
+--tls-priv-key-node-pass  (Optional)  Password for encrypting the node key
+--tls-node-subject        (Optional)  Subject for the node certificate
+--tls-for-rest            (Optional)  Enum of either: yes (default), no. Enables the certificate for both the transport and rest layers or just the former
 --help                                Shows help menu
 EOF
 }
@@ -43,11 +43,11 @@ security_disabled=""
 
 tls_self_managed=""
 tls_init_setup=""
-tls_root_password=""
+tls_priv_key_root_pass=""
 tls_root_subject=""
-tls_admin_password=""
+tls_priv_key_admin_pass=""
 tls_admin_subject=""
-tls_node_password=""
+tls_priv_key_node_pass=""
 tls_node_subject=""
 tls_for_rest=""
 
@@ -62,11 +62,11 @@ function parse_args() {
         "security-disabled"
         "tls-self-managed"
         "tls-init-setup"
-        "tls-root-password"
+        "tls-priv-key-root-pass"
         "tls-root-subject"
-        "tls-admin-password"
+        "tls-priv-key-admin-pass"
         "tls-admin-subject"
-        "tls-node-password"
+        "tls-priv-key-node-pass"
         "tls-node-subject"
         "tls-for-rest"
         "help"
@@ -106,14 +106,14 @@ function parse_args() {
             --tls-init-setup) shift
                 tls_init_setup=$1
                 ;;
-            --tls-root-password) shift
-                tls_root_password=$1
+            --tls-priv-key-root-pass) shift
+                tls_priv_key_root_pass=$1
                 ;;
-            --tls-admin-password) shift
-                tls_admin_password=$1
+            --tls-priv-key-admin-pass) shift
+                tls_priv_key_admin_pass=$1
                 ;;
-            --tls-node-password) shift
-                tls_node_password=$1
+            --tls-priv-key-node-pass) shift
+                tls_priv_key_node_pass=$1
                 ;;
             --tls-root-subject) shift
                 tls_root_subject=$1
@@ -185,8 +185,8 @@ function validate_args () {
     fi
 
     if [ "${tls_self_managed}" == "yes" ]; then
-        if [ -z "${tls_root_password}" ]; then
-            err_message="${err_message}- '--tls-root-password' is required \n"
+        if [ -z "${tls_priv_key_root_pass}" ]; then
+            err_message="${err_message}- '--tls-priv-key-root-pass' is required \n"
         fi
     fi
 
@@ -226,8 +226,8 @@ if [ "${tls_self_managed}" ]; then
         # create root and admin certs
         source \
             "${TLS_DIR}"/self-managed-init.sh \
-                --root-password "${tls_root_password}" \
-                --admin-password "${tls_admin_password}" \
+                --root-password "${tls_priv_key_root_pass}" \
+                --admin-password "${tls_priv_key_admin_pass}" \
                 --root-subject "${tls_root_subject}" \
                 --admin-subject "${tls_admin_subject}" \
                 --rest-with-tls "${tls_for_rest}" \
@@ -243,8 +243,8 @@ if [ "${tls_self_managed}" ]; then
     source \
         "${TLS_DIR}"/self-managed-node.sh \
             --name "${node_name}" \
-            --root-password "${tls_root_password}" \
-            --node-password "${tls_node_password}" \
+            --root-password "${tls_priv_key_root_pass}" \
+            --node-password "${tls_priv_key_node_pass}" \
             --node-subject "${tls_node_subject}" \
             --rest-with-tls "${tls_for_rest}" \
             --target-dir "${OPENSEARCH_PATH_CERTS}"

@@ -36,12 +36,12 @@ Now, configuring the required system settings along with connecting the interfac
 ### Set-up an OpenSearch cluster:
 ```
 # create the certificates
-sudo snap run opensearch.setup         \
-    --node-name cm0                    \
-    --node-roles cluster_manager,data  \
-    --tls-root-password root1234       \
-    --tls-admin-password admin1234     \
-    --tls-node-password node1234       \
+sudo snap run opensearch.setup            \
+    --node-name cm0                       \
+    --node-roles cluster_manager,data     \
+    --tls-priv-key-root-pass root1234     \
+    --tls-priv-key-admin-pass admin1234   \
+    --tls-priv-key-node-pass node1234     \
     --tls-init-setup yes    # this creates the root and admin certs as well.
 
 # start opensearch
@@ -49,7 +49,7 @@ sudo snap start opensearch.daemon
 
 # initialize the security index
 # should only be called once per cluster, or for rebuilding the security index
-sudo snap run opensearch.security-init --tls-admin-password=admin1234
+sudo snap run opensearch.security-init --tls-priv-key-admin-pass=admin1234
 ```
 
 ### Test your installation:
