@@ -10,7 +10,7 @@ description: |
     Developers build with OpenSearch for use cases such as application search, 
     log analytics, data observability, data ingestion, and more.
 
-grade: devel # must be 'stable' to release into candidate/stable channels
+grade: stable # must be 'stable' to release into candidate/stable channels
 
 confinement: strict # use 'strict' once you have the right plugs and slots
 
