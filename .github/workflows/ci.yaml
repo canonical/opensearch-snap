@@ -4,9 +4,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  VERSION: 2.6.0
-
 on:
   workflow_call:
   pull_request:
@@ -23,6 +20,10 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+
+      - name: Install required dependencies
+        run: |
+          sudo snap install yq
 
       - name: Upgrade linux deps
         run: |
@@ -47,7 +48,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: opensearch_snap_amd64
-          path: opensearch_${{env.VERSION}}_amd64.snap
+          path: "opensearch_*.snap"
 
   test:
     name: Test Snap
@@ -64,8 +65,10 @@ jobs:
 
       - name: Install snap file
         run: |
+          version="$(cat snap/snapcraft.yaml | yq .version)"
+          
           sudo snap remove --purge opensearch
-          sudo snap install opensearch_${{env.VERSION}}_amd64.snap --dangerous --jailmode
+          sudo snap install opensearch_${version}_amd64.snap --dangerous --jailmode
 
       - name: Setup the required system configs
         run: |

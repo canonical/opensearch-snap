@@ -1,7 +1,6 @@
 name: Build OpenSearch from source, run tests and release.
 
 env:
-  VERSION: 2.6.0
   RELEASE: edge
 
 on:
@@ -21,16 +20,31 @@ jobs:
     needs:
       - ci-tests
     steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Install required dependencies
+        run: |
+          sudo snap install yq
+
       - name: Download snap file
         uses: actions/download-artifact@v3
         with:
           name: opensearch_snap_amd64
           path: .
 
+      - name: Set snap release channel
+        run: |
+          version="$(cat snap/snapcraft.yaml | yq .version)"
+          channel="${version%%.*}/${{env.RELEASE}}"
+          
+          echo "version=${version}" >> $GITHUB_ENV
+          echo "channel=${channel}" >> $GITHUB_ENV
+
       - name: Publish snap to Store
         uses: snapcore/action-publish@v1
         env:
           SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.STORE_LOGIN }}
         with:
-          snap: opensearch_${{env.VERSION}}_amd64.snap
-          release: ${{env.RELEASE}}
+          snap: opensearch_${{env.version}}_amd64.snap
+          release: ${{env.channel}}
