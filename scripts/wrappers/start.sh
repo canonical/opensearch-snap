@@ -43,6 +43,9 @@ function start_opensearch () {
     exit_if_missing_perm "sys-fs-cgroup-service"
     exit_if_missing_perm "system-observe"
 
+    # unset cumulated classpath
+    unset OPENSEARCH_CLASSPATH
+
     # start
     "${SNAP}"/usr/bin/setpriv \
         --clear-groups \
