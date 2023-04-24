@@ -12,6 +12,9 @@ analytics suite that makes it easy to ingest, search, visualize, and analyze dat
 
 
 ### Installation:
+[![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-black.svg)](https://snapcraft.io/opensearch)
+
+or:
 ```
 sudo snap install opensearch --channel=latest/edge
 sudo snap connect opensearch:process-control
