@@ -16,7 +16,7 @@ analytics suite that makes it easy to ingest, search, visualize, and analyze dat
 
 or:
 ```
-sudo snap install opensearch --channel=latest/edge
+sudo snap install opensearch --channel=2/candidate
 sudo snap connect opensearch:process-control
 ```
 
@@ -62,6 +62,12 @@ sudo snap run opensearch.test-node-up
 
 # Check if the security index is well initialised:
 sudo snap run opensearch.test-security-index-created
+```
+
+or:
+```
+sudo cp /var/snap/opensearch/current/config/certificates/node-cm0.pem ./
+curl --cacert node-cm0.pem -XGET https://admin:admin@localhost:9200/_cluster/health
 ```
 
 ## License
