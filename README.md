@@ -12,8 +12,11 @@ analytics suite that makes it easy to ingest, search, visualize, and analyze dat
 
 
 ### Installation:
+[![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-black.svg)](https://snapcraft.io/opensearch)
+
+or:
 ```
-sudo snap install opensearch --channel=latest/edge
+sudo snap install opensearch --channel=2/candidate
 sudo snap connect opensearch:process-control
 ```
 
@@ -29,12 +32,12 @@ sudo sysctl -w net.ipv4.tcp_retries2=5
 #### Creating certificates:
 ```
 # create the certificates
-sudo snap run opensearch.setup         \
-    --node-name cm0                    \
-    --node-roles cluster_manager,data  \
-    --tls-root-password root1234       \
-    --tls-admin-password admin1234     \
-    --tls-node-password node1234       \
+sudo snap run opensearch.setup          \
+    --node-name cm0                     \
+    --node-roles cluster_manager,data   \
+    --tls-priv-key-root-pass root1234   \
+    --tls-priv-key-admin-pass admin1234 \
+    --tls-priv-key-node-pass node1234   \
     --tls-init-setup yes    # this creates the root and admin certs as well.
 ```
 
@@ -45,20 +48,53 @@ sudo snap start opensearch.daemon
 
 #### Creating the Security Index:
 ```
-sudo snap run opensearch.security-init --admin-password=admin1234
+sudo snap run opensearch.security-init --tls-priv-key-admin-pass=admin1234
 ```
 
 ### Testing the OpenSearch setup:
-You can either consume the REST API yourself or see if the below commands succeed, and you see that the tests "PASS" successfully: 
+You can either consume the REST API yourself or see if the below commands succeed, and you see that the tests `"PASSED"` successfully: 
 ```
 # Check if cluster is healthy (green):
 sudo snap run opensearch.test-cluster-health-green
+> ....
+> PASSED
+
 
 # Check if node is up:
 sudo snap run opensearch.test-node-up
+> ....
+> PASSED
+
 
 # Check if the security index is well initialised:
 sudo snap run opensearch.test-security-index-created
+> ....
+> PASSED
+```
+
+or:
+```
+sudo cp /var/snap/opensearch/current/config/certificates/node-cm0.pem ./
+curl --cacert node-cm0.pem -XGET https://admin:admin@localhost:9200/_cluster/health
+> {
+  "cluster_name": "opensearch-cluster",
+  "status": "green",
+  "timed_out": false,
+  "number_of_nodes": 1,
+  "number_of_data_nodes": 1,
+  "discovered_master": true,
+  "discovered_cluster_manager": true,
+  "active_primary_shards": 2,
+  "active_shards": 2,
+  "relocating_shards": 0,
+  "initializing_shards": 0,
+  "unassigned_shards": 0,
+  "delayed_unassigned_shards": 0,
+  "number_of_pending_tasks": 0,
+  "number_of_in_flight_fetch": 0,
+  "task_max_waiting_in_queue_millis": 0,
+  "active_shards_percent_as_number": 100
+}
 ```
 
 ## License

@@ -5,23 +5,23 @@ set -eu
 
 usage() {
 cat << EOF
-usage: start.sh --init-security yes --admin-password ...
+usage: start.sh --init-security yes --tls-priv-key-admin-pass ...
 To be ran / setup once per cluster - or when wanting to rebuild the security index.
---admin-password  (Optional)    Passphrase of the admin key
---help                          Shows help menu
+--tls-priv-key-admin-pass  (Optional) Passphrase of the admin key
+--help                                Shows help menu
 EOF
 }
 
 
 # Args
-admin_password=""
+tls_priv_key_admin_pass=""
 
 
 # Args handling
 function parse_args () {
     # init-security boolean - from the charm, this should be based on a flag on the app data bag.
     local LONG_OPTS_LIST=(
-        "admin-password"
+        "tls-priv-key-admin-pass"
         "help"
     )
     local opts=$(getopt \
@@ -34,8 +34,8 @@ function parse_args () {
 
     while [ $# -gt 0 ]; do
         case $1 in
-            --admin-password) shift
-                admin_password=$1
+            --tls-priv-key-admin-pass) shift
+                tls_priv_key_admin_pass=$1
                 ;;
             --help) usage
                 exit
@@ -58,8 +58,8 @@ function init_security_plugin () {
         "-key" "${OPENSEARCH_PATH_CERTS}/admin-key.pem"
     )
 
-    if [ -n "${admin_password}" ]; then
-        sec_args+=("-keypass" "${admin_password}")
+    if [ -n "${tls_priv_key_admin_pass}" ]; then
+        sec_args+=("-keypass" "${tls_priv_key_admin_pass}")
     fi
 
     source \
