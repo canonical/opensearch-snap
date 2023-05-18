@@ -9,6 +9,15 @@ on:
   pull_request:
 
 jobs:
+
+  shellcheck:
+    name: Shellcheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@master
+
   build:
     name: Build Snap
     runs-on: ubuntu-latest
@@ -28,14 +37,14 @@ jobs:
       - name: Upgrade linux deps
         run: |
           sudo apt-get update
-          
+
           # install security updates
           sudo apt-get -s dist-upgrade \
             | grep "^Inst" \
             | grep -i securi \
             | awk -F " " {'print $2'} \
             | xargs sudo apt-get install -y
-          
+
           sudo apt-get autoremove -y
 
       - id: build-snap
@@ -71,7 +80,7 @@ jobs:
       - name: Install snap file
         run: |
           version="$(cat snap/snapcraft.yaml | yq .version)"
-          
+
           sudo snap remove --purge opensearch
           sudo snap install opensearch_${version}_amd64.snap --dangerous --jailmode
 
@@ -116,10 +125,10 @@ jobs:
       - name: Ensure the cluster is reachable and node created
         run: |
           sudo snap install yq
-          
+
           sudo cp /var/snap/opensearch/current/config/certificates/node-cm0.pem ./
           cert=./node-cm0.pem
-          
+
           # Check node name
           cluster_resp=$(curl --cacert ${cert} -XGET https://localhost:9200 -u 'admin:admin')
           echo -e "Cluster Response: \n ${cluster_resp}"
