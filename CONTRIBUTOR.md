@@ -1,6 +1,9 @@
 ## Developer Guide:
 
 
+### Building the Snap:
+Steps to build the snap
+
 ### Installation:
 Steps to install it locally:
 ```
@@ -26,7 +29,7 @@ Now, configuring the required system settings along with connecting the interfac
     sudo snap connect opensearch:process-control
     sudo snap connect opensearch:system-observe
     sudo snap connect opensearch:sys-fs-cgroup-service
-   
+
     # system configs required by opensearch, should be set using the following way:
     sudo sysctl -w vm.swappiness=0
     sudo sysctl -w vm.max_map_count=262144
@@ -62,10 +65,10 @@ The OpenSearch setup can be tested either in either of the following ways:
     ```
    # Check if cluster is healthy (green):
    sudo snap run opensearch.test-cluster-health-green
-   
+
    # Check if node is up:
    sudo snap run opensearch.test-node-up
-   
+
    # Check if the security index is well initialised:
    sudo snap run opensearch.test-security-index-created
    ```
