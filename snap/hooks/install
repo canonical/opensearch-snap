@@ -17,6 +17,8 @@ function create_file_structure () {
     # -------------------------------
 
     # Opensearch install folders and set config
+    add_folder "${SNAP_DATA}/etc/opensearch/" 777
+    add_folder "${SNAP_DATA}/usr/share/opensearch/" 777
     dir_copy_if_not_exists "bin" "${SNAP_DATA}/etc/opensearch/" 770
     dir_copy_if_not_exists "jdk" "${SNAP_DATA}/usr/share/opensearch/" 770
     dir_copy_if_not_exists "lib" "${SNAP_DATA}/usr/share/opensearch/" 550
@@ -34,7 +36,10 @@ function create_file_structure () {
 
 
 function set_base_config_props () {
-    # Change conf to set log and data paths for both opensearch.yaml and jvm.options
+    # Change conf to set log and data paths for both opensearch.yml and jvm.options
+    file_copy "opensearch.yml" "${SNAP_DATA}/etc/opensearch/config/opensearch.yml" 777
+    file_copy "jvm.options" "${SNAP_DATA}/etc/opensearch/config/jvm.options" 777
+
     set_yaml_prop "${SNAP_DATA}/etc/opensearch/opensearch.yml" "path.data" "${SNAP_COMMON}/data"
     set_yaml_prop "${SNAP_DATA}/etc/opensearch/opensearch.yml" "path.logs" "${SNAP_COMMON}/logs"
 
@@ -42,5 +47,8 @@ function set_base_config_props () {
 }
 
 
+ls $SNAP
+ls $SNAP_DATA
+ls $SNAP_COMMON
 create_file_structure
 set_base_config_props
