@@ -24,7 +24,7 @@ function create_file_structure () {
     dir_copy_if_not_exists "lib" "${SNAP_DATA}/usr/share/opensearch/" 550
     dir_copy_if_not_exists "modules" "${SNAP_DATA}/etc/opensearch/" 550
     dir_copy_if_not_exists "plugins" "${SNAP_DATA}/usr/share/opensearch/" 770
-    dir_copy_if_not_exists "config" "${SNAP_DATA}/etc/opensearch" 770
+    dir_copy_if_not_exists "config" "${SNAP_DATA}/etc/opensearch/" 770
 
     add_folder "${SNAP_DATA}/etc/opensearch/certificates" 770
     add_file "${SNAP_DATA}/etc/opensearch/unicast_hosts.txt" 770
@@ -37,18 +37,12 @@ function create_file_structure () {
 
 function set_base_config_props () {
     # Change conf to set log and data paths for both opensearch.yml and jvm.options
-    file_copy "opensearch.yml" "${SNAP_DATA}/etc/opensearch/config/opensearch.yml" 777
-    file_copy "jvm.options" "${SNAP_DATA}/etc/opensearch/config/jvm.options" 777
+    set_yaml_prop "${SNAP_DATA}/etc/opensearch/config/opensearch.yml" "path.data" "${SNAP_COMMON}/data"
+    set_yaml_prop "${SNAP_DATA}/etc/opensearch/config/opensearch.yml" "path.logs" "${SNAP_COMMON}/logs"
 
-    set_yaml_prop "${SNAP_DATA}/etc/opensearch/opensearch.yml" "path.data" "${SNAP_COMMON}/data"
-    set_yaml_prop "${SNAP_DATA}/etc/opensearch/opensearch.yml" "path.logs" "${SNAP_COMMON}/logs"
-
-    replace_in_file "${SNAP_DATA}/etc/opensearch/jvm.options" "=logs/" "=${SNAP_COMMON}/logs/"
+    replace_in_file "${SNAP_DATA}/etc/opensearch/config/jvm.options" "=logs/" "=${SNAP_COMMON}/logs/"
 }
 
 
-ls $SNAP
-ls $SNAP_DATA
-ls $SNAP_COMMON
 create_file_structure
 set_base_config_props
