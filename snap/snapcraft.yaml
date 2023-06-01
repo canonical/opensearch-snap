@@ -46,7 +46,7 @@ environment:
 
   OPENSEARCH_HOME: ${SNAP_DATA}/etc/opensearch
   OPENSEARCH_JAVA_HOME: ${SNAP_DATA}/usr/share/opensearch/jdk
-  OPENSEARCH_PATH_CONF: ${SNAP_DATA}/etc/opensearch
+  OPENSEARCH_PATH_CONF: ${SNAP_DATA}/etc/opensearch/config
   OPENSEARCH_TMPDIR: ${SNAP_COMMON}/tmp
   OPENSEARCH_PLUGINS: ${SNAP_DATA}/usr/share/opensearch/plugins
 
