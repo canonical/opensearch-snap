@@ -23,7 +23,7 @@ function create_file_structure () {
     dir_copy_if_not_exists "jdk" "${SNAP_DATA}/usr/share/opensearch/" 770
     dir_copy_if_not_exists "lib" "${SNAP_DATA}/usr/share/opensearch/" 550
     dir_copy_if_not_exists "modules" "${SNAP_DATA}/etc/opensearch/" 550
-    dir_copy_if_not_exists "plugins" "${SNAP_DATA}/usr/share/opensearch/" 770
+    dir_copy_if_not_exists "plugins" "${SNAP_DATA}/etc/opensearch/" 770
     dir_copy_if_not_exists "config" "${SNAP_DATA}/etc/opensearch/" 770
 
     add_folder "${SNAP_DATA}/etc/opensearch/certificates" 770

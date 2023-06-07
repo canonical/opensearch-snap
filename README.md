@@ -52,7 +52,7 @@ sudo snap run opensearch.security-init --tls-priv-key-admin-pass=admin1234
 ```
 
 ### Testing the OpenSearch setup:
-You can either consume the REST API yourself or see if the below commands succeed, and you see that the tests `"PASSED"` successfully: 
+You can either consume the REST API yourself or see if the below commands succeed, and you see that the tests `"PASSED"` successfully:
 ```
 # Check if cluster is healthy (green):
 sudo snap run opensearch.test-cluster-health-green

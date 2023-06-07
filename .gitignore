@@ -396,3 +396,4 @@ pip-selfcheck.json
 # End of https://www.toptal.com/developers/gitignore/api/intellij+all,intellij+iml,python,visualstudiocode,macos,linux,venv
 
 *.snap
+opensearch-deb
