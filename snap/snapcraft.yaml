@@ -44,11 +44,12 @@ hooks:
 environment:
   SNAP_LOG_DIR: ${SNAP_COMMON}/ops/snap/logs
 
-  OPENSEARCH_HOME: ${SNAP_DATA}/etc/opensearch
-  OPENSEARCH_JAVA_HOME: ${SNAP_DATA}/usr/share/opensearch/jdk/bin
+  OPENSEARCH_JAVA_HOME: ${SNAP_DATA}/usr/share/opensearch/jdk
+  JAVA_HOME: ${SNAP_DATA}/usr/share/opensearch/jdk
+  OPENSEARCH_HOME: ${SNAP_DATA}/usr/share/opensearch
   OPENSEARCH_PATH_CONF: ${SNAP_DATA}/etc/opensearch/config
   OPENSEARCH_TMPDIR: ${SNAP_COMMON}/tmp
-  OPENSEARCH_PLUGINS: ${SNAP_DATA}/etc/opensearch/plugins
+  OPENSEARCH_PLUGINS: ${SNAP_DATA}/usr/share/opensearch/plugins
 
 apps:
   daemon:
