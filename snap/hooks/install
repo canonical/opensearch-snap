@@ -27,6 +27,7 @@ function create_file_structure () {
     add_folder "${SNAP_DATA}/config/certificates" 770
     add_file "${SNAP_DATA}/config/unicast_hosts.txt" 770
 
+    add_folder "${SNAP_DATA}/extensions" 770
     add_folder "${SNAP_COMMON}/data" 770
     add_folder "${SNAP_COMMON}/logs" 774
     add_folder "${SNAP_COMMON}/tmp" 770
