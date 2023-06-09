@@ -17,20 +17,19 @@ function create_file_structure () {
     # -------------------------------
 
     # Opensearch install folders and set config
-    add_folder "${SNAP_DATA}/etc/opensearch/" 770
     add_folder "${SNAP_DATA}/usr/share/opensearch/" 770
     dir_copy_if_not_exists "bin" "${SNAP_DATA}/usr/share/opensearch/" 770
     dir_copy_if_not_exists "jdk" "${SNAP_DATA}/usr/share/opensearch/" 770
     dir_copy_if_not_exists "lib" "${SNAP_DATA}/usr/share/opensearch/" 550
     dir_copy_if_not_exists "modules" "${SNAP_DATA}/usr/share/opensearch/" 550
     dir_copy_if_not_exists "plugins" "${SNAP_DATA}/usr/share/opensearch/" 770
-    dir_copy_if_not_exists "config" "${SNAP_DATA}/etc/opensearch/" 770
+    add_folder "${SNAP_DATA}/usr/share/opensearch/extensions" 770
+    add_file "${SNAP_DATA}/usr/share/opensearch/extensions/extensions.yml" 770
 
+    add_folder "${SNAP_DATA}/etc/opensearch/" 770
+    dir_copy_if_not_exists "config" "${SNAP_DATA}/etc/opensearch/" 770
     add_folder "${SNAP_DATA}/etc/opensearch/certificates" 770
     add_file "${SNAP_DATA}/etc/opensearch/unicast_hosts.txt" 770
-
-    add_folder "${SNAP_DATA}/extensions" 770
-    add_file "${SNAP_DATA}/extensions/extensions.yml" 770
 
     add_folder "${SNAP_COMMON}/data" 770
     add_folder "${SNAP_COMMON}/logs" 774
