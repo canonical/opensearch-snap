@@ -1,9 +1,5 @@
 ## Developer Guide:
 
-
-### Building the Snap:
-Steps to build the snap
-
 ### Installation:
 Steps to install it locally:
 ```
