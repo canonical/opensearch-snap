@@ -29,6 +29,9 @@ function create_file_structure () {
     add_folder "${SNAP_DATA}/etc/opensearch/certificates" 770
     add_file "${SNAP_DATA}/etc/opensearch/unicast_hosts.txt" 770
 
+    add_folder "${SNAP_DATA}/extensions" 770
+    add_file "${SNAP_DATA}/extensions/extensions.yml" 770
+
     add_folder "${SNAP_COMMON}/data" 770
     add_folder "${SNAP_COMMON}/logs" 774
     add_folder "${SNAP_COMMON}/tmp" 770
