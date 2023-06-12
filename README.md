@@ -74,7 +74,7 @@ sudo snap run opensearch.test-security-index-created
 
 or:
 ```
-sudo cp /var/snap/opensearch/current/config/certificates/node-cm0.pem ./
+sudo cp /var/snap/opensearch/current/etc/opensearch/config/certificates/node-cm0.pem ./
 curl --cacert node-cm0.pem -XGET https://admin:admin@localhost:9200/_cluster/health
 > {
   "cluster_name": "opensearch-cluster",

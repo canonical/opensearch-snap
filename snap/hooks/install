@@ -28,7 +28,7 @@ function create_file_structure () {
 
     add_folder "${SNAP_DATA}/etc/opensearch/" 770
     dir_copy_if_not_exists "config" "${SNAP_DATA}/etc/opensearch/" 770
-    add_folder "${SNAP_DATA}/etc/opensearch/certificates" 770
+    add_folder "${SNAP_DATA}/etc/opensearch/config/certificates" 770
     add_file "${SNAP_DATA}/etc/opensearch/unicast_hosts.txt" 770
 
     add_folder "${SNAP_COMMON}/data" 770
