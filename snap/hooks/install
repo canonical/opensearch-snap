@@ -33,8 +33,8 @@ function create_file_structure () {
     add_folder "${ETC}config/certificates" 770
     add_file "${ETC}unicast_hosts.txt" 770
 
-    add_folder "${SNAP_COMMON}/data" 770
-    add_folder "${SNAP_COMMON}/logs" 774
+    add_folder "${SNAP_COMMON}/var/lib/opensearch/data" 770
+    add_folder "${SNAP_COMMON}/var/log/opensearch/logs" 774
     add_folder "${SNAP_COMMON}/tmp" 770
 }
 
