@@ -44,7 +44,7 @@ function set_base_config_props () {
     set_yaml_prop "${ETC}config/opensearch.yml" "path.data" "${SNAP_COMMON}/var/lib/opensearch/data"
     set_yaml_prop "${ETC}config/opensearch.yml" "path.logs" "${SNAP_COMMON}/var/log/opensearch/logs"
 
-    replace_in_file "${ETC}config/jvm.options" "=logs/" "=${SNAP_COMMON}/var/log/opensearch/logs"
+    replace_in_file "${ETC}config/jvm.options" "=logs/" "=${SNAP_COMMON}/var/log/opensearch/logs/"
 }
 
 
