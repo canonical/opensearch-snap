@@ -19,7 +19,7 @@ function create_file_structure () {
     USR="${SNAP_DATA}/usr/share/opensearch"
 
     # Opensearch install folders and set config
-    add_folder "${USR}/" 770
+    add_folder "${USR}" 770
     dir_copy_if_not_exists "bin" "${USR}/" 770
     dir_copy_if_not_exists "jdk" "${USR}/" 770
     dir_copy_if_not_exists "lib" "${USR}/" 550
@@ -28,10 +28,10 @@ function create_file_structure () {
     add_folder "${SNAP_DATA}/usr/share/opensearch/extensions" 770
     add_file "${SNAP_DATA}/usr/share/opensearch/extensions/extensions.yml" 770
 
-    add_folder "${ETC}/" 770
+    add_folder "${ETC}" 770
     dir_copy_if_not_exists "config" "${ETC}/" 770
-    add_folder "${ETC}config/certificates" 770
-    add_file "${ETC}unicast_hosts.txt" 770
+    add_folder "${ETC}/config/certificates" 770
+    add_file "${ETC}/unicast_hosts.txt" 770
 
     add_folder "${SNAP_COMMON}/var/lib/opensearch/data" 770
     add_folder "${SNAP_COMMON}/var/log/opensearch/logs" 774
@@ -41,10 +41,10 @@ function create_file_structure () {
 
 function set_base_config_props () {
     # Change conf to set log and data paths for both opensearch.yml and jvm.options
-    set_yaml_prop "${ETC}config/opensearch.yml" "path.data" "${SNAP_COMMON}/var/lib/opensearch/data"
-    set_yaml_prop "${ETC}config/opensearch.yml" "path.logs" "${SNAP_COMMON}/var/log/opensearch/logs"
+    set_yaml_prop "${ETC}/config/opensearch.yml" "path.data" "${SNAP_COMMON}/var/lib/opensearch/data"
+    set_yaml_prop "${ETC}/config/opensearch.yml" "path.logs" "${SNAP_COMMON}/var/log/opensearch/logs"
 
-    replace_in_file "${ETC}config/jvm.options" "=logs/" "=${SNAP_COMMON}/var/log/opensearch/logs/"
+    replace_in_file "${ETC}/config/jvm.options" "=logs/" "=${SNAP_COMMON}/var/log/opensearch/logs/"
 }
 
 
