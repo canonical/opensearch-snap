@@ -15,21 +15,21 @@ function create_file_structure () {
     dir_copy_if_not_exists "config" "${SNAP_COMMON}/backups" 774
 
     # -------------------------------
-    ETC="${SNAP_DATA}/etc/opensearch/"
-    USR="${SNAP_DATA}/usr/share/opensearch/"
+    ETC="${SNAP_DATA}/etc/opensearch"
+    USR="${SNAP_DATA}/usr/share/opensearch"
 
     # Opensearch install folders and set config
-    add_folder "${USR}" 770
-    dir_copy_if_not_exists "bin" "${USR}" 770
-    dir_copy_if_not_exists "jdk" "${USR}" 770
-    dir_copy_if_not_exists "lib" "${USR}" 550
-    dir_copy_if_not_exists "modules" "${USR}" 550
-    dir_copy_if_not_exists "plugins" "${USR}" 770
+    add_folder "${USR}/" 770
+    dir_copy_if_not_exists "bin" "${USR}/" 770
+    dir_copy_if_not_exists "jdk" "${USR}/" 770
+    dir_copy_if_not_exists "lib" "${USR}/" 550
+    dir_copy_if_not_exists "modules" "${USR}/" 550
+    dir_copy_if_not_exists "plugins" "${USR}/" 770
     add_folder "${SNAP_DATA}/usr/share/opensearch/extensions" 770
     add_file "${SNAP_DATA}/usr/share/opensearch/extensions/extensions.yml" 770
 
-    add_folder "${ETC}" 770
-    dir_copy_if_not_exists "config" "${ETC}" 770
+    add_folder "${ETC}/" 770
+    dir_copy_if_not_exists "config" "${ETC}/" 770
     add_folder "${ETC}config/certificates" 770
     add_file "${ETC}unicast_hosts.txt" 770
 
