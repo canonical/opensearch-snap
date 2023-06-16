@@ -20,6 +20,7 @@ function create_file_structure () {
 
     # Opensearch install folders and set config
     add_folder "${USR}" 770
+    dir_copy_if_not_exists "config" "${USR}" 770
     dir_copy_if_not_exists "bin" "${USR}/" 770
     dir_copy_if_not_exists "jdk" "${USR}/" 770
     dir_copy_if_not_exists "lib" "${USR}/" 550
@@ -30,7 +31,7 @@ function create_file_structure () {
 
     add_folder "${ETC}" 770
     add_folder "${ETC}/certificates" 770
-    add_file "${ETC}/unicast_hosts.txt" 770
+    add_file "${ETC}/unicast_sts.txt" 770
 
     add_folder "${SNAP_COMMON}/var/lib/opensearch" 770
     add_folder "${SNAP_COMMON}/var/log/opensearch" 774
