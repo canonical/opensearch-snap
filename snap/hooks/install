@@ -40,10 +40,10 @@ function create_file_structure () {
 
 function set_base_config_props () {
     # Change conf to set log and data paths for both opensearch.yml and jvm.options
-    set_yaml_prop "${ETC}/config/opensearch.yml" "path.data" "${SNAP_COMMON}/var/lib/opensearch"
-    set_yaml_prop "${ETC}/config/opensearch.yml" "path.logs" "${SNAP_COMMON}/var/log/opensearch"
+    set_yaml_prop "${ETC}/opensearch.yml" "path.data" "${SNAP_COMMON}/var/lib/opensearch"
+    set_yaml_prop "${ETC}/opensearch.yml" "path.logs" "${SNAP_COMMON}/var/log/opensearch"
 
-    replace_in_file "${ETC}/config/jvm.options" "=logs/" "=${SNAP_COMMON}/var/log/opensearch"
+    replace_in_file "${ETC}/jvm.options" "=logs/" "=${SNAP_COMMON}/var/log/opensearch"
 }
 
 
