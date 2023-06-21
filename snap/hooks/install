@@ -13,6 +13,7 @@ function create_file_structure () {
     dir_copy_if_not_exists "config" "${SNAP_COMMON}/backups" 774
 
     # -------------------------------
+
     ETC="${SNAP_DATA}/etc/opensearch"
     USR="${SNAP_DATA}/usr/share/opensearch"
 
@@ -27,6 +28,8 @@ function create_file_structure () {
     add_file "${SNAP_DATA}/usr/share/opensearch/extensions/extensions.yml" 770
 
     add_folder "${ETC}" 770
+    # TODO figure out what files we actually need from the config directory.
+    ls -al "config"
     dir_copy_if_not_exists "config/." "${ETC}" 770
     add_folder "${ETC}/certificates" 770
     add_file "${ETC}/unicast_hosts.txt" 770
