@@ -32,6 +32,10 @@ function dir_copy_if_not_exists () {
     fi
 }
 
+function copy_dir_contents () {
+    cp -R -n -r  "${SNAP}/${1}" "${2}"
+}
+
 function file_copy () {
     cp -n  "${SNAP}/${1}" "${2}"
 

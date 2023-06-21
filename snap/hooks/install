@@ -10,7 +10,7 @@ source "${OPS_ROOT}"/helpers/set-conf.sh
 
 function create_file_structure () {
     add_folder "${SNAP_COMMON}/backups" 774
-    dir_copy_if_not_exists "config" "${SNAP_COMMON}/backups" 774
+    dir_copy_if_not_exists "config/." "${SNAP_COMMON}/backups"
 
     # -------------------------------
 
@@ -30,7 +30,7 @@ function create_file_structure () {
     add_folder "${ETC}" 770
     # TODO figure out what files we actually need from the config directory.
     ls -al "${SNAP}/config"
-    dir_copy_if_not_exists "config/." "${ETC}"
+    copy_dir_contents "config/." "${ETC}"
     add_folder "${ETC}/certificates" 770
     add_file "${ETC}/unicast_hosts.txt" 770
 
