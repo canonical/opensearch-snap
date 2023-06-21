@@ -10,7 +10,7 @@ source "${OPS_ROOT}"/helpers/set-conf.sh
 
 function create_file_structure () {
     add_folder "${SNAP_COMMON}/backups" 774
-    dir_copy_if_not_exists "config/." "${SNAP_COMMON}/backups"
+    copy_dir_contents "config/." "${SNAP_COMMON}/backups"
 
     # -------------------------------
 
