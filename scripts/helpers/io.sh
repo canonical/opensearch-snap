@@ -9,7 +9,7 @@ function set_access_restrictions () {
     fi
 
     chown -R snap_daemon "${1}"
-    chgrp root "${1}"
+    chgrp -R root "${1}"
 }
 
 function add_folder () {
@@ -23,7 +23,7 @@ function add_file () {
 }
 
 function dir_copy_if_not_exists () {
-    cp -R -n -r  "${SNAP}/${1}" "${2}"
+    cp -R -n -r "${SNAP}/${1}" "${2}"
 
     if [[ $# -eq 3 ]]; then
         set_access_restrictions "${2}/${1}" "${3}"
