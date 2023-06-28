@@ -23,6 +23,9 @@ system-usernames:
 
 
 plugs:
+  shmem-perf-analyzer:
+    interface: shared-memory
+    private: true
   sys-fs-cgroup-service:
     interface: system-files
     read:
@@ -33,6 +36,7 @@ hooks:
     plugs:
       - network
       - network-bind
+      - shmem-perf-analyzer
     environment:
       OPS_ROOT: ${SNAP}/ops
 
@@ -64,6 +68,7 @@ apps:
       - log-observe
       - mount-observe
       - process-control
+      - shmem-perf-analyzer
       - system-observe
       - sys-fs-cgroup-service
     environment:
@@ -164,3 +169,15 @@ parts:
         tar -xzvf "${archive}" -C "${CRAFT_PART_INSTALL}/" --strip-components=1
       
         rm "${archive}"
+      
+        
+      
+#layout:
+#  /etc/opensearch/:
+#    symlink: ${SNAP_DATA}/config
+#  /var/lib/opensearch/:
+#    symlink: ${SNAP_DATA}/data
+#  /usr/share/opensearch/:
+#  /usr/share/opensearch/jdk:
+#  /usr/share/opensearch/lib:
+#  /usr/share/opensearch/lib:
