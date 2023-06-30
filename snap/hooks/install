@@ -9,25 +9,26 @@ source "${OPS_ROOT}"/helpers/set-conf.sh
 
 
 function create_file_structure () {
-    add_folder "${SNAP_COMMON}/backups" 774
-    copy_dir_contents "config/" "${SNAP_COMMON}/backups"
-
-    # -------------------------------
-
     ETC="${SNAP_DATA}/etc/opensearch"
     USR="${SNAP_DATA}/usr/share/opensearch"
 
     # Opensearch install folders and set config
     add_folder "${USR}" 770
-    dir_copy_if_not_exists "bin" "${USR}/" 770
-    dir_copy_if_not_exists "jdk" "${USR}/" 770
-    dir_copy_if_not_exists "lib" "${USR}/" 550
-    dir_copy_if_not_exists "modules" "${USR}/" 550
-    dir_copy_if_not_exists "plugins" "${USR}/" 770
-    add_folder "${SNAP_DATA}/usr/share/opensearch/extensions" 770
-    add_file "${SNAP_DATA}/usr/share/opensearch/extensions/extensions.yml" 770
+    add_folder "${USR}/extensions" 770
+    add_file "${USR}/extensions/extensions.yml" 770
 
-    dir_copy_if_not_exists "config" "${ETC}" 770
+    add_folder "${SNAP_DATA}/etc" 770
+
+    ls -al "${SNAP}"
+    pushd "${SNAP}/opensearch"
+    ls -al
+    dir_copy_if_not_exists "plugins" "${USR}" 770
+    ls -la "${USR}"
+    ls -la "${USR}/plugins"
+    ls -la "${USR}/plugins/opensearch-reports-scheduler"
+    dir_contents_copy "config" "${ETC}" 770
+    ls -al "${ETC}"
+    popd
     add_folder "${ETC}/certificates" 770
     add_file "${ETC}/unicast_hosts.txt" 770
 
@@ -44,7 +45,6 @@ function set_base_config_props () {
 
     replace_in_file "${ETC}/jvm.options" "=logs/" "=${SNAP_COMMON}/var/log/opensearch"
 }
-
 
 create_file_structure
 set_base_config_props

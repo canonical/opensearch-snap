@@ -23,7 +23,7 @@ function add_file () {
 }
 
 function dir_copy_if_not_exists () {
-    cp -R -n -r "${SNAP}/${1}" "${2}"
+    cp -R -n -r "${1}" "${2}"
 
     if [[ $# -eq 3 ]]; then
         set_access_restrictions "${2}/${1}" "${3}"
@@ -32,8 +32,14 @@ function dir_copy_if_not_exists () {
     fi
 }
 
-function copy_dir_contents () {
-    cp -R -n -r  "${SNAP}/${1}" "${2}"
+function dir_contents_copy () {
+    cp -R -n -r -a "${1}" "${2}"
+
+    if [[ $# -eq 3 ]]; then
+        set_access_restrictions "${2}" "${3}"
+    else
+        set_access_restrictions "${2}"
+    fi
 }
 
 function file_copy () {

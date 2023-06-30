@@ -43,9 +43,8 @@ hooks:
 
 environment:
   SNAP_LOG_DIR: ${SNAP_COMMON}/ops/snap/logs
-
-  OPENSEARCH_JAVA_HOME: ${SNAP_DATA}/usr/share/opensearch/jdk
-  OPENSEARCH_HOME: ${SNAP_DATA}/usr/share/opensearch
+  OPENSEARCH_JAVA_HOME: ${SNAP}/usr/share/opensearch/jdk
+  OPENSEARCH_HOME: ${SNAP}/usr/share/opensearch
   OPENSEARCH_PATH_CONF: ${SNAP_DATA}/etc/opensearch
   OPENSEARCH_TMPDIR: ${SNAP_COMMON}/tmp
   OPENSEARCH_PLUGINS: ${SNAP_DATA}/usr/share/opensearch/plugins
@@ -160,7 +159,17 @@ parts:
         version="$(craftctl get version)"
         archive="opensearch-${version}-linux-x64.tar.gz"
 
+        mkdir ${CRAFT_PART_INSTALL}/opensearch
+
         curl -o "${archive}" "https://artifacts.opensearch.org/releases/bundle/opensearch/${version}/${archive}"
-        tar -xzvf "${archive}" -C "${CRAFT_PART_INSTALL}/" --strip-components=1
+        tar -xzvf "${archive}" -C "${CRAFT_PART_INSTALL}/opensearch" --strip-components=1
 
         rm "${archive}"
+    override-prime: |
+        # TODO symlinks
+        craftctl default
+        mkdir -p /usr/share/opensearch
+        mv opensearch/bin /usr/share/opensearch
+        mv opensearch/jdk /usr/share/opensearch
+        mv opensearch/lib /usr/share/opensearch
+        mv opensearch/modules /usr/share/opensearch
