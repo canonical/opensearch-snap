@@ -8,16 +8,6 @@ source "${OPS_ROOT}"/helpers/io.sh
 source "${OPS_ROOT}"/helpers/set-conf.sh
 
 function create_file_structure () {
-#    add_folder "${SNAP_COMMON}/backups" 774
-#    ls -la "${SNAP_COMMON}"
-#    ls -la "${SNAP_COMMON}/backups"
-#    dir_copy_if_not_exists "config" "${SNAP_COMMON}/backups" 774
-
-    # -------------------------------
-
-    #add_folder "${OPENSEARCH_PATH_CONF}" 770
-    #add_folder "${OPENSEARCH_HOME}" 770
-
     mkdir -p "${OPENSEARCH_PATH_CONF}"
     mkdir -p "${OPENSEARCH_HOME}"
     mkdir -p "${OPENSEARCH_VARLIB}"
@@ -27,33 +17,38 @@ function create_file_structure () {
     mkdir -p "${OPENSEARCH_PATH_CONF}/extensions"
     mkdir -p "${SNAP_COMMON}/backups"
 
-#    cp -R -n -r -p "${SNAP}/modules" "${SNAP}/plugins" "${OPENSEARCH_HOME}"
-#    cp -R -n -r -p "${SNAP}/plugins" "${OPENSEARCH_HOME}"
-#    cp -R -n -r -p "${SNAP}"/config/* "${OPENSEARCH_PATH_CONF}"
+    chmod -R 774 "${SNAP_COMMON}/backups"
 
-    chmod -R 770 "${SNAP_DATA}"/*
-    chmod -R 770 "${SNAP_COMMON}"/*
-    chown -R snap_daemon "${SNAP_DATA}"/*
-    chown -R snap_daemon "${SNAP_COMMON}"/*
+    cp -R -n -r -p "${SNAP}"/config/* "${OPENSEARCH_PATH_CONF}"
 
+#    chmod -R 770 "${SNAP_DATA}"/*
+#    chmod -R 770 "${SNAP_COMMON}"/*
+#    chown -R snap_daemon "${SNAP_DATA}"/*
+#    chown -R snap_daemon "${SNAP_COMMON}"/*
 
-    "${SNAP}"/usr/bin/setpriv \
-        --clear-groups \
-        --reuid snap_daemon \
-        --regid snap_daemon -- \
-        cp -R -n -r -p "${SNAP}"/config/* "${OPENSEARCH_PATH_CONF}"
-    "${SNAP}"/usr/bin/setpriv \
-        --clear-groups \
-        --reuid snap_daemon \
-        --regid snap_daemon -- \
-        cp -R -n -r -p "${SNAP}/modules" "${SNAP}/plugins" "${OPENSEARCH_HOME}" 
 }
 
 
 function set_base_config_props () {
     # Change conf to set log and data paths for both opensearch.yaml and jvm.options
+    #     More info, check: https://github.com/opensearch-project/OpenSearch/blob/  \
+    #     418ab51718cb68b7a57d4cf524b1dec9ed02b224/server/src/main/java/org/opensearch/env/Environment.java#L68
     set_yaml_prop "${OPENSEARCH_PATH_CONF}/opensearch.yml" "path.data" "${OPENSEARCH_VARLIB}"
+    set_yaml_prop "${OPENSEARCH_PATH_CONF}/opensearch.yml" "node.pidfile" "${OPENSEARCH_HOME}"/pidfile
     set_yaml_prop "${OPENSEARCH_PATH_CONF}/opensearch.yml" "path.logs" "${OPENSEARCH_VARLOG}"
+    set_yaml_prop "${OPENSEARCH_PATH_CONF}/opensearch.yml" "path.home" "${OPENSEARCH_HOME}"
+
+    # For a module or plugin to be loaded, their class must be specified in the java classpath and their
+    # properties and security policy must be present in a folder. Build the folder with all the modules.
+    # File path described in:
+    #    https://github.com/opensearch-project/OpenSearch/blob/418ab51718cb68b7a57d4cf524b1dec9ed02b224/  \
+    #    server/src/main/java/org/opensearch/plugins/PluginInfo.java#L64
+    mkdir -p "${OPENSEARCH_HOME}"/modules
+    mkdir -p "${OPENSEARCH_HOME}"/plugins
+    cp -R -n -r -p "${OPENSEARCH_MODULES}"/* "${OPENSEARCH_HOME}"/modules
+    cp -R -n -r -p "${OPENSEARCH_PLUGINS}"/* "${OPENSEARCH_HOME}"/plugins
+    # JARs are not needed, remove them
+    find "${OPENSEARCH_HOME}" -name '*.jar' -type f -delete
 
     replace_in_file "${OPENSEARCH_PATH_CONF}/jvm.options" "=logs/" "=${OPENSEARCH_VARLOG}"
 }
@@ -61,3 +56,9 @@ function set_base_config_props () {
 
 create_file_structure
 set_base_config_props
+
+# Set final permissions
+chmod -R 770 "${SNAP_DATA}"/*
+chmod -R 770 "${SNAP_COMMON}"/*
+chown -R snap_daemon "${SNAP_DATA}"/*
+chown -R snap_daemon "${SNAP_COMMON}"/*

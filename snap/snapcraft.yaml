@@ -47,16 +47,14 @@ environment:
   OPENSEARCH_VARLIB: ${SNAP_COMMON}/var/lib/opensearch
   OPENSEARCH_TMPDIR: ${SNAP_COMMON}/usr/lib/tmpfiles.d
   OPENSEARCH_VARLOG: ${SNAP_COMMON}/var/log/opensearch
+  OPENSEARCH_HOME: ${SNAP_COMMON}/usr/share/opensearch
 
   OPS_ROOT: ${SNAP}/ops
   OPENSEARCH_BIN: ${SNAP}/usr/share/opensearch/bin
   OPENSEARCH_JAVA_HOME: ${SNAP}/usr/share/opensearch/jdk
   OPENSEARCH_LIB: ${SNAP}/usr/share/opensearch/lib
-
-
-  OPENSEARCH_HOME: ${SNAP_DATA}/usr/share/opensearch
-  OPENSEARCH_PLUGINS: ${SNAP_DATA}/usr/share/opensearch/plugins
-  OPENSEARCH_MODULES: ${SNAP_DATA}/usr/share/opensearch/modules
+  OPENSEARCH_PLUGINS: ${SNAP}/usr/share/opensearch/plugins
+  OPENSEARCH_MODULES: ${SNAP}/usr/share/opensearch/modules
 
   OPENSEARCH_PATH_CERTS: ${OPENSEARCH_PATH_CONF}/certificates
 
@@ -176,22 +174,22 @@ parts:
       
         mkdir -p "${CRAFT_PART_INSTALL}/usr/share/opensearch"
 
-        # OPENSEARCH_HOME points to SNAP_DATA, whereas the /lib folder sits in /snap
-        sed -i 's@OPENSEARCH_CLASSPATH=\"\$OPENSEARCH_HOME/lib/\*\"@OPENSEARCH_CLASSPATH=\"\$OPENSEARCH_LIB/*\"@g' "${CRAFT_PART_INSTALL}"/bin/opensearch-env
+        # OPENSEARCH_HOME points to SNAP_COMMON, whereas the /lib folder sits in /snap
+        sed -i 's@OPENSEARCH_CLASSPATH=\"\$OPENSEARCH_HOME/lib/\*\"@if \[\[ -z "$OPENSEARCH_HOME" \]\]; then OPENSEARCH_CLASSPATH=\"\$OPENSEARCH_LIB/*; fi\"@g' "${CRAFT_PART_INSTALL}"/bin/opensearch-env
         sed -i 's@bin/opensearch-keystore@\"\${OPENSEARCH_BIN}\"/opensearch-keystore@' "${CRAFT_PART_INSTALL}"/bin/opensearch
         mv "${CRAFT_PART_INSTALL}/bin" "${CRAFT_PART_INSTALL}/usr/share/opensearch/bin"
         chmod -R 555 "${CRAFT_PART_INSTALL}/usr/share/opensearch/bin"
-        #chown -R snap_daemon "${CRAFT_PART_INSTALL}/usr/share/opensearch/bin"
-        #chgrp root "${CRAFT_PART_INSTALL}/usr/share/opensearch/bin"
 
         mv "${CRAFT_PART_INSTALL}/jdk" "${CRAFT_PART_INSTALL}/usr/share/opensearch"
         chmod -R 555 "${CRAFT_PART_INSTALL}/usr/share/opensearch/jdk"
-        #chown -R snap_daemon "${CRAFT_PART_INSTALL}/usr/share/opensearch/jdk"
-        #chgrp root "${CRAFT_PART_INSTALL}/usr/share/opensearch/jdk"
 
         mv "${CRAFT_PART_INSTALL}/lib" "${CRAFT_PART_INSTALL}/usr/share/opensearch"
         chmod -R 555 "${CRAFT_PART_INSTALL}/usr/share/opensearch/lib"
-        #chown -R snap_daemon "${OPENSEARCH_LIB}"
-        #chgrp root "${OPENSEARCH_LIB}"
+
+        mv "${CRAFT_PART_INSTALL}/modules" "${CRAFT_PART_INSTALL}/usr/share/opensearch/"
+        chmod -R 555 "${CRAFT_PART_INSTALL}/usr/share/opensearch/modules"
+
+        mv "${CRAFT_PART_INSTALL}/plugins" "${CRAFT_PART_INSTALL}/usr/share/opensearch/"
+        chmod -R 555 "${CRAFT_PART_INSTALL}/usr/share/opensearch/plugins"
 
         rm "${archive}"

@@ -1,3 +1,4 @@
+
 #!/usr/bin/env bash
 
 set -eu
@@ -58,6 +59,17 @@ function set_proc_conf () {
     # 3. Reduce TCP retransmission timeout = ~6 seconds
     # sysctl -w net.ipv4.tcp_retries2=15 -- default in local machine
     "${SNAP}"/sbin/sysctl -w net.ipv4.tcp_retries2=5
+}
+
+function set_opensearch_classpath () {
+
+    # Set classpath to load all jars available
+    jars="${SNAP}/performance-analyzer-rca/lib/*:${OPENSEARCH_LIB}/*"
+    for p in $(ls "${OPENSEARCH_PLUGINS}"); do jars="$jars:${OPENSEARCH_PLUGINS}/$p/*"; done
+    for p in $(ls "${OPENSEARCH_MODULES}"); do jars="$jars:${OPENSEARCH_MODULES}/$p/*"; done
+    for p in $(ls "${OPENSEARCH_LIB}/tools"); do jars="$jars:${OPENSEARCH_LIB}/tools/$p/*"; done
+
+    export OPENSEARCH_CLASSPATH="$jars"
 }
 
 

@@ -3,10 +3,9 @@
 set -eu
 
 
-# source "${OPS_ROOT}"/helpers/snap-logger.sh "daemon"
+source "${OPS_ROOT}"/helpers/snap-logger.sh "daemon"
 source "${OPS_ROOT}"/helpers/snap-interfaces.sh
 source "${OPS_ROOT}"/sys/set-sys-config.sh
-# source "${OPS_ROOT}"/helpers/env-variables.sh
 
 usage() {
 cat << EOF
@@ -42,6 +41,9 @@ function start_opensearch () {
     exit_if_missing_perm "mount-observe"
     exit_if_missing_perm "sys-fs-cgroup-service"
     exit_if_missing_perm "system-observe"
+
+    set_opensearch_classpath
+    echo "Set classpath to: ${OPENSEARCH_CLASSPATH}"
 
     # start
     "${SNAP}"/usr/bin/setpriv \
