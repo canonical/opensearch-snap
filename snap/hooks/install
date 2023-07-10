@@ -1,11 +1,11 @@
-##!/usr/bin/env bash
+#!/usr/bin/env bash
 
 set -eux
 
 
-#source "${OPS_ROOT}"/helpers/snap-logger.sh "hook-install"
-#source "${OPS_ROOT}"/helpers/io.sh
-#source "${OPS_ROOT}"/helpers/set-conf.sh
+source "${OPS_ROOT}"/helpers/snap-logger.sh "hook-install"
+source "${OPS_ROOT}"/helpers/io.sh
+source "${OPS_ROOT}"/helpers/set-conf.sh
 
 function create_file_structure () {
 #    add_folder "${SNAP_COMMON}/backups" 774
