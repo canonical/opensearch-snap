@@ -6,7 +6,7 @@ set -eu
 # source "${OPS_ROOT}"/helpers/snap-logger.sh "daemon"
 source "${OPS_ROOT}"/helpers/snap-interfaces.sh
 source "${OPS_ROOT}"/sys/set-sys-config.sh
-
+# source "${OPS_ROOT}"/helpers/env-variables.sh
 
 usage() {
 cat << EOF
@@ -48,7 +48,7 @@ function start_opensearch () {
         --clear-groups \
         --reuid snap_daemon \
         --regid snap_daemon -- \
-        "${OPENSEARCH_HOME}"/bin/opensearch
+        "${OPENSEARCH_BIN}"/opensearch
 }
 
 

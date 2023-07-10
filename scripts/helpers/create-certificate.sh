@@ -22,9 +22,9 @@ EOF
 ALLOWED_CERT_TYPES=("root" "admin" "node" "client") # "node" refers to the transport layer, whereas "client" refers to the "Rest" layer
 KEY_SIZE_BITS=2048
 LIFESPAN_DAYS=730
-declare -A SUBJECTS=( ["root"]="/C=DE/ST=Berlin/L=Berlin/O=Canonical/OU=DataPlatform/CN=localhost"  # CN=root.dns.a-record
-                      ["admin"]="/C=DE/ST=Berlin/L=Berlin/O=Canonical/OU=DataPlatform/CN=admin"
-                      ["node"]="/C=DE/ST=Berlin/L=Berlin/O=Canonical/OU=DataPlatform/CN=localhost")  # CN=node1.dns.a-record
+declare -A SUBJECTS=( ["root"]="/C=UK/ST=London/L=London/O=Canonical/OU=DataPlatform/CN=localhost"  # CN=root.dns.a-record
+                      ["admin"]="/C=UK/ST=London/L=London/O=Canonical/OU=DataPlatform/CN=admin"
+                      ["node"]="/C=UK/ST=London/L=London/O=Canonical/OU=DataPlatform/CN=localhost")  # CN=node1.dns.a-record
 
 
 # Args
