@@ -191,7 +191,7 @@ parts:
         mkdir -p "${CRAFT_PART_INSTALL}/usr/share/opensearch"
 
         # OPENSEARCH_HOME points to SNAP_COMMON, whereas the /lib folder sits in /snap
-        sed -i 's@OPENSEARCH_CLASSPATH=\"\$OPENSEARCH_HOME/lib/\*\"@if \[\[ -z "$OPENSEARCH_HOME" \]\]; then OPENSEARCH_CLASSPATH=\"\$OPENSEARCH_LIB/*; fi\"@g' "${CRAFT_PART_INSTALL}"/bin/opensearch-env
+        sed -i 's@OPENSEARCH_CLASSPATH=\"\$OPENSEARCH_HOME/lib/\*\"@if \[\[ -z "$OPENSEARCH_HOME" \]\]; then OPENSEARCH_CLASSPATH=\"\$OPENSEARCH_LIB\"/*; fi@g' "${CRAFT_PART_INSTALL}"/bin/opensearch-env
         sed -i 's@bin/opensearch-keystore@\"\${OPENSEARCH_BIN}\"/opensearch-keystore@' "${CRAFT_PART_INSTALL}"/bin/opensearch
         mv "${CRAFT_PART_INSTALL}/bin" "${CRAFT_PART_INSTALL}/usr/share/opensearch/bin"
         chmod -R 555 "${CRAFT_PART_INSTALL}/usr/share/opensearch/bin"

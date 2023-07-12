@@ -64,10 +64,8 @@ function set_proc_conf () {
 function set_opensearch_classpath () {
 
     # Set classpath to load all jars available
-    jars="${SNAP}/performance-analyzer-rca/lib/*:${OPENSEARCH_LIB}/*"
-    for p in $(ls "${OPENSEARCH_PLUGINS}"); do jars="$jars:${OPENSEARCH_PLUGINS}/$p/*"; done
-    for p in $(ls "${OPENSEARCH_MODULES}"); do jars="$jars:${OPENSEARCH_MODULES}/$p/*"; done
-    for p in $(ls "${OPENSEARCH_LIB}/tools"); do jars="$jars:${OPENSEARCH_LIB}/tools/$p/*"; done
+    # Avoid the jar conflicts on jackson-core with performance-analyzer-rca
+    jars="${OPENSEARCH_LIB}/*:usr/share/opensearch/plugins/opensearch-security/*"
 
     export OPENSEARCH_CLASSPATH="$jars"
 }
