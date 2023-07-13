@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+set -eux
+
+OLD_SNAP_DATA=$(cat "${SNAP_COMMON}"/on_refresh_snap)
+rm "${SNAP_COMMON}"/on_refresh_snap
+
+# ensure the folders exist with the correct permissions
+mkdir -p "${OPENSEARCH_PATH_CONF}"
+mkdir -p "${OPENSEARCH_HOME}"
+chgrp root "${SNAP_DATA}"/*
+chmod -R 770 "${SNAP_DATA}"/*
+chown -R snap_daemon "${SNAP_DATA}"/*
+
+
+# Copy configuration data
+mv "${OLD_SNAP_DATA}"/etc/opensearch/* "${SNAP_DATA}"/etc/opensearch
+mv "${OLD_SNAP_DATA}"/usr/share/opensearch/* "${SNAP_DATA}"/usr/share/opensearch
