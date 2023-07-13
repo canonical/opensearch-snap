@@ -19,7 +19,7 @@ function create_file_structure () {
 
     chmod -R 774 "${SNAP_COMMON}/backups"
 
-    cp -R -n -r -p "${SNAP}"/config/* "${OPENSEARCH_PATH_CONF}"
+    cp -n -r "${SNAP}"/config/* "${OPENSEARCH_PATH_CONF}"
 }
 
 
@@ -39,8 +39,8 @@ function set_base_config_props () {
     #    server/src/main/java/org/opensearch/plugins/PluginInfo.java#L64
     mkdir -p "${OPENSEARCH_HOME}"/modules
     mkdir -p "${OPENSEARCH_HOME}"/plugins
-    cp -R -n -r -p "${OPENSEARCH_MODULES}"/* "${OPENSEARCH_HOME}"/modules
-    cp -R -n -r -p "${OPENSEARCH_PLUGINS}"/* "${OPENSEARCH_HOME}"/plugins
+    cp -n -r "${OPENSEARCH_MODULES}"/* "${OPENSEARCH_HOME}"/modules
+    cp -n -r "${OPENSEARCH_PLUGINS}"/* "${OPENSEARCH_HOME}"/plugins
 
     sed -i s@=logs/@"=${OPENSEARCH_VARLOG}"@ "${OPENSEARCH_PATH_CONF}/jvm.options"
 }
@@ -50,7 +50,9 @@ create_file_structure
 set_base_config_props
 
 # Set final permissions
-#chmod -R 770 "${SNAP_DATA}"/*
+chgrp root "${SNAP_DATA}"/*
+chgrp root "${SNAP_COMMON}"/*
+chmod -R 770 "${SNAP_DATA}"/*
 chmod -R 770 "${SNAP_COMMON}"/*
-#chown -R snap_daemon "${SNAP_DATA}"/*
+chown -R snap_daemon "${SNAP_DATA}"/*
 chown -R snap_daemon "${SNAP_COMMON}"/*

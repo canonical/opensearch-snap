@@ -35,22 +35,6 @@ hooks:
       - network-bind
     environment:
       OPS_ROOT: ${SNAP}/ops
-      SNAP_LOG_DIR: ${SNAP_COMMON}/ops/snap/logs
-      OPENSEARCH_PATH_CONF: ${SNAP_COMMON}/etc/opensearch
-      OPENSEARCH_VARLIB: ${SNAP_COMMON}/var/lib/opensearch
-      OPENSEARCH_TMPDIR: ${SNAP_COMMON}/usr/lib/tmpfiles.d
-      OPENSEARCH_VARLOG: ${SNAP_COMMON}/var/log/opensearch
-      OPENSEARCH_HOME: ${SNAP_COMMON}/usr/share/opensearch
-
-      OPENSEARCH_BIN: ${SNAP}/usr/share/opensearch/bin
-      OPENSEARCH_JAVA_HOME: ${SNAP}/usr/share/opensearch/jdk
-      OPENSEARCH_LIB: ${SNAP}/usr/share/opensearch/lib
-      OPENSEARCH_PLUGINS: ${SNAP}/usr/share/opensearch/plugins
-      OPENSEARCH_MODULES: ${SNAP}/usr/share/opensearch/modules
-
-      OPENSEARCH_PATH_CERTS: ${OPENSEARCH_PATH_CONF}/certificates
-
-
 
   configure:
     environment:
@@ -59,11 +43,12 @@ hooks:
 
 environment:
   SNAP_LOG_DIR: ${SNAP_COMMON}/ops/snap/logs
-  OPENSEARCH_PATH_CONF: ${SNAP_COMMON}/etc/opensearch
   OPENSEARCH_VARLIB: ${SNAP_COMMON}/var/lib/opensearch
   OPENSEARCH_TMPDIR: ${SNAP_COMMON}/usr/lib/tmpfiles.d
   OPENSEARCH_VARLOG: ${SNAP_COMMON}/var/log/opensearch
-  OPENSEARCH_HOME: ${SNAP_COMMON}/usr/share/opensearch
+
+  OPENSEARCH_PATH_CONF: ${SNAP_DATA}/etc/opensearch
+  OPENSEARCH_HOME: ${SNAP_DATA}/usr/share/opensearch
 
   OPS_ROOT: ${SNAP}/ops
   OPENSEARCH_BIN: ${SNAP}/usr/share/opensearch/bin
