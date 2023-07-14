@@ -5,14 +5,11 @@ set -eux
 OLD_SNAP_DATA=$(cat "${SNAP_COMMON}"/on_refresh_snap)
 rm "${SNAP_COMMON}"/on_refresh_snap
 
-# ensure the folders exist with the correct permissions
-mkdir -p "${OPENSEARCH_PATH_CONF}"
-mkdir -p "${OPENSEARCH_HOME}"
-chgrp root "${SNAP_DATA}"/*
-chmod -R 770 "${SNAP_DATA}"/*
-chown -R snap_daemon "${SNAP_DATA}"/*
+for i in $(find "${SNAP_DATA}"/etc/opensearch -type f); do
+        # Some files may have been created by snap_daemon and then, will cause permission denied
+	if sed "s@${OLD_SNAP_DATA}@${SNAP_DATA}@g" $i > "$SNAP_DATA"/temp_sed_file; then
+		cat "$SNAP_DATA"/temp_sed_file > $i
+	fi
+done
 
-
-# Copy configuration data
-mv "${OLD_SNAP_DATA}"/etc/opensearch/* "${SNAP_DATA}"/etc/opensearch
-mv "${OLD_SNAP_DATA}"/usr/share/opensearch/* "${SNAP_DATA}"/usr/share/opensearch
+rm "$SNAP_DATA"/temp_sed_file

@@ -3,4 +3,4 @@
 set -eux
 
 # A refresh started, point to the new snap revision where data will be
-echo "${SNAP_DATA}/etc/opensearch" > "${SNAP_COMMON}"/on_refresh_snap
+echo "${SNAP_DATA}" > "${SNAP_COMMON}"/on_refresh_snap

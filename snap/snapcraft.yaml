@@ -65,6 +65,7 @@ apps:
     daemon: simple
     install-mode: disable
     command: ops/start.sh
+    post-stop-command: ops/post-stop.sh
     restart-condition: always
     restart-delay: 20s
     # reload-command: ops/start.sh

@@ -50,9 +50,10 @@ create_file_structure
 set_base_config_props
 
 # Set final permissions
-chgrp root "${SNAP_DATA}"/*
-chgrp root "${SNAP_COMMON}"/*
+# Following recommendation from: https://forum.snapcraft.io/t/system-usernames/13386/7
 chmod -R 770 "${SNAP_DATA}"/*
 chmod -R 770 "${SNAP_COMMON}"/*
 chown -R snap_daemon "${SNAP_DATA}"/*
 chown -R snap_daemon "${SNAP_COMMON}"/*
+chgrp root "${SNAP_DATA}"/*
+chgrp root "${SNAP_COMMON}"/*
