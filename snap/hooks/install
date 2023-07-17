@@ -14,10 +14,6 @@ function create_file_structure () {
     mkdir -p "${OPENSEARCH_VARLOG}"
     mkdir -p "${OPENSEARCH_TMPDIR}"
     mkdir -p "${OPENSEARCH_PATH_CERTS}"
-    mkdir -p "${OPENSEARCH_PATH_CONF}/extensions"
-    mkdir -p "${SNAP_COMMON}/backups"
-
-    chmod -R 774 "${SNAP_COMMON}/backups"
 
     cp -n -r "${SNAP}"/config/* "${OPENSEARCH_PATH_CONF}"
 }
@@ -39,6 +35,7 @@ function set_base_config_props () {
     #    server/src/main/java/org/opensearch/plugins/PluginInfo.java#L64
     mkdir -p "${OPENSEARCH_HOME}"/modules
     mkdir -p "${OPENSEARCH_HOME}"/plugins
+    mkdir -p "${OPENSEARCH_HOME}"/extensions
     cp -n -r "${OPENSEARCH_MODULES}"/* "${OPENSEARCH_HOME}"/modules
     cp -n -r "${OPENSEARCH_PLUGINS}"/* "${OPENSEARCH_HOME}"/plugins
 

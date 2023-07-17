@@ -67,7 +67,7 @@ function set_opensearch_classpath () {
     # Avoid the jar conflicts on jackson-core with performance-analyzer-rca
     jars="${OPENSEARCH_LIB}/*:usr/share/opensearch/plugins/opensearch-security/*"
 
-    export OPENSEARCH_CLASSPATH="$jars"
+    export OPENSEARCH_CLASSPATH="${jars}"
 }
 
 

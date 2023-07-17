@@ -17,10 +17,6 @@ analytics suite that makes it easy to ingest, search, visualize, and analyze dat
 or:
 ```
 sudo snap install opensearch --channel=2/candidate
-sudo snap connect opensearch:sys-fs-cgroup-service
-sudo snap connect opensearch:log-observe
-sudo snap connect opensearch:mount-observe
-sudo snap connect opensearch:system-observe
 sudo snap connect opensearch:process-control
 ```
 

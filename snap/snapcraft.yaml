@@ -44,7 +44,7 @@ hooks:
 environment:
   SNAP_LOG_DIR: ${SNAP_COMMON}/ops/snap/logs
   OPENSEARCH_VARLIB: ${SNAP_COMMON}/var/lib/opensearch
-  OPENSEARCH_TMPDIR: ${SNAP_COMMON}/usr/lib/tmpfiles.d
+  OPENSEARCH_TMPDIR: ${SNAP_COMMON}/usr/share/tmp
   OPENSEARCH_VARLOG: ${SNAP_COMMON}/var/log/opensearch
 
   OPENSEARCH_PATH_CONF: ${SNAP_DATA}/etc/opensearch
@@ -65,7 +65,6 @@ apps:
     daemon: simple
     install-mode: disable
     command: ops/start.sh
-    post-stop-command: ops/post-stop.sh
     restart-condition: always
     restart-delay: 20s
     # reload-command: ops/start.sh
@@ -176,22 +175,15 @@ parts:
       
         mkdir -p "${CRAFT_PART_INSTALL}/usr/share/opensearch"
 
-        # OPENSEARCH_HOME points to SNAP_COMMON, whereas the /lib folder sits in /snap
+        # OPENSEARCH_HOME points to SNAP_DATA, whereas the /lib folder sits in /snap
         sed -i 's@OPENSEARCH_CLASSPATH=\"\$OPENSEARCH_HOME/lib/\*\"@if \[\[ -z "$OPENSEARCH_HOME" \]\]; then OPENSEARCH_CLASSPATH=\"\$OPENSEARCH_LIB\"/*; fi@g' "${CRAFT_PART_INSTALL}"/bin/opensearch-env
         sed -i 's@bin/opensearch-keystore@\"\${OPENSEARCH_BIN}\"/opensearch-keystore@' "${CRAFT_PART_INSTALL}"/bin/opensearch
-        mv "${CRAFT_PART_INSTALL}/bin" "${CRAFT_PART_INSTALL}/usr/share/opensearch/bin"
-        chmod -R 555 "${CRAFT_PART_INSTALL}/usr/share/opensearch/bin"
 
-        mv "${CRAFT_PART_INSTALL}/jdk" "${CRAFT_PART_INSTALL}/usr/share/opensearch"
-        chmod -R 555 "${CRAFT_PART_INSTALL}/usr/share/opensearch/jdk"
-
-        mv "${CRAFT_PART_INSTALL}/lib" "${CRAFT_PART_INSTALL}/usr/share/opensearch"
-        chmod -R 555 "${CRAFT_PART_INSTALL}/usr/share/opensearch/lib"
-
-        mv "${CRAFT_PART_INSTALL}/modules" "${CRAFT_PART_INSTALL}/usr/share/opensearch/"
-        chmod -R 555 "${CRAFT_PART_INSTALL}/usr/share/opensearch/modules"
-
-        mv "${CRAFT_PART_INSTALL}/plugins" "${CRAFT_PART_INSTALL}/usr/share/opensearch/"
-        chmod -R 555 "${CRAFT_PART_INSTALL}/usr/share/opensearch/plugins"
+        declare -a dirs=(bin jdk lib modules plugins)
+        for dir in "${dirs[@]}"; do
+            target_dir="${CRAFT_PART_INSTALL}/usr/share/opensearch/${dir}"
+            mv "${CRAFT_PART_INSTALL}/${dir}" "${target_dir}"
+            chmod -R 555 "${target_dir}"
+        done
 
         rm "${archive}"
