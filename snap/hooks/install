@@ -14,8 +14,14 @@ function create_file_structure () {
     mkdir -p "${OPENSEARCH_VARLOG}"
     mkdir -p "${OPENSEARCH_TMPDIR}"
     mkdir -p "${OPENSEARCH_PATH_CERTS}"
+    mkdir -p "${OPENSEARCH_LIB}"
+    # Create a dummy /bin folder otherwise OpenSearch will try to do it:
+    # https://github.com/opensearch-project/OpenSearch/blob/db838c4ca090103a8ba562b3cb124044be725c62/
+    #      server/src/main/java/org/opensearch/bootstrap/Security.java#L315
+    mkdir -p "${OPENSEARCH_HOME}"/bin
 
-    cp -n -r "${SNAP}"/config/* "${OPENSEARCH_PATH_CONF}"
+    cp -n -r "${SNAP}"/usr/share/opensearch/config/* "${OPENSEARCH_PATH_CONF}"
+    chmod -R 755 "${OPENSEARCH_PATH_CONF}"
 }
 
 
@@ -24,7 +30,7 @@ function set_base_config_props () {
     #     More info, check: https://github.com/opensearch-project/OpenSearch/blob/  \
     #     418ab51718cb68b7a57d4cf524b1dec9ed02b224/server/src/main/java/org/opensearch/env/Environment.java#L68
     set_yaml_prop "${OPENSEARCH_PATH_CONF}/opensearch.yml" "path.data" "${OPENSEARCH_VARLIB}"
-    set_yaml_prop "${OPENSEARCH_PATH_CONF}/opensearch.yml" "node.pidfile" "${OPENSEARCH_HOME}"/pidfile
+    set_yaml_prop "${OPENSEARCH_PATH_CONF}/opensearch.yml" "node.pidfile" "${OPENSEARCH_PATH_CONF}"/pidfile
     set_yaml_prop "${OPENSEARCH_PATH_CONF}/opensearch.yml" "path.logs" "${OPENSEARCH_VARLOG}"
     set_yaml_prop "${OPENSEARCH_PATH_CONF}/opensearch.yml" "path.home" "${OPENSEARCH_HOME}"
 
@@ -36,8 +42,10 @@ function set_base_config_props () {
     mkdir -p "${OPENSEARCH_HOME}"/modules
     mkdir -p "${OPENSEARCH_HOME}"/plugins
     mkdir -p "${OPENSEARCH_HOME}"/extensions
-    cp -n -r "${OPENSEARCH_MODULES}"/* "${OPENSEARCH_HOME}"/modules
-    cp -n -r "${OPENSEARCH_PLUGINS}"/* "${OPENSEARCH_HOME}"/plugins
+    cp -n -r "${SNAP}"/usr/share/opensearch/modules/* "${OPENSEARCH_HOME}"/modules
+    cp -n -r "${SNAP}"/usr/share/opensearch/plugins/* "${OPENSEARCH_HOME}"/plugins
+
+    cp -n -r "${SNAP}"/usr/share/opensearch/lib/* "${OPENSEARCH_LIB}"
 
     sed -i s@=logs/@"=${OPENSEARCH_VARLOG}"@ "${OPENSEARCH_PATH_CONF}/jvm.options"
 }
@@ -48,9 +56,19 @@ set_base_config_props
 
 # Set final permissions
 # Following recommendation from: https://forum.snapcraft.io/t/system-usernames/13386/7
-chmod -R 770 "${SNAP_DATA}"/*
+# SNAP_DATA: daemon can only read its content; users can write in it IF having root permission
+# SNAP_COMMON: daemon and users can read and write on it
+#chmod -R 755 "${SNAP_DATA}"/*
 chmod -R 770 "${SNAP_COMMON}"/*
-chown -R snap_daemon "${SNAP_DATA}"/*
+#chown -R root "${SNAP_DATA}"/*
 chown -R snap_daemon "${SNAP_COMMON}"/*
-chgrp root "${SNAP_DATA}"/*
+#chgrp root "${SNAP_DATA}"/*
 chgrp root "${SNAP_COMMON}"/*
+
+# Set daemon user to have access to these folders
+chown -R snap_daemon "${OPENSEARCH_HOME}"/bin
+chgrp root "${OPENSEARCH_HOME}"/bin
+# OpenSearch needs write access to the path conf so it can write the keystore file
+chmod -R 770 "${OPENSEARCH_PATH_CONF}"
+chown -R snap_daemon "${OPENSEARCH_PATH_CONF}"
+chgrp root "${OPENSEARCH_PATH_CONF}"

@@ -61,16 +61,6 @@ function set_proc_conf () {
     "${SNAP}"/sbin/sysctl -w net.ipv4.tcp_retries2=5
 }
 
-function set_opensearch_classpath () {
-
-    # Set classpath to load all jars available
-    # Avoid the jar conflicts on jackson-core with performance-analyzer-rca
-    jars="${OPENSEARCH_LIB}/*:usr/share/opensearch/plugins/opensearch-security/*"
-
-    export OPENSEARCH_CLASSPATH="${jars}"
-}
-
-
 parse_args
 set_defaults
 

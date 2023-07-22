@@ -4,3 +4,8 @@ set -eux
 
 # A refresh started, point to the new snap revision where data will be
 echo "${SNAP_DATA}" > "${SNAP_COMMON}"/on_refresh_snap
+
+# Clean old SNAP_DATA lib,plugins and modules, as we've copied the jars to the new folder already
+rm -rf "${SNAP_DATA}"/usr/share/opensearch/lib
+rm -rf "${SNAP_DATA}"/usr/share/opensearch/modules
+rm -rf "${SNAP_DATA}"/usr/share/opensearch/plugins

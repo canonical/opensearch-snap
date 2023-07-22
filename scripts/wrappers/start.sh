@@ -44,8 +44,6 @@ function start_opensearch () {
 
     warn_if_missing_perm "process-control"
 
-    set_opensearch_classpath
-
     # start
     "${SNAP}"/usr/bin/setpriv \
         --clear-groups \

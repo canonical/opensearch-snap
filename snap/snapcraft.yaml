@@ -34,14 +34,18 @@ hooks:
       - network
       - network-bind
     environment:
-      OPS_ROOT: ${SNAP}/ops
+      OPS_ROOT: ${SNAP}/usr/share/ops
 
   configure:
     environment:
-      OPS_ROOT: ${SNAP}/ops
+      OPS_ROOT: ${SNAP}/usr/share/ops
 
 
 environment:
+  OPS_ROOT: ${SNAP}/usr/share/ops
+  OPENSEARCH_BIN: ${SNAP}/usr/share/opensearch/bin
+  OPENSEARCH_JAVA_HOME: ${SNAP}/usr/share/opensearch/jdk
+
   SNAP_LOG_DIR: ${SNAP_COMMON}/ops/snap/logs
   OPENSEARCH_VARLIB: ${SNAP_COMMON}/var/lib/opensearch
   OPENSEARCH_TMPDIR: ${SNAP_COMMON}/usr/share/tmp
@@ -49,25 +53,28 @@ environment:
 
   OPENSEARCH_PATH_CONF: ${SNAP_DATA}/etc/opensearch
   OPENSEARCH_HOME: ${SNAP_DATA}/usr/share/opensearch
-
-  OPS_ROOT: ${SNAP}/ops
-  OPENSEARCH_BIN: ${SNAP}/usr/share/opensearch/bin
-  OPENSEARCH_JAVA_HOME: ${SNAP}/usr/share/opensearch/jdk
-  OPENSEARCH_LIB: ${SNAP}/usr/share/opensearch/lib
-  OPENSEARCH_PLUGINS: ${SNAP}/usr/share/opensearch/plugins
-  OPENSEARCH_MODULES: ${SNAP}/usr/share/opensearch/modules
+  OPENSEARCH_LIB: ${SNAP_DATA}/usr/share/opensearch/lib
+  OPENSEARCH_PLUGINS: ${SNAP_DATA}/usr/share/opensearch/plugins
+  OPENSEARCH_MODULES: ${SNAP_DATA}/usr/share/opensearch/modules
 
   OPENSEARCH_PATH_CERTS: ${OPENSEARCH_PATH_CONF}/certificates
+  # OPENSEARCH_CLASSPATH: ${OPENSEARCH_LIB}/*:${OPENSEARCH_PLUGINS}/opensearch-security/*
 
 
 apps:
+  opensearch-env:
+    command: usr/share/opensearch/bin/opensearch-env
+    plugs:
+      - network
+      - network-bind
+
   daemon:
     daemon: simple
     install-mode: disable
-    command: ops/start.sh
+    command: usr/share/ops/start.sh
     restart-condition: always
     restart-delay: 20s
-    # reload-command: ops/start.sh
+    # reload-command: ${SNAP}/usr/share/ops/start.sh
     plugs:
       - network
       - network-bind
@@ -77,56 +84,57 @@ apps:
       - system-observe
       - sys-fs-cgroup-service
     environment:
-      OPS_ROOT: ${SNAP}/ops
+      OPS_ROOT: ${SNAP}/usr/share/ops
       OPENSEARCH_PATH_CERTS: ${OPENSEARCH_PATH_CONF}/certificates
 
   security-init:
-    command: ops/security-init.sh
+    command: usr/share/ops/security-init.sh
     plugs:
       - network
       - network-bind
     environment:
-      OPS_ROOT: ${SNAP}/ops
+      OPS_ROOT: ${SNAP}/usr/share/ops
       OPENSEARCH_PATH_CERTS: ${OPENSEARCH_PATH_CONF}/certificates
       JAVA_OPTS: ""
 
   setup:
-    command: ops/setup.sh
+    command: usr/share/ops/setup.sh
     environment:
-      OPS_ROOT: ${SNAP}/ops
+      OPS_ROOT: ${SNAP}/usr/share/ops
       OPENSEARCH_PATH_CERTS: ${OPENSEARCH_PATH_CONF}/certificates
 
-  set-conf-value:
-    command: ops/change-conf.sh
+  plugin:
+    command: usr/share/ops/plugin.sh
     environment:
-      OPS_ROOT: ${SNAP}/ops
-
-  plugin-add:
-    command: ops/plugins/add.sh
-
-  plugins-list:
-    command: ops/plugins/list.sh
-
-  plugins-remove:
-    command: ops/plugins/remove.sh
+      OPS_ROOT: ${SNAP}/usr/share/ops
+      OPENSEARCH_PATH_CERTS: ${OPENSEARCH_PATH_CONF}/certificates
 
   test-cluster-health-green:
-    command: ops/tests/test-cluster-health-green.sh
+    command: usr/share/ops/tests/test-cluster-health-green.sh
     plugs:
       - network
       - network-bind
+    environment:
+      OPS_ROOT: ${SNAP}/usr/share/ops
+      OPENSEARCH_PATH_CERTS: ${OPENSEARCH_PATH_CONF}/certificates
 
   test-node-up:
-    command: ops/tests/test-node-up.sh
+    command: usr/share/ops/tests/test-node-up.sh
     plugs:
       - network
       - network-bind
+    environment:
+      OPS_ROOT: ${SNAP}/usr/share/ops
+      OPENSEARCH_PATH_CERTS: ${OPENSEARCH_PATH_CONF}/certificates
 
   test-security-index-created:
-    command: ops/tests/test-security-index-created.sh
+    command: usr/share/ops/tests/test-security-index-created.sh
     plugs:
       - network
       - network-bind
+    environment:
+      OPS_ROOT: ${SNAP}/usr/share/ops
+      OPENSEARCH_PATH_CERTS: ${OPENSEARCH_PATH_CONF}/certificates
 
 parts:
   dependencies:
@@ -157,12 +165,11 @@ parts:
     source: ./scripts
     source-type: local
     override-build: |
-      target_dir="${CRAFT_PART_INSTALL}/ops"
-      
-      rm -rf "${target_dir}"
-      
+      target_dir="${CRAFT_PART_INSTALL}/usr/share/ops"
+      mkdir -p "${target_dir}"
       cp -r wrappers/. "${target_dir}"
       cp -r helpers/ "${target_dir}/helpers"
+      rm -rf wrappers/ helpers/
 
   opensearch:
     plugin: nil
@@ -175,15 +182,16 @@ parts:
       
         mkdir -p "${CRAFT_PART_INSTALL}/usr/share/opensearch"
 
-        # OPENSEARCH_HOME points to SNAP_DATA, whereas the /lib folder sits in /snap
-        sed -i 's@OPENSEARCH_CLASSPATH=\"\$OPENSEARCH_HOME/lib/\*\"@if \[\[ -z "$OPENSEARCH_HOME" \]\]; then OPENSEARCH_CLASSPATH=\"\$OPENSEARCH_LIB\"/*; fi@g' "${CRAFT_PART_INSTALL}"/bin/opensearch-env
+        # OPENSEARCH_HOME points to SNAP_DATA, whereas the /bin folder sits in /snap
         sed -i 's@bin/opensearch-keystore@\"\${OPENSEARCH_BIN}\"/opensearch-keystore@' "${CRAFT_PART_INSTALL}"/bin/opensearch
 
-        declare -a dirs=(bin jdk lib modules plugins)
+        declare -a dirs=(bin jdk lib modules plugins config performance-analyzer-rca)
         for dir in "${dirs[@]}"; do
             target_dir="${CRAFT_PART_INSTALL}/usr/share/opensearch/${dir}"
             mv "${CRAFT_PART_INSTALL}/${dir}" "${target_dir}"
-            chmod -R 555 "${target_dir}"
+            chmod -R 755 "${target_dir}"
         done
 
+        # Final clean-up
         rm "${archive}"
+        rm -rf "${CRAFT_PART_INSTALL}/"LICENSE.txt "${CRAFT_PART_INSTALL}/"manifest.yml "${CRAFT_PART_INSTALL}/"logs/ "${CRAFT_PART_INSTALL}/"NOTICE.txt "${CRAFT_PART_INSTALL}/"opensearch-tar-install.sh "${CRAFT_PART_INSTALL}/"README.md
