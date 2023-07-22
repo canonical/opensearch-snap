@@ -62,12 +62,6 @@ environment:
 
 
 apps:
-  opensearch-env:
-    command: usr/share/opensearch/bin/opensearch-env
-    plugs:
-      - network
-      - network-bind
-
   daemon:
     daemon: simple
     install-mode: disable

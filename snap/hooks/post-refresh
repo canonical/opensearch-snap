@@ -13,3 +13,9 @@ for i in $(find "${OPENSEARCH_PATH_CONF}" -type f); do
 done
 
 rm -f "$SNAP_DATA"/temp_sed_file
+# Clean old SNAP_DATA lib,plugins and modules, as we've copied the jars to the new folder already
+mv "${SNAP_COMMON}"/in_upgrade/lib "${SNAP_DATA}"/usr/share/opensearch/lib
+mv "${SNAP_COMMON}"/in_upgrade/modules "${SNAP_DATA}"/usr/share/opensearch/modules
+mv "${SNAP_COMMON}"/in_upgrade/plugins "${SNAP_DATA}"/usr/share/opensearch/plugins
+
+rm -rf "${SNAP_COMMON}"/in_upgrade
