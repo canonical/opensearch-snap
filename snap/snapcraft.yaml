@@ -58,7 +58,6 @@ environment:
   OPENSEARCH_MODULES: ${SNAP_DATA}/usr/share/opensearch/modules
 
   OPENSEARCH_PATH_CERTS: ${OPENSEARCH_PATH_CONF}/certificates
-  # OPENSEARCH_CLASSPATH: ${OPENSEARCH_LIB}/*:${OPENSEARCH_PLUGINS}/opensearch-security/*
 
 
 apps:
@@ -99,9 +98,38 @@ apps:
 
   plugin:
     command: usr/share/ops/plugin.sh
+    plugs:
+      # Needed to download the plugin
+      - network
+      - network-bind
+      # Needed for the JVM (coredump_filter, etc)
+      - log-observe
+      - mount-observe
+      - process-control
+      - system-observe
+      - sys-fs-cgroup-service
     environment:
-      OPS_ROOT: ${SNAP}/usr/share/ops
-      OPENSEARCH_PATH_CERTS: ${OPENSEARCH_PATH_CONF}/certificates
+      # Overriden env variables, place the plugin on a temp file and
+      # the plugin script will then relocate it with the right permissions
+      # to the correct place.
+      OPENSEARCH_PATH_CONF: ${SNAP_DATA}/temp_plugin/config
+      OPENSEARCH_HOME: ${SNAP_DATA}/temp_plugin
+      OPENSEARCH_PLUGINS: ${SNAP_DATA}/temp_plugin/plugins
+      OPENSEARCH_MODULES: ${SNAP_DATA}/temp_plugin/modules
+      OPENSEARCH_CLASSPATH: ${OPENSEARCH_LIB}/*:${OPENSEARCH_LIB}/tools/plugin-cli/*
+
+  keystore:
+    command: usr/share/ops/keystore.sh
+    plugs:
+      # Needed to download the plugin
+      - network
+      - network-bind
+      # Needed for the JVM (coredump_filter, etc)
+      - log-observe
+      - mount-observe
+      - process-control
+      - system-observe
+      - sys-fs-cgroup-service
 
   test-cluster-health-green:
     command: usr/share/ops/tests/test-cluster-health-green.sh
@@ -177,6 +205,7 @@ parts:
         mkdir -p "${CRAFT_PART_INSTALL}/usr/share/opensearch"
 
         # OPENSEARCH_HOME points to SNAP_DATA, whereas the /bin folder sits in /snap
+        sed -i 's@OPENSEARCH_CLASSPATH=\"\$OPENSEARCH_HOME/lib/\*\"@if \[\[ -z "$OPENSEARCH_CLASSPATH" \]\]; then OPENSEARCH_CLASSPATH=\"\$OPENSEARCH_LIB\"/*; fi@g' "${CRAFT_PART_INSTALL}"/bin/opensearch-env
         sed -i 's@bin/opensearch-keystore@\"\${OPENSEARCH_BIN}\"/opensearch-keystore@' "${CRAFT_PART_INSTALL}"/bin/opensearch
 
         declare -a dirs=(bin jdk lib modules plugins config performance-analyzer-rca)

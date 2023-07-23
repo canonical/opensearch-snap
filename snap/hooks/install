@@ -58,11 +58,8 @@ set_base_config_props
 # Following recommendation from: https://forum.snapcraft.io/t/system-usernames/13386/7
 # SNAP_DATA: daemon can only read its content; users can write in it IF having root permission
 # SNAP_COMMON: daemon and users can read and write on it
-#chmod -R 755 "${SNAP_DATA}"/*
 chmod -R 770 "${SNAP_COMMON}"/*
-#chown -R root "${SNAP_DATA}"/*
 chown -R snap_daemon "${SNAP_COMMON}"/*
-#chgrp root "${SNAP_DATA}"/*
 chgrp root "${SNAP_COMMON}"/*
 
 # Set daemon user to have access to these folders
