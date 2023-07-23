@@ -138,15 +138,15 @@ jobs:
 
       - name: Install backup plugin and configure it
         run: |
-          opensearch.plugin --install repository-s3
+          sudo opensearch.plugin --install repository-s3
 
-          echo "TEST" > /var/snap/opensearch/current/testkey
+          echo "TEST" | sudo tee /var/snap/opensearch/current/testkey
 
-          opensearch.keystore add-file s3.client.default.access_key /var/snap/opensearch/current/testkey
-          opensearch.keystore add-file s3.client.default.secret_key /var/snap/opensearch/current/testkey
+          sudo opensearch.keystore add-file s3.client.default.access_key /var/snap/opensearch/current/testkey
+          sudo opensearch.keystore add-file s3.client.default.secret_key /var/snap/opensearch/current/testkey
 
-          snap restart opensearch
-          sleep 20s
+          sudo snap restart opensearch
+          sleep 100s
           cluster_resp=$(curl --cacert ${cert} -XGET https://localhost:9200 -u 'admin:admin')
           echo -e "Cluster Response: \n ${cluster_resp}"
           node_name=$(echo "${cluster_resp}" | yq -r .name)
@@ -165,9 +165,8 @@ jobs:
 
       - name: Remove backup plugin
         run: |
-          opensearch.plugin --remove repository-s3
-          snap restart opensearch
-          sleep 20s
+          sudo opensearch.plugin --remove repository-s3
+
 
       - name: Ensure the cluster is reachable and node created after upgrade
         run: |
