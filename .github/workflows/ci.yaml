@@ -170,12 +170,13 @@ jobs:
       - name: Remove backup plugin
         run: |
           sudo opensearch.plugin --remove repository-s3
-
+          sudo opensearch.keystore remove s3.client.default.access_key
+          sudo opensearch.keystore remove s3.client.default.secret_key
 
       - name: Ensure the cluster is reachable and node created after upgrade
         run: |
           # start opensearch after upgrade
-          sudo snap start opensearch.daemon
+          sudo snap restart opensearch.daemon
           # Give some time for the service to come back up
           sleep 100s
 

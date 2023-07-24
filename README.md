@@ -97,6 +97,111 @@ curl --cacert node-cm0.pem -XGET https://admin:admin@localhost:9200/_cluster/hea
 }
 ```
 
+## CLI Commands
+
+Snaps overload the environment variables such as OPENSEARCH_HOME and sets them to the /snap and /var/snap folder paths.
+
+To use the CLI commands, either use the snap commands, such as ```opensearch.<command>``` or call other CLI commands as described below.
+
+The snap overloads the following commands:
+
+### Plugin CLI
+
+Snap provides a way to safely manage plugins into opensearch.
+
+#### Install Plugins
+
+```
+opensearch.plugin --install [--batch --verbose --silent] <plugin-name>
+
+# For example:
+$ sudo opensearch.plugin --install repository-s3 # demands root user
+-> Installing repository-s3
+-> Downloading repository-s3 from opensearch
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@     WARNING: plugin requires additional permissions     @
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+* java.lang.RuntimePermission accessDeclaredMembers
+* java.lang.RuntimePermission getClassLoader
+* java.lang.reflect.ReflectPermission suppressAccessChecks
+* java.net.NetPermission setDefaultAuthenticator
+* java.net.SocketPermission * connect,resolve
+* java.util.PropertyPermission opensearch.allow_insecure_settings read,write
+See http://docs.oracle.com/javase/8/docs/technotes/guides/security/permissions.html
+for descriptions of what these permissions allow and the associated risks.
+-> Installed repository-s3 with folder name repository-s3
+(failed reverse-i-search)`regstart': juju un^Cgister localhost-localhost
+```
+
+#### List Plugins
+
+```
+$ sudo opensearch.plugin --list
+opensearch-alerting
+opensearch-anomaly-detection
+opensearch-asynchronous-search
+opensearch-cross-cluster-replication
+opensearch-geospatial
+opensearch-index-management
+opensearch-job-scheduler
+opensearch-knn
+opensearch-ml
+opensearch-neural-search
+opensearch-notifications
+opensearch-notifications-core
+opensearch-observability
+opensearch-performance-analyzer
+opensearch-reports-scheduler
+opensearch-security
+opensearch-security-analytics
+opensearch-sql
+repository-s3
+```
+
+#### Remove Plugins
+
+```
+opensearch.plugin --remove <plugin>
+
+# For example:
+$ sudo opensearch.plugin --remove repository-s3
+-> removing [repository-s3]...
+```
+
+### Keystore CLI
+
+Keystore CLI allows users to manage keystore similarly to OpenSearch's CLI.
+
+The user must set only the command and use the same options and values as the upstream CLI.
+
+```
+$ opensearch.keystore [options] <value>
+```
+
+#### Adding key with file
+
+Save the file in a path that snap can access: ```/var/snap/opensearch/current/<path to your file>```.
+
+Then, execute the command as usual:
+
+```
+$ opensearch.keystore add-file [options] /var/snap/opensearch/current/<path to your file>
+```
+
+### Running other CLI commands
+
+To run other CLI commands from opensearch, the appropriate environment variables must also be set.
+
+Here is an example on how to set it:
+```
+$ sudo OPENSEARCH_JAVA_HOME=/snap/opensearch/current/usr/share/opensearch/jdk \
+       OPENSEARCH_PATH_CONF=/var/snap/opensearch/current/etc/opensearch \
+       OPENSEARCH_HOME=/var/snap/opensearch/current/usr/share/opensearch \
+       OPENSEARCH_LIB=/var/snap/opensearch/current/usr/share/opensearch/lib \
+       OPENSEARCH_PATH_CERTS=/var/snap/opensearch/current/etc/opensearch/certificates \
+       /snap/opensearch/current/usr/share/opensearch/bin/<command> [options]
+```
+
 ## License
 The Opensearch Snap is free software, distributed under the Apache
 Software License, version 2.0. See
