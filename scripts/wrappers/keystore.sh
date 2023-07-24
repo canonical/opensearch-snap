@@ -35,4 +35,4 @@ fi
 "${OPENSEARCH_BIN}"/opensearch-keystore ${params}
 
 # opensearch.keystore must be set to the opensearch process user, fix permissions if file exists
-chown snap_daemon:snap_daemon /var/snap/opensearch/x1/etc/opensearch/opensearch.keystore > /dev/null 2>&1 || true
+chown snap_daemon:snap_daemon "${SNAP_DATA}"/etc/opensearch/opensearch.keystore > /dev/null 2>&1 || true
