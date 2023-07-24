@@ -147,6 +147,10 @@ jobs:
 
           sudo snap restart opensearch
           sleep 100s
+
+          sudo cp /var/snap/opensearch/current/etc/opensearch/certificates/node-cm0.pem ./
+          cert=./node-cm0.pem
+
           cluster_resp=$(curl --cacert ${cert} -XGET https://localhost:9200 -u 'admin:admin')
           echo -e "Cluster Response: \n ${cluster_resp}"
           node_name=$(echo "${cluster_resp}" | yq -r .name)
