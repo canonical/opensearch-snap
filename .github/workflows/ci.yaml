@@ -138,7 +138,7 @@ jobs:
 
       - name: Install backup plugin and configure it
         run: |
-          sudo opensearch.plugin --install repository-s3
+          sudo opensearch.plugin --install --batch repository-s3
 
           echo "TEST" | sudo tee /var/snap/opensearch/current/testkey
 
