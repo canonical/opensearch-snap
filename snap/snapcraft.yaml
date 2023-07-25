@@ -58,7 +58,8 @@ environment:
   OPENSEARCH_MODULES: ${SNAP_DATA}/usr/share/opensearch/modules
 
   OPENSEARCH_PATH_CERTS: ${OPENSEARCH_PATH_CONF}/certificates
-
+  KNN_LIB_DIR: ${OPENSEARCH_HOME}/plugins/opensearch-knn/lib
+  LD_LIBRARY_PATH: ${LD_LIBRARY_PATH}:${KNN_LIB_DIR}
 
 apps:
   daemon:
