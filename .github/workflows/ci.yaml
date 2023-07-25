@@ -129,9 +129,11 @@ jobs:
           fi
 
           # Check cluster health
-          health_resp=$(curl --cacert ${cert} -XGET https://localhost:9200/_cluster/health -u 'admin:admin')
+          health_resp=$(curl --cacert ${cert} -XGET https://localhost:9200/_cluster/health?wait_for_status=green&timeout=30s -u 'admin:admin')
           echo -e "Cluster Health Response: \n ${health_resp}"
           cluster_status=$(echo "${health_resp}" | yq -r .status)
           if [ "${cluster_status}" != "green" ]; then
+              curl --cacert ${cert} -XGET https://localhost:9200/_cat/shards -u 'admin:admin'
+          
               exit 1
           fi
