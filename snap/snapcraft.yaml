@@ -50,6 +50,9 @@ environment:
   OPENSEARCH_TMPDIR: ${SNAP_COMMON}/tmp
   OPENSEARCH_PLUGINS: ${SNAP_DATA}/plugins
 
+  KNN_LIB_DIR: ${OPENSEARCH_PLUGINS}/opensearch-knn/lib
+  LD_LIBRARY_PATH: ${LD_LIBRARY_PATH}:${KNN_LIB_DIR}
+
 apps:
   daemon:
     daemon: simple
