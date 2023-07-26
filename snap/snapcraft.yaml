@@ -51,7 +51,6 @@ environment:
   OPENSEARCH_PLUGINS: ${SNAP_DATA}/plugins
 
   KNN_LIB_DIR: ${OPENSEARCH_PLUGINS}/opensearch-knn/lib
-  LD_LIBRARY_PATH: ${LD_LIBRARY_PATH}:${KNN_LIB_DIR}
 
 apps:
   daemon:
@@ -72,6 +71,7 @@ apps:
     environment:
       OPS_ROOT: ${SNAP}/ops
       OPENSEARCH_PATH_CERTS: ${OPENSEARCH_PATH_CONF}/certificates
+      LD_LIBRARY_PATH: "${LD_LIBRARY_PATH}:${KNN_LIB_DIR}"
 
   security-init:
     command: ops/security-init.sh
