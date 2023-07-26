@@ -144,6 +144,21 @@ jobs:
         run: |
           sudo snap install jq
 
+          curl -k https://localhost:9200/train-index -XPUT -H 'Content-Type: application/json' -u admin:admin -d '{
+            "settings": {
+              "number_of_shards": 3,
+              "number_of_replicas": 0
+            },
+            "mappings": {
+              "properties": {
+                "train-field": {
+                  "type": "knn_vector",
+                  "dimension": 4
+                }
+              }
+            }
+          }'
+
           add_data=$(curl -k https://localhost:9200/_bulk -XPOST -H 'Content-Type: application/json' -u admin:admin -d '{ "index": { "_index": "train-index", "_id": "1" } }
           { "train-field": [1.5, 5.5, 4.5, 6.4]}
           { "index": { "_index": "train-index", "_id": "2" } }
