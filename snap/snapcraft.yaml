@@ -51,15 +51,13 @@ environment:
   OPENSEARCH_TMPDIR: ${SNAP_COMMON}/usr/share/tmp
   OPENSEARCH_VARLOG: ${SNAP_COMMON}/var/log/opensearch
 
-  OPENSEARCH_PATH_CONF: ${SNAP_DATA}/etc/opensearch
-  OPENSEARCH_HOME: ${SNAP_DATA}/usr/share/opensearch
-  OPENSEARCH_LIB: ${SNAP_DATA}/usr/share/opensearch/lib
-  OPENSEARCH_PLUGINS: ${SNAP_DATA}/usr/share/opensearch/plugins
-  OPENSEARCH_MODULES: ${SNAP_DATA}/usr/share/opensearch/modules
+  OPENSEARCH_PATH_CONF: /var/snap/opensearch/current/etc/opensearch
+  OPENSEARCH_HOME: /var/snap/opensearch/current/usr/share/opensearch
+  OPENSEARCH_LIB: /var/snap/opensearch/current/usr/share/opensearch/lib
+  OPENSEARCH_PLUGINS: /var/snap/opensearch/current/usr/share/opensearch/plugins
+  OPENSEARCH_MODULES: /var/snap/opensearch/current/usr/share/opensearch/modules
 
   OPENSEARCH_PATH_CERTS: ${OPENSEARCH_PATH_CONF}/certificates
-  KNN_LIB_DIR: ${OPENSEARCH_HOME}/plugins/opensearch-knn/lib
-  LD_LIBRARY_PATH: ${LD_LIBRARY_PATH}:${KNN_LIB_DIR}
 
 apps:
   daemon:
@@ -96,41 +94,6 @@ apps:
     environment:
       OPS_ROOT: ${SNAP}/usr/share/ops
       OPENSEARCH_PATH_CERTS: ${OPENSEARCH_PATH_CONF}/certificates
-
-  plugin:
-    command: usr/share/ops/plugin.sh
-    plugs:
-      # Needed to download the plugin
-      - network
-      - network-bind
-      # Needed for the JVM (coredump_filter, etc)
-      - log-observe
-      - mount-observe
-      - process-control
-      - system-observe
-      - sys-fs-cgroup-service
-    environment:
-      # Overriden env variables, place the plugin on a temp file and
-      # the plugin script will then relocate it with the right permissions
-      # to the correct place.
-      OPENSEARCH_PATH_CONF: ${SNAP_DATA}/temp_plugin/config
-      OPENSEARCH_HOME: ${SNAP_DATA}/temp_plugin
-      OPENSEARCH_PLUGINS: ${SNAP_DATA}/temp_plugin/plugins
-      OPENSEARCH_MODULES: ${SNAP_DATA}/temp_plugin/modules
-      OPENSEARCH_CLASSPATH: ${OPENSEARCH_LIB}/*:${OPENSEARCH_LIB}/tools/plugin-cli/*
-
-  keystore:
-    command: usr/share/ops/keystore.sh
-    plugs:
-      # Needed to download the plugin
-      - network
-      - network-bind
-      # Needed for the JVM (coredump_filter, etc)
-      - log-observe
-      - mount-observe
-      - process-control
-      - system-observe
-      - sys-fs-cgroup-service
 
   test-cluster-health-green:
     command: usr/share/ops/tests/test-cluster-health-green.sh
