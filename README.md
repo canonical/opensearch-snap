@@ -119,6 +119,18 @@ $ sudo OPENSEARCH_JAVA_HOME=/snap/opensearch/current/usr/share/opensearch/jdk \
        /snap/opensearch/current/usr/share/opensearch/bin/<command> [options]
 ```
 
+### Running Keystore commands
+
+Keystore commands run similarly to the CLI commands, except they should be executed with ```snap_daemon``` permission:
+```
+$ sudo -u snap_daemon OPENSEARCH_JAVA_HOME=/snap/opensearch/current/usr/share/opensearch/jdk \
+       OPENSEARCH_PATH_CONF=/var/snap/opensearch/current/etc/opensearch \
+       OPENSEARCH_HOME=/var/snap/opensearch/current/usr/share/opensearch \
+       OPENSEARCH_LIB=/var/snap/opensearch/current/usr/share/opensearch/lib \
+       OPENSEARCH_PATH_CERTS=/var/snap/opensearch/current/etc/opensearch/certificates \
+       /snap/opensearch/current/usr/share/opensearch/bin/opensearch-keystore [options]
+```
+
 ## License
 The Opensearch Snap is free software, distributed under the Apache
 Software License, version 2.0. See

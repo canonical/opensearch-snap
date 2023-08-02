@@ -145,15 +145,15 @@ jobs:
                OPENSEARCH_PATH_CERTS=/var/snap/opensearch/current/etc/opensearch/certificates \
                /snap/opensearch/current/usr/share/opensearch/bin/opensearch-plugin install --batch repository-s3
 
-          echo "TEST" | sudo tee /var/snap/opensearch/current/testkey
+          echo "TEST" | sudo tee -a /var/snap/opensearch/current/testkey
 
-          sudo OPENSEARCH_JAVA_HOME=/snap/opensearch/current/usr/share/opensearch/jdk \
+          sudo -u snap_daemon OPENSEARCH_JAVA_HOME=/snap/opensearch/current/usr/share/opensearch/jdk \
                OPENSEARCH_PATH_CONF=/var/snap/opensearch/current/etc/opensearch \
                OPENSEARCH_HOME=/var/snap/opensearch/current/usr/share/opensearch \
                OPENSEARCH_LIB=/var/snap/opensearch/current/usr/share/opensearch/lib \
                OPENSEARCH_PATH_CERTS=/var/snap/opensearch/current/etc/opensearch/certificates \
                /snap/opensearch/current/usr/share/opensearch/bin/opensearch-keystore add-file s3.client.default.access_key /var/snap/opensearch/current/testkey
-          sudo OPENSEARCH_JAVA_HOME=/snap/opensearch/current/usr/share/opensearch/jdk \
+          sudo -u snap_daemon OPENSEARCH_JAVA_HOME=/snap/opensearch/current/usr/share/opensearch/jdk \
                OPENSEARCH_PATH_CONF=/var/snap/opensearch/current/etc/opensearch \
                OPENSEARCH_HOME=/var/snap/opensearch/current/usr/share/opensearch \
                OPENSEARCH_LIB=/var/snap/opensearch/current/usr/share/opensearch/lib \
@@ -191,13 +191,13 @@ jobs:
                OPENSEARCH_PATH_CERTS=/var/snap/opensearch/current/etc/opensearch/certificates \
                /snap/opensearch/current/usr/share/opensearch/bin/opensearch-plugin remove repository-s3
 
-          sudo OPENSEARCH_JAVA_HOME=/snap/opensearch/current/usr/share/opensearch/jdk \
+          sudo sudo -u snap_daemon OPENSEARCH_JAVA_HOME=/snap/opensearch/current/usr/share/opensearch/jdk \
                OPENSEARCH_PATH_CONF=/var/snap/opensearch/current/etc/opensearch \
                OPENSEARCH_HOME=/var/snap/opensearch/current/usr/share/opensearch \
                OPENSEARCH_LIB=/var/snap/opensearch/current/usr/share/opensearch/lib \
                OPENSEARCH_PATH_CERTS=/var/snap/opensearch/current/etc/opensearch/certificates \
                /snap/opensearch/current/usr/share/opensearch/bin/opensearch-keystore remove s3.client.default.access_key
-          sudo OPENSEARCH_JAVA_HOME=/snap/opensearch/current/usr/share/opensearch/jdk \
+          sudo sudo -u snap_daemon OPENSEARCH_JAVA_HOME=/snap/opensearch/current/usr/share/opensearch/jdk \
                OPENSEARCH_PATH_CONF=/var/snap/opensearch/current/etc/opensearch \
                OPENSEARCH_HOME=/var/snap/opensearch/current/usr/share/opensearch \
                OPENSEARCH_LIB=/var/snap/opensearch/current/usr/share/opensearch/lib \
