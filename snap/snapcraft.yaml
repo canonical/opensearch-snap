@@ -179,6 +179,10 @@ parts:
             chmod -R 755 "${target_dir}"
         done
 
+        # It is important to correct the user permissions for the opensearch.keystore file, after the script is executed.
+        # Given we know which user is going to be used for the daemon, we can set this correction in the keystore script.
+        echo 'chown snap_daemon:snap_daemon /var/snap/opensearch/current/etc/opensearch/opensearch.keystore || true' >> "${CRAFT_PART_INSTALL}"/usr/share/opensearch/bin/opensearch-keystore
+
         # Final clean-up
         rm "${archive}"
         rm -rf "${CRAFT_PART_INSTALL}/"LICENSE.txt "${CRAFT_PART_INSTALL}/"manifest.yml "${CRAFT_PART_INSTALL}/"logs/ "${CRAFT_PART_INSTALL}/"NOTICE.txt "${CRAFT_PART_INSTALL}/"opensearch-tar-install.sh "${CRAFT_PART_INSTALL}/"README.md
