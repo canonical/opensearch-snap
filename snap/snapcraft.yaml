@@ -61,8 +61,6 @@ environment:
 
   KNN_LIB_DIR: ${OPENSEARCH_PLUGINS}/opensearch-knn/lib
 
-  KNN_LIB_DIR: ${OPENSEARCH_PLUGINS}/opensearch-knn/lib
-
 apps:
   daemon:
     daemon: simple
