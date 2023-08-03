@@ -69,7 +69,7 @@ set_defaults
 # Check node name
 endpoint="https://localhost:9200"
 
-cluster_resp=$(curl -k -XGET "${endpoint}" -u "admin:${admin_auth_password}")
+cluster_resp=$(curl -sk -XGET "${endpoint}" -u "admin:${admin_auth_password}")
 echo -e "Cluster Response: \n ${cluster_resp}"
 
 node_name_resp=$(echo "${cluster_resp}" | yq -r .name)
