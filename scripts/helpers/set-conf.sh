@@ -62,3 +62,12 @@ function set_yaml_prop() {
 
     "${SNAP}"/bin/yq -i "${expression} ${operator} ${value}" "${target_file}"
 }
+
+function set_python_prop () {
+    python3 \
+        "${OPS_ROOT}"/helpers/conf-setter.py \
+        --file "${1}" \
+        --key "${2}" \
+        --value "${3}" \
+        --output "persist"
+}
