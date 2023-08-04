@@ -140,7 +140,7 @@ jobs:
               exit 1
           fi
 
-      - name: Export opensearch env variables
+      - name: Install backup plugin and configure it
         run: |
           export OPENSEARCH_JAVA_HOME=/snap/opensearch/current/usr/share/opensearch/jdk
           export OPENSEARCH_PATH_CONF=/var/snap/opensearch/current/etc/opensearch
@@ -148,8 +148,6 @@ jobs:
           export OPENSEARCH_LIB=/var/snap/opensearch/current/usr/share/opensearch/lib
           export OPENSEARCH_PATH_CERTS=/var/snap/opensearch/current/etc/opensearch/certificates
 
-      - name: Install backup plugin and configure it
-        run: |
           sudo -E /snap/opensearch/current/usr/share/opensearch/bin/opensearch-plugin install --batch repository-s3
 
           echo "TEST" | sudo tee -a /var/snap/opensearch/current/testkey
@@ -177,10 +175,18 @@ jobs:
 
           if [ "$(ls /var/snap/opensearch/x2)" ]; then
               echo "Snap upgraded."
+          else
+              exit 1
           fi
 
       - name: Remove backup plugin
         run: |
+          export OPENSEARCH_JAVA_HOME=/snap/opensearch/current/usr/share/opensearch/jdk
+          export OPENSEARCH_PATH_CONF=/var/snap/opensearch/current/etc/opensearch
+          export OPENSEARCH_HOME=/var/snap/opensearch/current/usr/share/opensearch
+          export OPENSEARCH_LIB=/var/snap/opensearch/current/usr/share/opensearch/lib
+          export OPENSEARCH_PATH_CERTS=/var/snap/opensearch/current/etc/opensearch/certificates
+
           sudo -E /snap/opensearch/current/usr/share/opensearch/bin/opensearch-plugin remove repository-s3
           sudo -E /snap/opensearch/current/usr/share/opensearch/bin/opensearch-keystore remove s3.client.default.access_key
           sudo -E /snap/opensearch/current/usr/share/opensearch/bin/opensearch-keystore remove s3.client.default.secret_key

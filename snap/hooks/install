@@ -8,13 +8,7 @@ source "${OPS_ROOT}"/helpers/io.sh
 source "${OPS_ROOT}"/helpers/set-conf.sh
 
 function create_file_structure () {
-    mkdir -p "${OPENSEARCH_PATH_CONF}"
-    mkdir -p "${OPENSEARCH_HOME}"
-    mkdir -p "${OPENSEARCH_VARLIB}"
-    mkdir -p "${OPENSEARCH_VARLOG}"
-    mkdir -p "${OPENSEARCH_TMPDIR}"
-    mkdir -p "${OPENSEARCH_PATH_CERTS}"
-    mkdir -p "${OPENSEARCH_LIB}"
+    mkdir -p "${OPENSEARCH_PATH_CONF}" "${OPENSEARCH_HOME}" "${OPENSEARCH_VARLIB}" "${OPENSEARCH_VARLOG}" "${OPENSEARCH_TMPDIR}" "${OPENSEARCH_PATH_CERTS}" "${OPENSEARCH_LIB}"
     # Create a dummy /bin folder otherwise OpenSearch will try to do it:
     # https://github.com/opensearch-project/OpenSearch/blob/db838c4ca090103a8ba562b3cb124044be725c62/
     #      server/src/main/java/org/opensearch/bootstrap/Security.java#L315
