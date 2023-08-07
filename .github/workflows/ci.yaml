@@ -181,13 +181,14 @@ jobs:
           fi
 
       - name: Remove backup plugin
+        env: 
+          OPENSEARCH_JAVA_HOME: /snap/opensearch/current/usr/share/opensearch/jdk
+          OPENSEARCH_BIN: /snap/opensearch/current/usr/share/opensearch/bin
+          OPENSEARCH_PATH_CONF: /var/snap/opensearch/current/etc/opensearch
+          OPENSEARCH_HOME: /var/snap/opensearch/current/usr/share/opensearch
+          OPENSEARCH_LIB: /var/snap/opensearch/current/usr/share/opensearch/lib
+          OPENSEARCH_PATH_CERTS: /var/snap/opensearch/current/etc/opensearch/certificates
         run: |
-          export OPENSEARCH_JAVA_HOME=/snap/opensearch/current/usr/share/opensearch/jdk
-          export OPENSEARCH_PATH_CONF=/var/snap/opensearch/current/etc/opensearch
-          export OPENSEARCH_HOME=/var/snap/opensearch/current/usr/share/opensearch
-          export OPENSEARCH_LIB=/var/snap/opensearch/current/usr/share/opensearch/lib
-          export OPENSEARCH_PATH_CERTS=/var/snap/opensearch/current/etc/opensearch/certificates
-
           sudo -E /snap/opensearch/current/usr/share/opensearch/bin/opensearch-plugin remove repository-s3
           sudo -E /snap/opensearch/current/usr/share/opensearch/bin/opensearch-keystore remove s3.client.default.access_key
           sudo -E /snap/opensearch/current/usr/share/opensearch/bin/opensearch-keystore remove s3.client.default.secret_key
