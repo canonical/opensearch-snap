@@ -167,7 +167,6 @@ parts:
     override-build: |
         version="$(craftctl get version)"
         archive="opensearch-${version}-linux-x64.tar.gz"
-        varsnap="/var/snap/opensearch"
       
         curl -o "${archive}" "https://artifacts.opensearch.org/releases/bundle/opensearch/${version}/${archive}"
         tar -xzvf "${archive}" -C "${CRAFT_PART_INSTALL}/" --strip-components=1
@@ -178,7 +177,7 @@ parts:
         sed -i 's@OPENSEARCH_CLASSPATH=\"\$OPENSEARCH_HOME/lib/\*\"@if \[\[ -z "$OPENSEARCH_CLASSPATH" \]\]; then OPENSEARCH_CLASSPATH=\"\$OPENSEARCH_LIB\"/*; fi@g' "${CRAFT_PART_INSTALL}"/bin/opensearch-env
         sed -i 's@bin/opensearch-keystore@\"\${OPENSEARCH_BIN}\"/opensearch-keystore@' "${CRAFT_PART_INSTALL}"/bin/opensearch
         # OPENSEARCH_VARLOG is not defined during build part
-        sed -i "s@=logs/@=$varsnap/common/var/log/opensearch/@g" "${CRAFT_PART_INSTALL}"/config/jvm.options
+        sed -i "s@=logs/@=/var/snap/opensearch/common/var/log/opensearch/@g" "${CRAFT_PART_INSTALL}"/config/jvm.options
 
         mkdir -p "${CRAFT_PART_INSTALL}/etc/opensearch/"
         mv "${CRAFT_PART_INSTALL}"/config/* "${CRAFT_PART_INSTALL}/etc/opensearch/"
@@ -192,7 +191,7 @@ parts:
 
         # It is important to correct the user permissions for the opensearch.keystore file, after the script is executed.
         # Given we know which user is going to be used for the daemon, we can set this correction in the keystore script.
-        echo 'chown snap_daemon:snap_daemon "$varsnap"/current/etc/opensearch/opensearch.keystore || true' >> "${CRAFT_PART_INSTALL}"/usr/share/opensearch/bin/opensearch-keystore
+        echo 'chown snap_daemon:snap_daemon /var/snap/opensearch/current/etc/opensearch/opensearch.keystore || true' >> "${CRAFT_PART_INSTALL}"/usr/share/opensearch/bin/opensearch-keystore
 
         # Final clean-up
         rm "${archive}"

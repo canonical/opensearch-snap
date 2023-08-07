@@ -13,6 +13,12 @@ function create_file_structure () {
     for f in "${folders[@]}"; do
         add_folder $f 770
     done
+
+    declare -a common=(modules plugins lib)
+    for dir in "${common[@]}"; do
+        file_copy usr/share/opensearch/"${dir}"/. "${OPENSEARCH_HOME}/${dir}" 770
+    done
+    add_folder "${OPENSEARCH_HOME}"/extensions 770
 }
 
 
@@ -21,14 +27,6 @@ function set_base_config_props () {
     set_yaml_prop "${OPENSEARCH_PATH_CONF}/opensearch.yml" "node.pidfile" "${OPENSEARCH_PATH_CONF}"/pidfile
     set_yaml_prop "${OPENSEARCH_PATH_CONF}/opensearch.yml" "path.logs" "${OPENSEARCH_VARLOG}"
     set_yaml_prop "${OPENSEARCH_PATH_CONF}/opensearch.yml" "path.home" "${OPENSEARCH_HOME}"
-
-    mkdir -p "${OPENSEARCH_HOME}"/modules
-    mkdir -p "${OPENSEARCH_HOME}"/plugins
-    mkdir -p "${OPENSEARCH_HOME}"/extensions
-    mkdir -p "${OPENSEARCH_LIB}"
-    cp -n -r "${SNAP}"/usr/share/opensearch/modules/* "${OPENSEARCH_HOME}"/modules
-    cp -n -r "${SNAP}"/usr/share/opensearch/plugins/* "${OPENSEARCH_HOME}"/plugins
-    cp -n -r "${SNAP}"/usr/share/opensearch/lib/* "${OPENSEARCH_LIB}"
 }
 
 
