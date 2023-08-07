@@ -23,7 +23,7 @@ function add_file () {
 }
 
 function dir_copy_if_not_exists () {
-    cp -R -n -r -p "${SNAP}/${1}" "${2}"
+    cp -n -p "${SNAP}/${1}" "${2}"
 
     if [[ $# -eq 3 ]]; then
         set_access_restrictions "${2}/${1}" "${3}"

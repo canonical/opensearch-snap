@@ -157,7 +157,7 @@ jobs:
           sudo -E "${OPENSEARCH_BIN}"/opensearch-keystore add-file s3.client.default.secret_key /var/snap/opensearch/current/testkey
 
           sudo snap restart opensearch
-          sleep 100s
+          sleep 20s
 
           sudo cp /var/snap/opensearch/current/etc/opensearch/certificates/node-cm0.pem ./
           cert=./node-cm0.pem
@@ -181,7 +181,7 @@ jobs:
           fi
 
       - name: Remove backup plugin
-        env: 
+        env:
           OPENSEARCH_JAVA_HOME: /snap/opensearch/current/usr/share/opensearch/jdk
           OPENSEARCH_BIN: /snap/opensearch/current/usr/share/opensearch/bin
           OPENSEARCH_PATH_CONF: /var/snap/opensearch/current/etc/opensearch
@@ -189,7 +189,6 @@ jobs:
           OPENSEARCH_LIB: /var/snap/opensearch/current/usr/share/opensearch/lib
           OPENSEARCH_PATH_CERTS: /var/snap/opensearch/current/etc/opensearch/certificates
         run: |
-          OPENSEARCH
           sudo -E "${OPENSEARCH_BIN}"/opensearch-plugin remove repository-s3
           sudo -E "${OPENSEARCH_BIN}"/opensearch-keystore remove s3.client.default.access_key
           sudo -E "${OPENSEARCH_BIN}"/opensearch-keystore remove s3.client.default.secret_key
@@ -199,7 +198,7 @@ jobs:
           # start opensearch after upgrade
           sudo snap restart opensearch.daemon
           # Give some time for the service to come back up
-          sleep 100s
+          sleep 20s
 
           sudo cp /var/snap/opensearch/current/etc/opensearch/certificates/node-cm0.pem ./
           cert=./node-cm0.pem
