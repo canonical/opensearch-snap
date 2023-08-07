@@ -190,4 +190,7 @@ parts:
 
         # Final clean-up
         rm "${archive}"
-        rm -rf "${CRAFT_PART_INSTALL}/"LICENSE.txt "${CRAFT_PART_INSTALL}/"manifest.yml "${CRAFT_PART_INSTALL}/"logs/ "${CRAFT_PART_INSTALL}/"NOTICE.txt "${CRAFT_PART_INSTALL}/"opensearch-tar-install.sh "${CRAFT_PART_INSTALL}/"README.md
+        declare -a resources=(LICENSE.txt, manifest.yml, logs, NOTICE.txt, opensearch-tar-install.sh, README.md)
+        for res in "${resources[@]}"; do
+            rm -rf "${CRAFT_PART_INSTALL}/${res}"
+        done
