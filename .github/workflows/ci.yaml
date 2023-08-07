@@ -149,12 +149,12 @@ jobs:
           OPENSEARCH_LIB: /var/snap/opensearch/current/usr/share/opensearch/lib
           OPENSEARCH_PATH_CERTS: /var/snap/opensearch/current/etc/opensearch/certificates
         run: |
-          sudo -E /snap/opensearch/current/usr/share/opensearch/bin/opensearch-plugin install --batch repository-s3
+          sudo -E "${OPENSEARCH_BIN}"/opensearch-plugin install --batch repository-s3
 
           echo "TEST" | sudo tee -a /var/snap/opensearch/current/testkey
 
-          sudo -E /snap/opensearch/current/usr/share/opensearch/bin/opensearch-keystore add-file s3.client.default.access_key /var/snap/opensearch/current/testkey
-          sudo -E /snap/opensearch/current/usr/share/opensearch/bin/opensearch-keystore add-file s3.client.default.secret_key /var/snap/opensearch/current/testkey
+          sudo -E "${OPENSEARCH_BIN}"/opensearch-keystore add-file s3.client.default.access_key /var/snap/opensearch/current/testkey
+          sudo -E "${OPENSEARCH_BIN}"/opensearch-keystore add-file s3.client.default.secret_key /var/snap/opensearch/current/testkey
 
           sudo snap restart opensearch
           sleep 100s
