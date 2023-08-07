@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 
-set -ux
+set -eu
 
 
+# Set final permissions
+# Following recommendation from: https://forum.snapcraft.io/t/system-usernames/13386/7
 function set_access_restrictions () {
     if [[ $# -eq 2 ]]; then
         chmod -R "${2}" "${1}"

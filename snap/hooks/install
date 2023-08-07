@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -ux
+set -eu
 
 
 source "${OPS_ROOT}"/helpers/snap-logger.sh "hook-install"
@@ -8,12 +8,11 @@ source "${OPS_ROOT}"/helpers/io.sh
 source "${OPS_ROOT}"/helpers/set-conf.sh
 
 function create_file_structure () {
-    file_copy etc/opensearch/* "${OPENSEARCH_PATH_CONF}" 770
+    file_copy etc/opensearch/. "${OPENSEARCH_PATH_CONF}" 770
     declare -a folders=("${OPENSEARCH_HOME}" "${OPENSEARCH_HOME}"/bin "${OPENSEARCH_VARLIB}" "${OPENSEARCH_VARLOG}" "${OPENSEARCH_TMPDIR}" "${OPENSEARCH_PATH_CERTS}")
     for f in "${folders[@]}"; do
         add_folder $f 770
     done
-    file_copy etc/opensearch/* "${OPENSEARCH_PATH_CONF}" 770
 }
 
 
@@ -30,19 +29,8 @@ function set_base_config_props () {
     cp -n -r "${SNAP}"/usr/share/opensearch/modules/* "${OPENSEARCH_HOME}"/modules
     cp -n -r "${SNAP}"/usr/share/opensearch/plugins/* "${OPENSEARCH_HOME}"/plugins
     cp -n -r "${SNAP}"/usr/share/opensearch/lib/* "${OPENSEARCH_LIB}"
-
-    sed -i s@=logs/@"=${OPENSEARCH_VARLOG}"@ "${OPENSEARCH_PATH_CONF}/jvm.options"
 }
 
 
 create_file_structure
 set_base_config_props
-
-# Set final permissions
-# Following recommendation from: https://forum.snapcraft.io/t/system-usernames/13386/7
-# SNAP_DATA: daemon can only read its content; users can write in it IF having root permission
-# SNAP_COMMON: daemon and users can read and write on it
-# set_access_restrictions expect one single folder, so iterate over folders under SNAP_COMMON
-for d in $(ls "${SNAP_COMMON}"); do
-	set_access_restrictions "${SNAP_COMMON}"/"$d" 770
-done
