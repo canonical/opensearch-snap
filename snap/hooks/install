@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -eux
+set -ux
 
 
 source "${OPS_ROOT}"/helpers/snap-logger.sh "hook-install"
@@ -8,10 +8,12 @@ source "${OPS_ROOT}"/helpers/io.sh
 source "${OPS_ROOT}"/helpers/set-conf.sh
 
 function create_file_structure () {
-    declare -a folders=("${OPENSEARCH_HOME}" "${OPENSEARCH_PATH_CONF}" "${OPENSEARCH_HOME}"/bin "${OPENSEARCH_VARLIB}" "${OPENSEARCH_VARLOG}" "${OPENSEARCH_TMPDIR}" "${OPENSEARCH_PATH_CERTS}")
+    file_copy etc/opensearch/* "${OPENSEARCH_PATH_CONF}" 770
+    declare -a folders=("${OPENSEARCH_HOME}" "${OPENSEARCH_HOME}"/bin "${OPENSEARCH_VARLIB}" "${OPENSEARCH_VARLOG}" "${OPENSEARCH_TMPDIR}" "${OPENSEARCH_PATH_CERTS}")
     for f in "${folders[@]}"; do
         add_folder $f 770
     done
+    file_copy etc/opensearch/* "${OPENSEARCH_PATH_CONF}" 770
 }
 
 

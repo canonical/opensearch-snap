@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -eu
+set -ux
 
 
 function set_access_restrictions () {
@@ -13,7 +13,7 @@ function set_access_restrictions () {
 }
 
 function add_folder () {
-    [ -d "${1}" ] || mkdir -p "${1}"
+    mkdir -p "${1}"
     set_access_restrictions "${1}" "${2}"
 }
 
@@ -22,22 +22,13 @@ function add_file () {
     set_access_restrictions "${1}" "${2}"
 }
 
-function dir_copy_if_not_exists () {
-    cp -n -p "${SNAP}/${1}" "${2}"
-
-    if [[ $# -eq 3 ]]; then
-        set_access_restrictions "${2}/${1}" "${3}"
-    else
-        set_access_restrictions "${2}/${1}"
-    fi
-}
-
 function file_copy () {
-    cp -n -p "${SNAP}/${1}" "${2}"
+    mkdir -p "${2}"
+    cp -r -p "${SNAP}/${1}" "${2}"
 
     if [[ $# -eq 3 ]]; then
-        set_access_restrictions "${2}/${1}" "${3}"
+        set_access_restrictions "${2}" "${3}"
     else
-        set_access_restrictions "${2}/${1}"
+        set_access_restrictions "${2}"
     fi
 }

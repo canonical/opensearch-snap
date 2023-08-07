@@ -177,11 +177,13 @@ parts:
         sed -i 's@OPENSEARCH_CLASSPATH=\"\$OPENSEARCH_HOME/lib/\*\"@if \[\[ -z "$OPENSEARCH_CLASSPATH" \]\]; then OPENSEARCH_CLASSPATH=\"\$OPENSEARCH_LIB\"/*; fi@g' "${CRAFT_PART_INSTALL}"/bin/opensearch-env
         sed -i 's@bin/opensearch-keystore@\"\${OPENSEARCH_BIN}\"/opensearch-keystore@' "${CRAFT_PART_INSTALL}"/bin/opensearch
 
-        declare -a dirs=(bin jdk lib modules plugins config performance-analyzer-rca)
+        mkdir -p "${CRAFT_PART_INSTALL}/etc/opensearch/"
+        mv "${CRAFT_PART_INSTALL}"/config/* "${CRAFT_PART_INSTALL}/etc/opensearch/"
+
+        declare -a dirs=(bin jdk lib modules plugins performance-analyzer-rca)
         for dir in "${dirs[@]}"; do
             target_dir="${CRAFT_PART_INSTALL}/usr/share/opensearch/${dir}"
             mv "${CRAFT_PART_INSTALL}/${dir}" "${target_dir}"
-            chmod -R 755 "${target_dir}"
         done
 
         # It is important to correct the user permissions for the opensearch.keystore file, after the script is executed.
