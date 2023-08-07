@@ -141,13 +141,14 @@ jobs:
           fi
 
       - name: Install backup plugin and configure it
+        env:
+          OPENSEARCH_JAVA_HOME: /snap/opensearch/current/usr/share/opensearch/jdk
+          OPENSEARCH_BIN: /snap/opensearch/current/usr/share/opensearch/bin
+          OPENSEARCH_PATH_CONF: /var/snap/opensearch/current/etc/opensearch
+          OPENSEARCH_HOME: /var/snap/opensearch/current/usr/share/opensearch
+          OPENSEARCH_LIB: /var/snap/opensearch/current/usr/share/opensearch/lib
+          OPENSEARCH_PATH_CERTS: /var/snap/opensearch/current/etc/opensearch/certificates
         run: |
-          export OPENSEARCH_JAVA_HOME=/snap/opensearch/current/usr/share/opensearch/jdk
-          export OPENSEARCH_PATH_CONF=/var/snap/opensearch/current/etc/opensearch
-          export OPENSEARCH_HOME=/var/snap/opensearch/current/usr/share/opensearch
-          export OPENSEARCH_LIB=/var/snap/opensearch/current/usr/share/opensearch/lib
-          export OPENSEARCH_PATH_CERTS=/var/snap/opensearch/current/etc/opensearch/certificates
-
           sudo -E /snap/opensearch/current/usr/share/opensearch/bin/opensearch-plugin install --batch repository-s3
 
           echo "TEST" | sudo tee -a /var/snap/opensearch/current/testkey
