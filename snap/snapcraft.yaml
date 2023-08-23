@@ -34,30 +34,30 @@ hooks:
       - network
       - network-bind
     environment:
-      OPS_ROOT: ${SNAP}/usr/share/ops
+      OPS_ROOT: ${SNAP}/opt/opensearch
 
   configure:
     environment:
-      OPS_ROOT: ${SNAP}/usr/share/ops
+      OPS_ROOT: ${SNAP}/opt/opensearch
 
 
 environment:
-  OPS_ROOT: ${SNAP}/usr/share/ops
+  SNAP_LOG_DIR: ${SNAP_COMMON}/ops/snap/logs
+
   OPENSEARCH_BIN: ${SNAP}/usr/share/opensearch/bin
   OPENSEARCH_JAVA_HOME: ${SNAP}/usr/share/opensearch/jdk
 
-  SNAP_LOG_DIR: ${SNAP_COMMON}/ops/snap/logs
+  OPENSEARCH_HOME: ${SNAP_DATA}/usr/share/opensearch
+  OPENSEARCH_LIB: ${OPENSEARCH_HOME}/lib
+  OPENSEARCH_PLUGINS: ${OPENSEARCH_HOME}/plugins
+  OPENSEARCH_MODULES: ${OPENSEARCH_HOME}/modules
+
+  OPENSEARCH_PATH_CONF: ${SNAP_DATA}/etc/opensearch
+  OPENSEARCH_PATH_CERTS: ${SNAP_DATA}/etc/opensearch/certificates
+
   OPENSEARCH_VARLIB: ${SNAP_COMMON}/var/lib/opensearch
   OPENSEARCH_TMPDIR: ${SNAP_COMMON}/usr/share/tmp
   OPENSEARCH_VARLOG: ${SNAP_COMMON}/var/log/opensearch
-
-  OPENSEARCH_PATH_CONF: /var/snap/opensearch/current/etc/opensearch
-  OPENSEARCH_HOME: /var/snap/opensearch/current/usr/share/opensearch
-  OPENSEARCH_LIB: /var/snap/opensearch/current/usr/share/opensearch/lib
-  OPENSEARCH_PLUGINS: /var/snap/opensearch/current/usr/share/opensearch/plugins
-  OPENSEARCH_MODULES: /var/snap/opensearch/current/usr/share/opensearch/modules
-
-  OPENSEARCH_PATH_CERTS: ${OPENSEARCH_PATH_CONF}/certificates
 
   KNN_LIB_DIR: ${OPENSEARCH_PLUGINS}/opensearch-knn/lib
 
@@ -65,7 +65,7 @@ apps:
   daemon:
     daemon: simple
     install-mode: disable
-    command: usr/share/ops/start.sh
+    command: opt/opensearch/start.sh
     restart-condition: always
     restart-delay: 20s
     # reload-command: ${SNAP}/usr/share/ops/start.sh
@@ -78,51 +78,53 @@ apps:
       - system-observe
       - sys-fs-cgroup-service
     environment:
-      OPS_ROOT: ${SNAP}/usr/share/ops
+      OPS_ROOT: ${SNAP}/opt/opensearch
       OPENSEARCH_PATH_CERTS: ${OPENSEARCH_PATH_CONF}/certificates
       LD_LIBRARY_PATH: "${LD_LIBRARY_PATH}:${KNN_LIB_DIR}"
 
   security-init:
-    command: usr/share/ops/security-init.sh
+    command: opt/opensearch/security-init.sh
     plugs:
       - network
       - network-bind
     environment:
-      OPS_ROOT: ${SNAP}/usr/share/ops
-      OPENSEARCH_PATH_CERTS: ${OPENSEARCH_PATH_CONF}/certificates
+      OPS_ROOT: ${SNAP}/opt/opensearch
       JAVA_OPTS: ""
 
   setup:
-    command: usr/share/ops/setup.sh
+    command: opt/opensearch/setup.sh
     environment:
-      OPS_ROOT: ${SNAP}/usr/share/ops
-      OPENSEARCH_PATH_CERTS: ${OPENSEARCH_PATH_CONF}/certificates
+      OPS_ROOT: ${SNAP}/opt/opensearch
+
+  plugin-add:
+    command: opt/opensearch/plugins/add.sh
+
+  plugins-list:
+    command: opt/opensearch/plugins/list.sh
+
+  plugins-remove:
+    command: opt/opensearch/plugins/remove.sh
 
   test-cluster-health-green:
-    command: usr/share/ops/tests/test-cluster-health-green.sh
+    command: opt/opensearch/tests/test-cluster-health-green.sh
     plugs:
       - network
       - network-bind
-    environment:
-      OPS_ROOT: ${SNAP}/usr/share/ops
-      OPENSEARCH_PATH_CERTS: ${OPENSEARCH_PATH_CONF}/certificates
 
   test-node-up:
-    command: usr/share/ops/tests/test-node-up.sh
+    command: opt/opensearch/tests/test-node-up.sh
     plugs:
       - network
       - network-bind
     environment:
-      OPS_ROOT: ${SNAP}/usr/share/ops
       OPENSEARCH_PATH_CERTS: ${OPENSEARCH_PATH_CONF}/certificates
 
   test-security-index-created:
-    command: usr/share/ops/tests/test-security-index-created.sh
+    command: opt/opensearch/tests/test-security-index-created.sh
     plugs:
       - network
       - network-bind
     environment:
-      OPS_ROOT: ${SNAP}/usr/share/ops
       OPENSEARCH_PATH_CERTS: ${OPENSEARCH_PATH_CONF}/certificates
 
 parts:
@@ -131,8 +133,6 @@ parts:
     stage-snaps:
       - yq
     stage-packages:
-      - python3
-      - python3-yaml
       - util-linux
       - curl
       - procps
@@ -156,11 +156,10 @@ parts:
     source: ./scripts
     source-type: local
     override-build: |
-      target_dir="${CRAFT_PART_INSTALL}/usr/share/ops"
+      target_dir="${CRAFT_PART_INSTALL}/opt/opensearch"
       mkdir -p "${target_dir}"
       cp -r wrappers/. "${target_dir}"
       cp -r helpers/ "${target_dir}/helpers"
-      rm -rf wrappers/ helpers/
 
   opensearch:
     plugin: nil
@@ -172,12 +171,6 @@ parts:
         tar -xzvf "${archive}" -C "${CRAFT_PART_INSTALL}/" --strip-components=1
       
         mkdir -p "${CRAFT_PART_INSTALL}/usr/share/opensearch"
-
-        # OPENSEARCH_HOME points to SNAP_DATA, whereas the /bin folder sits in /snap
-        sed -i 's@OPENSEARCH_CLASSPATH=\"\$OPENSEARCH_HOME/lib/\*\"@if \[\[ -z "$OPENSEARCH_CLASSPATH" \]\]; then OPENSEARCH_CLASSPATH=\"\$OPENSEARCH_LIB\"/*; fi@g' "${CRAFT_PART_INSTALL}"/bin/opensearch-env
-        sed -i 's@bin/opensearch-keystore@\"\${OPENSEARCH_BIN}\"/opensearch-keystore@' "${CRAFT_PART_INSTALL}"/bin/opensearch
-        # OPENSEARCH_VARLOG is not defined during build part
-        sed -i "s@=logs/@=/var/snap/opensearch/common/var/log/opensearch/@g" "${CRAFT_PART_INSTALL}"/config/jvm.options
 
         mkdir -p "${CRAFT_PART_INSTALL}/etc/opensearch/"
         mv "${CRAFT_PART_INSTALL}"/config/* "${CRAFT_PART_INSTALL}/etc/opensearch/"
@@ -191,10 +184,13 @@ parts:
 
         # It is important to correct the user permissions for the opensearch.keystore file, after the script is executed.
         # Given we know which user is going to be used for the daemon, we can set this correction in the keystore script.
+        # TODO: we should perhaps NOT alter the source script - but 
         echo 'chown snap_daemon:root /var/snap/opensearch/current/etc/opensearch/opensearch.keystore || true' >> "${CRAFT_PART_INSTALL}"/usr/share/opensearch/bin/opensearch-keystore
 
         # Final clean-up
         rm "${archive}"
+      
+        # TODO do not delete these
         declare -a resources=(LICENSE.txt manifest.yml logs NOTICE.txt opensearch-tar-install.sh README.md config)
         for res in "${resources[@]}"; do
             rm -rf "${CRAFT_PART_INSTALL}/${res}"

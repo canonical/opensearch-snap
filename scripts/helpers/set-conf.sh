@@ -6,6 +6,18 @@ function replace_in_file() {
         --reuid snap_daemon -- sed -i "s@${2}@${3}@" "${1}"
 }
 
+function remove_yaml_prop() {
+    local target_file="${1}"
+    local key_path="${2}"
+
+    if [[ ${key_path} != ^.* ]]; then
+        key_path=".${key_path}"
+    fi
+
+    "${SNAP}"/bin/yq -i "del(${key_path})" "${target_file}"
+}
+
+
 function set_yaml_prop() {
     local target_file="${1}"
     local full_key_path="${2}"
@@ -63,11 +75,12 @@ function set_yaml_prop() {
     "${SNAP}"/bin/yq -i "${expression} ${operator} ${value}" "${target_file}"
 }
 
-function set_python_prop () {
-    python3 \
-        "${OPS_ROOT}"/helpers/conf-setter.py \
-        --file "${1}" \
-        --key "${2}" \
-        --value "${3}" \
-        --output "persist"
-}
+
+#function set_python_prop () {
+#    python3 \
+#        "${OPS_ROOT}"/helpers/conf-setter.py \
+#        --file "${1}" \
+#        --key "${2}" \
+#        --value "${3}" \
+#        --output "persist"
+#}

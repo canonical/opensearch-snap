@@ -3,8 +3,6 @@
 set -eu
 
 
-# Set final permissions
-# Following recommendation from: https://forum.snapcraft.io/t/system-usernames/13386/7
 function set_access_restrictions () {
     if [[ $# -eq 2 ]]; then
         chmod -R "${2}" "${1}"
@@ -15,7 +13,7 @@ function set_access_restrictions () {
 }
 
 function add_folder () {
-    mkdir -p "${1}"
+    [ -d "${1}" ] || mkdir -p "${1}"
     set_access_restrictions "${1}" "${2}"
 }
 
@@ -24,9 +22,19 @@ function add_file () {
     set_access_restrictions "${1}" "${2}"
 }
 
+function dir_copy_if_not_exists () {
+    cp -R -n -r -p "${SNAP}/${1}" "${2}"
+
+    if [[ $# -eq 3 ]]; then
+        set_access_restrictions "${2}/${1}" "${3}"
+    else
+        set_access_restrictions "${2}/${1}"
+    fi
+}
+
 function file_copy () {
-    mkdir -p "${2}"
-    cp -r -p "${SNAP}/${1}" "${2}"
+    [ -d "${2}" ] || mkdir -p "${2}"
+    cp -r "${SNAP}/${1}" "${2}"
 
     if [[ $# -eq 3 ]]; then
         set_access_restrictions "${2}" "${3}"

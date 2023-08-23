@@ -3,8 +3,10 @@
 set -eu
 
 
+# source "${OPS_ROOT}"/helpers/snap-logger.sh "daemon"
 source "${OPS_ROOT}"/helpers/snap-interfaces.sh
 source "${OPS_ROOT}"/sys/set-sys-config.sh
+
 
 usage() {
 cat << EOF

@@ -7,18 +7,28 @@ source "${OPS_ROOT}"/helpers/snap-logger.sh "hook-install"
 source "${OPS_ROOT}"/helpers/io.sh
 source "${OPS_ROOT}"/helpers/set-conf.sh
 
+
 function create_file_structure () {
-    file_copy etc/opensearch/. "${OPENSEARCH_PATH_CONF}" 770
-    declare -a folders=("${OPENSEARCH_HOME}" "${OPENSEARCH_HOME}"/bin "${OPENSEARCH_VARLIB}" "${OPENSEARCH_VARLOG}" "${OPENSEARCH_TMPDIR}" "${OPENSEARCH_PATH_CERTS}")
+    file_copy "etc/opensearch/." "${OPENSEARCH_PATH_CONF}" 770
+    add_file "${OPENSEARCH_PATH_CONF}/unicast_hosts.txt" 770
+
+    declare -a folders=("${OPENSEARCH_HOME}" "${OPENSEARCH_VARLIB}" "${OPENSEARCH_VARLOG}" "${OPENSEARCH_TMPDIR}" "${OPENSEARCH_PATH_CERTS}")
     for f in "${folders[@]}"; do
-        add_folder $f 770
+        add_folder "${f}" 770
     done
+
+    "${SNAP}"/usr/bin/setpriv \
+            --clear-groups \
+            --reuid snap_daemon \
+            --regid snap_daemon -- find "${OPENSEARCH_PATH_CONF}" -type f -exec chmod 660 {} \;
 
     declare -a common=(modules plugins lib)
     for dir in "${common[@]}"; do
-        file_copy usr/share/opensearch/"${dir}"/. "${OPENSEARCH_HOME}/${dir}" 770
+        file_copy "usr/share/opensearch/${dir}/." "${OPENSEARCH_HOME}/${dir}" 770
     done
-    add_folder "${OPENSEARCH_HOME}"/extensions 770
+
+    add_folder "${OPENSEARCH_HOME}/extensions" 770
+    add_file "${OPENSEARCH_HOME}/extensions/extensions.yml" 770
 }
 
 
@@ -27,6 +37,8 @@ function set_base_config_props () {
     set_yaml_prop "${OPENSEARCH_PATH_CONF}/opensearch.yml" "node.pidfile" "${OPENSEARCH_PATH_CONF}"/pidfile
     set_yaml_prop "${OPENSEARCH_PATH_CONF}/opensearch.yml" "path.logs" "${OPENSEARCH_VARLOG}"
     set_yaml_prop "${OPENSEARCH_PATH_CONF}/opensearch.yml" "path.home" "${OPENSEARCH_HOME}"
+
+    replace_in_file "${OPENSEARCH_PATH_CONF}/jvm.options" "=logs/" "=${OPENSEARCH_VARLOG}/"
 }
 
 
