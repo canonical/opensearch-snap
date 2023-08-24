@@ -33,27 +33,25 @@ hooks:
     plugs:
       - network
       - network-bind
-    environment:
-      OPS_ROOT: ${SNAP}/opt/opensearch
-
-  configure:
-    environment:
-      OPS_ROOT: ${SNAP}/opt/opensearch
-
 
 environment:
+  SNAP_CURRENT: /snap/opensearch/current
+  SNAP_DATA_CURRENT: /var/snap/opensearch/current
+
   SNAP_LOG_DIR: ${SNAP_COMMON}/ops/snap/logs
 
-  OPENSEARCH_BIN: ${SNAP}/usr/share/opensearch/bin
-  OPENSEARCH_JAVA_HOME: ${SNAP}/usr/share/opensearch/jdk
+  OPS_ROOT: ${SNAP_CURRENT}/opt/opensearch
 
-  OPENSEARCH_HOME: ${SNAP_DATA}/usr/share/opensearch
+  OPENSEARCH_BIN: ${SNAP_CURRENT}/usr/share/opensearch/bin
+  OPENSEARCH_JAVA_HOME: ${SNAP_CURRENT}/usr/share/opensearch/jdk
+
+  OPENSEARCH_HOME: ${SNAP_DATA_CURRENT}/usr/share/opensearch
   OPENSEARCH_LIB: ${OPENSEARCH_HOME}/lib
   OPENSEARCH_PLUGINS: ${OPENSEARCH_HOME}/plugins
   OPENSEARCH_MODULES: ${OPENSEARCH_HOME}/modules
 
-  OPENSEARCH_PATH_CONF: ${SNAP_DATA}/etc/opensearch
-  OPENSEARCH_PATH_CERTS: ${SNAP_DATA}/etc/opensearch/certificates
+  OPENSEARCH_PATH_CONF: ${SNAP_DATA_CURRENT}/etc/opensearch
+  OPENSEARCH_PATH_CERTS: ${SNAP_DATA_CURRENT}/etc/opensearch/certificates
 
   OPENSEARCH_VARLIB: ${SNAP_COMMON}/var/lib/opensearch
   OPENSEARCH_TMPDIR: ${SNAP_COMMON}/usr/share/tmp
@@ -78,8 +76,6 @@ apps:
       - system-observe
       - sys-fs-cgroup-service
     environment:
-      OPS_ROOT: ${SNAP}/opt/opensearch
-      OPENSEARCH_PATH_CERTS: ${OPENSEARCH_PATH_CONF}/certificates
       LD_LIBRARY_PATH: "${LD_LIBRARY_PATH}:${KNN_LIB_DIR}"
 
   security-init:
@@ -88,13 +84,10 @@ apps:
       - network
       - network-bind
     environment:
-      OPS_ROOT: ${SNAP}/opt/opensearch
       JAVA_OPTS: ""
 
   setup:
     command: opt/opensearch/setup.sh
-    environment:
-      OPS_ROOT: ${SNAP}/opt/opensearch
 
   plugin-add:
     command: opt/opensearch/plugins/add.sh
@@ -116,16 +109,12 @@ apps:
     plugs:
       - network
       - network-bind
-    environment:
-      OPENSEARCH_PATH_CERTS: ${OPENSEARCH_PATH_CONF}/certificates
 
   test-security-index-created:
     command: opt/opensearch/tests/test-security-index-created.sh
     plugs:
       - network
       - network-bind
-    environment:
-      OPENSEARCH_PATH_CERTS: ${OPENSEARCH_PATH_CONF}/certificates
 
 parts:
   dependencies:
@@ -175,23 +164,23 @@ parts:
         mkdir -p "${CRAFT_PART_INSTALL}/etc/opensearch/"
         mv "${CRAFT_PART_INSTALL}"/config/* "${CRAFT_PART_INSTALL}/etc/opensearch/"
 
-        declare -a dirs=(bin jdk lib modules plugins performance-analyzer-rca)
-        for dir in "${dirs[@]}"; do
-            target_dir="${CRAFT_PART_INSTALL}/usr/share/opensearch/${dir}"
-            mv "${CRAFT_PART_INSTALL}/${dir}" "${target_dir}"
+        declare -a resources=(
+            bin jdk lib modules plugins performance-analyzer-rca manifest.yml NOTICE.txt LICENSE.txt README.md
+        )
+        for res in "${resources[@]}"; do
+            mv "${CRAFT_PART_INSTALL}/${res}" "${CRAFT_PART_INSTALL}/usr/share/opensearch/"
         done
-        chmod -R 755 "${CRAFT_PART_INSTALL}"/usr/share/opensearch/bin "${CRAFT_PART_INSTALL}"/usr/share/opensearch/jdk
+        chmod -R 755 "${CRAFT_PART_INSTALL}/usr/share/opensearch/bin" "${CRAFT_PART_INSTALL}/usr/share/opensearch/jdk"
 
         # It is important to correct the user permissions for the opensearch.keystore file, after the script is executed.
         # Given we know which user is going to be used for the daemon, we can set this correction in the keystore script.
-        # TODO: we should perhaps NOT alter the source script - but 
-        echo 'chown snap_daemon:root /var/snap/opensearch/current/etc/opensearch/opensearch.keystore || true' >> "${CRAFT_PART_INSTALL}"/usr/share/opensearch/bin/opensearch-keystore
+        # TODO: we should perhaps NOT alter the source script - but until we find a better alternative UX wise we keep it
+        echo 'chown snap_daemon:root /var/snap/opensearch/current/etc/opensearch/opensearch.keystore' >> "${CRAFT_PART_INSTALL}"/usr/share/opensearch/bin/opensearch-keystore
 
         # Final clean-up
         rm "${archive}"
       
-        # TODO do not delete these
-        declare -a resources=(LICENSE.txt manifest.yml logs NOTICE.txt opensearch-tar-install.sh README.md config)
+        declare -a resources=(logs opensearch-tar-install.sh config)
         for res in "${resources[@]}"; do
             rm -rf "${CRAFT_PART_INSTALL}/${res}"
         done

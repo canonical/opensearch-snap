@@ -151,10 +151,10 @@ jobs:
         run: |
           sudo -E "${OPENSEARCH_BIN}"/opensearch-plugin install --batch repository-s3
 
-          echo "TEST" | sudo tee -a /var/snap/opensearch/current/testkey
+          echo "TEST" | sudo tee -a testkey
 
-          sudo -E "${OPENSEARCH_BIN}"/opensearch-keystore add-file s3.client.default.access_key /var/snap/opensearch/current/testkey
-          sudo -E "${OPENSEARCH_BIN}"/opensearch-keystore add-file s3.client.default.secret_key /var/snap/opensearch/current/testkey
+          sudo -E "${OPENSEARCH_BIN}"/opensearch-keystore add-file s3.client.default.access_key ${PWD}/testkey
+          sudo -E "${OPENSEARCH_BIN}"/opensearch-keystore add-file s3.client.default.secret_key ${PWD}/testkey
 
           sudo snap restart opensearch
           sleep 20s

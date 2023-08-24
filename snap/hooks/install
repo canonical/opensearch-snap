@@ -18,9 +18,9 @@ function create_file_structure () {
     done
 
     "${SNAP}"/usr/bin/setpriv \
-            --clear-groups \
-            --reuid snap_daemon \
-            --regid snap_daemon -- find "${OPENSEARCH_PATH_CONF}" -type f -exec chmod 660 {} \;
+        --clear-groups \
+        --reuid snap_daemon \
+        --regid snap_daemon -- find "${OPENSEARCH_PATH_CONF}" -type f -exec chmod 660 {} \;
 
     declare -a common=(modules plugins lib)
     for dir in "${common[@]}"; do
@@ -34,7 +34,6 @@ function create_file_structure () {
 
 function set_base_config_props () {
     set_yaml_prop "${OPENSEARCH_PATH_CONF}/opensearch.yml" "path.data" "${OPENSEARCH_VARLIB}"
-    set_yaml_prop "${OPENSEARCH_PATH_CONF}/opensearch.yml" "node.pidfile" "${OPENSEARCH_PATH_CONF}"/pidfile
     set_yaml_prop "${OPENSEARCH_PATH_CONF}/opensearch.yml" "path.logs" "${OPENSEARCH_VARLOG}"
     set_yaml_prop "${OPENSEARCH_PATH_CONF}/opensearch.yml" "path.home" "${OPENSEARCH_HOME}"
 
