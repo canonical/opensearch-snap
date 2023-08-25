@@ -156,7 +156,7 @@ jobs:
           sudo -E "${OPENSEARCH_BIN}"/opensearch-keystore add-file s3.client.default.access_key ${PWD}/testkey
           sudo -E "${OPENSEARCH_BIN}"/opensearch-keystore add-file s3.client.default.secret_key ${PWD}/testkey
 
-          sudo snap restart opensearch
+          sudo snap restart opensearch.daemon
           sleep 20s
 
           sudo cp /var/snap/opensearch/current/etc/opensearch/certificates/node-cm0.pem ./
