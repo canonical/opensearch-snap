@@ -21,10 +21,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install required dependencies
-        run: |
-          sudo snap install yq
-
       - name: Upgrade linux deps
         run: |
           sudo apt-get update
@@ -37,6 +33,11 @@ jobs:
             | xargs sudo apt-get install -y
           
           sudo apt-get autoremove -y
+
+      - name: Install required dependencies
+        run: |
+          sudo snap install yq
+          sudo apt install -y python3-yaml tox python3-pip
 
       - id: build-snap
         name: Build snap
@@ -62,80 +63,42 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install required dependencies
+        run: |
+          sudo snap install yq
+          sudo apt install -y python3-yaml tox python3-pip
+
       - name: Download snap file
         uses: actions/download-artifact@v3
         with:
           name: opensearch_snap_amd64
           path: .
 
-      - name: Install snap file
-        run: |
-          version="$(cat snap/snapcraft.yaml | yq .version)"
-          
-          sudo snap remove --purge opensearch
-          sudo snap install opensearch_${version}_amd64.snap --dangerous --jailmode
-
-      - name: Setup the required system configs
-        run: |
-          sudo sysctl -w vm.swappiness=0
-          sudo sysctl -w vm.max_map_count=262144
-          sudo sysctl -w net.ipv4.tcp_retries2=5
-
-      - name: Connect required interfaces
-        run: |
-          sudo snap connect opensearch:log-observe
-          sudo snap connect opensearch:mount-observe
-          sudo snap connect opensearch:process-control
-          sudo snap connect opensearch:system-observe
-          sudo snap connect opensearch:sys-fs-cgroup-service
-
-      - name: Setup and Start OpenSearch
-        run: |
-          # create the certificates
-          sudo snap run opensearch.setup \
-              --node-name cm0 \
-              --node-roles cluster_manager,data \
-              --tls-priv-key-root-pass root1234 \
-              --tls-priv-key-admin-pass admin1234 \
-              --tls-priv-key-node-pass node1234 \
-              --tls-init-setup yes                 # this creates the root and admin certs as well.
-
-          # start opensearch
-          sudo snap start opensearch.daemon
-
-          # wait a bit for it to fully initialize
-          sleep 15s
-
-          # create the security index
-          sudo snap run opensearch.security-init --tls-priv-key-admin-pass=admin1234
-
-      - name: Setup tmate session
-        if: ${{ failure() }}
-        uses: mxschmitt/action-tmate@v3
+      - name: Setup snap file
+        run: tox -e snap-setup -- -f {tox_root}/snap/snapcraft.yaml
 
       - name: Ensure the cluster is reachable and node created
-        run: |
-          sudo snap install yq
-          
-          sudo cp /var/snap/opensearch/current/config/certificates/node-cm0.pem ./
-          cert=./node-cm0.pem
-          
-          # Check node name
-          cluster_resp=$(curl --cacert ${cert} -XGET https://localhost:9200 -u 'admin:admin')
-          echo -e "Cluster Response: \n ${cluster_resp}"
-          node_name=$(echo "${cluster_resp}" | yq -r .name)
-          if [ "${node_name}" != "cm0" ]; then
-              exit 1
-          fi
+        run: tox -e check-snap-install
 
-          # Check cluster health
-          health_resp=$(curl --cacert "${cert}" -XGET https://localhost:9200/_cluster/health -u 'admin:admin')
-          echo -e "Cluster Health Response: \n ${health_resp}"
-          cluster_status=$(echo "${health_resp}" | yq -r .status)
-          
-          # TODO: once this https://github.com/opensearch-project/OpenSearch/issues/8862 is fixed
-          # replace the following condition by "${cluster_status}" != "green"  
-          if [ "${cluster_status}" == "red" ]; then
-              curl --cacert ${cert} -XGET https://localhost:9200/_cat/shards -u 'admin:admin'
-              exit 1
-          fi
+      - name: Install backup plugin and configure it
+        env:
+          OPENSEARCH_JAVA_HOME: /snap/opensearch/current/usr/share/opensearch/jdk
+          OPENSEARCH_BIN: /snap/opensearch/current/usr/share/opensearch/bin
+          OPENSEARCH_PATH_CONF: /var/snap/opensearch/current/etc/opensearch
+          OPENSEARCH_HOME: /var/snap/opensearch/current/usr/share/opensearch
+          OPENSEARCH_LIB: /var/snap/opensearch/current/usr/share/opensearch/lib
+          OPENSEARCH_PATH_CERTS: /var/snap/opensearch/current/etc/opensearch/certificates
+        run: tox -e install-backup
+
+      - name: Upgrade snap
+        run: tox -e upgrade-to-local-snap -- -f {tox_root}/snap/snapcraft.yaml -c x2
+
+      - name: Remove backup plugin
+        env:
+          OPENSEARCH_JAVA_HOME: /snap/opensearch/current/usr/share/opensearch/jdk
+          OPENSEARCH_BIN: /snap/opensearch/current/usr/share/opensearch/bin
+          OPENSEARCH_PATH_CONF: /var/snap/opensearch/current/etc/opensearch
+          OPENSEARCH_HOME: /var/snap/opensearch/current/usr/share/opensearch
+          OPENSEARCH_LIB: /var/snap/opensearch/current/usr/share/opensearch/lib
+          OPENSEARCH_PATH_CERTS: /var/snap/opensearch/current/etc/opensearch/certificates
+        run: tox -e remove-backup
