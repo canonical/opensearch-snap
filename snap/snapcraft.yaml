@@ -139,6 +139,7 @@ parts:
       - libcrypt1
       - libexpat1
       - zlib1g
+      - python3-yaml
 
   wrapper-scripts:
     plugin: nil

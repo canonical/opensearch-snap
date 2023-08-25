@@ -21,10 +21,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install required dependencies
-        run: |
-          sudo snap install yq
-
       - name: Upgrade linux deps
         run: |
           sudo apt-get update
@@ -37,6 +33,11 @@ jobs:
             | xargs sudo apt-get install -y
           
           sudo apt-get autoremove -y
+
+      - name: Install required dependencies
+        run: |
+          sudo snap install yq
+          sudo apt install -y python3-yaml tox python3-pip
 
       - id: build-snap
         name: Build snap
