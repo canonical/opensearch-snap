@@ -72,10 +72,6 @@ jobs:
       - name: Setup snap file
         run: tox -e snap-setup -f {tox_root}/snap/snapcraft.yaml
 
-      - name: Setup tmate session
-        if: ${{ failure() }}
-        uses: mxschmitt/action-tmate@v3
-
       - name: Ensure the cluster is reachable and node created
         run: tox -e check-snap-install
 
