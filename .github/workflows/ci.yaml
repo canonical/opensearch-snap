@@ -75,7 +75,7 @@ jobs:
           path: .
 
       - name: Setup snap file
-        run: tox -e snap-setup -f {tox_root}/snap/snapcraft.yaml
+        run: tox -e snap-setup -- -f {tox_root}/snap/snapcraft.yaml
 
       - name: Ensure the cluster is reachable and node created
         run: tox -e check-snap-install
