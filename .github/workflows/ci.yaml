@@ -63,6 +63,11 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install required dependencies
+        run: |
+          sudo snap install yq
+          sudo apt install -y python3-yaml tox python3-pip
+
       - name: Download snap file
         uses: actions/download-artifact@v3
         with:
