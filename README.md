@@ -97,6 +97,26 @@ curl --cacert node-cm0.pem -XGET https://admin:admin@localhost:9200/_cluster/hea
 }
 ```
 
+### Run the CI pipeline with tox:
+To run the same test as the CI pipeline, do the following:
+1) Clean the environment:
+```
+rm -rf .tox/
+sudo snap remove --purge opensearch
+```
+2) Build the snap:
+```
+sudo snapcraft pack [optionally: --debug -v]
+```
+3) Run the tox commands:
+```
+tox -e snap-setup -- -f {tox_root}/snap/snapcraft.yaml
+tox -e check-snap-install
+tox -e install-backup
+tox -e upgrade-to-local-snap -- -f {tox_root}/snap/snapcraft.yaml -c x2
+tox -e remove-backup
+```
+
 ## Running OpenSearch CLI commands not exposed by the snap:
 In some cases, users may need to run cli commands that are not exposed by the OpenSearch snap. To achieve this, those commands must be run as the `snap_daemon` user with the required environment variables passed: 
 

@@ -1,10 +1,10 @@
 #!/usr/bin/bash
+# Copyright 2023 Canonical Ltd.
+# See LICENSE file for licensing details.
 
 set -eux
 
-run_python_yaml () {
-    python3 -c "import yaml; y=open('$1').read(); print(yaml.safe_load(y)['$2'])"
-}
+source "$(dirname $(dirname $0))"/utils/process_yaml.sh
 
 sudo cp "${OPENSEARCH_PATH_CERTS}"/node-cm0.pem ./
 cert=./node-cm0.pem

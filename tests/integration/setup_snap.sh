@@ -4,17 +4,23 @@
 
 set -eux
 
-usage ()  { echo "Call it with setup-snap.sh -f ./snap/snapcraft.yaml]"; exit 1; }
-[ $# -eq 0 ] && usage
+usage ()  { echo "Usage: setup_snap.sh -f ./snap/snapcraft.yaml]"; exit 1; }
+[ $# -lt 2 ] && usage
 
-while getopts ":v:" option; do
-    case $option in
-        f)
-        version="$(python3 -c \"import yaml; y=open('$OPTARG').read(); print(yaml.safe_load(y)['version'])\")"
+source "$(dirname $(dirname $0))"/utils/process_yaml.sh
+
+while true; do
+    case "${1:-}" in
+        -f)
+        version=$(run_python_yaml $2 version)
+        shift 2
         ;;
-        *)
+        -h)
         usage
         exit 1
+        ;;
+        *)
+        break
         ;;
     esac
 done
