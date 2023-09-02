@@ -58,7 +58,7 @@ set_defaults
 # Check cluster health
 endpoint="https://localhost:9200/_cluster/health"
 
-health_resp=$(curl -k -XGET "${endpoint}" -u "admin:${admin_auth_password}")
+health_resp=$(curl -sk -XGET "${endpoint}" -u "admin:${admin_auth_password}")
 echo -e "Cluster Health Response: \n ${health_resp}"
 
 cluster_status=$(echo "${health_resp}" | yq -r .status)
