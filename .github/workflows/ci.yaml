@@ -28,7 +28,6 @@ jobs:
       - name: Upgrade linux deps
         run: |
           sudo apt-get update
-          sudo apt-get upgrade -y
           
           # install security updates
           sudo apt-get -s dist-upgrade \
@@ -40,6 +39,8 @@ jobs:
           sudo apt-get autoremove -y
           sudo apt-get clean -y
           
+          sudo snap info snapd
+          sudo snap refresh snapd
           sudo snap info snapd
 
       - id: build-snap
