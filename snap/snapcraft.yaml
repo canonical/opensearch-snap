@@ -172,15 +172,3 @@ parts:
         tar -xzvf "${archive}" -C "${CRAFT_PART_INSTALL}/" --strip-components=1
       
         rm "${archive}"
-      
-        
-      
-#layout:
-#  /etc/opensearch/:
-#    symlink: ${SNAP_DATA}/config
-#  /var/lib/opensearch/:
-#    symlink: ${SNAP_DATA}/data
-#  /usr/share/opensearch/:
-#  /usr/share/opensearch/jdk:
-#  /usr/share/opensearch/lib:
-#  /usr/share/opensearch/lib:
