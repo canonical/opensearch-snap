@@ -37,6 +37,8 @@ jobs:
             | xargs sudo apt-get install -y
           
           sudo apt-get autoremove -y
+          sudo apt-get clean -y
+          sudo snap refresh snapd
 
       - id: build-snap
         name: Build snap
@@ -61,6 +63,10 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+
+      - name: Upgrade snapd
+        run: |
+          sudo snap refresh snapd
 
       - name: Download snap file
         uses: actions/download-artifact@v3
@@ -88,6 +94,7 @@ jobs:
           sudo snap connect opensearch:process-control
           sudo snap connect opensearch:system-observe
           sudo snap connect opensearch:sys-fs-cgroup-service
+          sudo snap connect opensearch:shmem-perf-analyzer
 
       - name: Setup and Start OpenSearch
         run: |

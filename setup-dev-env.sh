@@ -7,6 +7,7 @@ function connect_interfaces () {
     sudo snap connect opensearch:process-control
     sudo snap connect opensearch:system-observe
     sudo snap connect opensearch:sys-fs-cgroup-service
+    sudo snap connect opensearch:shmem-perf-analyzer
 }
 
 

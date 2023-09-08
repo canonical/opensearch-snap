@@ -9,13 +9,6 @@ source "${OPS_ROOT}"/helpers/set-conf.sh
 
 
 function create_file_structure () {
-    add_folder "${SNAP_COMMON}/backups" 774
-    ls -la "${SNAP_COMMON}"
-    ls -la "${SNAP_COMMON}/backups"
-    dir_copy_if_not_exists "config" "${SNAP_COMMON}/backups" 774
-
-    # -------------------------------
-
     # Opensearch install folders and set config
     dir_copy_if_not_exists "bin" "${SNAP_DATA}" 770
     dir_copy_if_not_exists "jdk" "${SNAP_DATA}" 770
@@ -33,6 +26,8 @@ function create_file_structure () {
     add_folder "${SNAP_COMMON}/data" 770
     add_folder "${SNAP_COMMON}/logs" 774
     add_folder "${SNAP_COMMON}/tmp" 770
+
+    add_folder "/dev/shm/performanceanalyzer" 770
 }
 
 
