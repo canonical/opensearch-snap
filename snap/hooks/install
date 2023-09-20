@@ -29,6 +29,8 @@ function create_file_structure () {
 
     add_folder "${OPENSEARCH_HOME}/extensions" 770
     add_file "${OPENSEARCH_HOME}/extensions/extensions.yml" 770
+    add_file "${OPENSEARCH_PATH_CONF}/unicast_hosts.txt" 770
+    add_folder "/dev/shm/performanceanalyzer" 770
 }
 
 

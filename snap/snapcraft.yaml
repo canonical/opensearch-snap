@@ -23,6 +23,9 @@ system-usernames:
 
 
 plugs:
+  shmem-perf-analyzer:
+    interface: shared-memory
+    private: true
   sys-fs-cgroup-service:
     interface: system-files
     read:
@@ -33,6 +36,14 @@ hooks:
     plugs:
       - network
       - network-bind
+      - shmem-perf-analyzer
+    environment:
+      OPS_ROOT: ${SNAP}/ops
+
+  configure:
+    environment:
+      OPS_ROOT: ${SNAP}/ops
+
 
 environment:
   SNAP_CURRENT: /snap/opensearch/current
@@ -73,6 +84,7 @@ apps:
       - log-observe
       - mount-observe
       - process-control
+      - shmem-perf-analyzer
       - system-observe
       - sys-fs-cgroup-service
     environment:
