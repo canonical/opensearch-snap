@@ -4,15 +4,20 @@
 
 set -eux
 
-usage ()  { echo "Usage: setup_snap.sh -f ./snap/snapcraft.yaml]"; exit 1; }
+usage ()  { echo "Usage: setup_snap.sh [-f ./snap/snapcraft.yaml] or [-s <path to snap file>]"; exit 1; }
 [ $# -lt 2 ] && usage
 
 source "$(dirname $(dirname $0))"/utils/process_yaml.sh
 
+version=
 while true; do
     case "${1:-}" in
         -f)
         version=$(run_python_yaml $2 version)
+        shift 2
+        ;;
+        -s)
+        snapfile=$2
         shift 2
         ;;
         -h)
@@ -25,8 +30,12 @@ while true; do
     esac
 done
 
-sudo snap remove --purge opensearch
-sudo snap install opensearch_${version}_amd64.snap --dangerous --jailmode
+sudo snap remove --purge opensearch || true
+if [ -z $version ]; then
+        sudo snap install ${snapfile} --dangerous --jailmode
+else
+	sudo snap install opensearch_${version}_amd64.snap --dangerous --jailmode
+fi
 
 sudo sysctl -w vm.swappiness=0
 sudo sysctl -w vm.max_map_count=262144
@@ -37,6 +46,7 @@ sudo snap connect opensearch:mount-observe
 sudo snap connect opensearch:process-control
 sudo snap connect opensearch:system-observe
 sudo snap connect opensearch:sys-fs-cgroup-service
+sudo snap connect opensearch:shmem-perf-analyzer
 
 sudo snap run opensearch.setup \
     --node-name cm0 \
