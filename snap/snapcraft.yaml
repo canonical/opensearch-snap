@@ -38,11 +38,11 @@ hooks:
       - network-bind
       - shmem-perf-analyzer
     environment:
-      OPS_ROOT: ${SNAP}/ops
+      OPS_ROOT: ${SNAP_CURRENT}/opt/opensearch
 
   configure:
     environment:
-      OPS_ROOT: ${SNAP}/ops
+      OPS_ROOT: ${SNAP_CURRENT}/opt/opensearch
 
 
 environment:

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -eu
+set -eux
 
 
 source "${OPS_ROOT}"/helpers/snap-logger.sh "hook-install"
@@ -9,28 +9,29 @@ source "${OPS_ROOT}"/helpers/set-conf.sh
 
 
 function create_file_structure () {
-    file_copy "etc/opensearch/." "${OPENSEARCH_PATH_CONF}" 770
-    add_file "${OPENSEARCH_PATH_CONF}/unicast_hosts.txt" 770
+
+    # want to use the * here, so not calling dir_copy_if_not_exists
+    # Doing it before OPENSEARCH_PATH_CERTS is created, as it is set as "snap_daemon" user
+    mkdir -p "${OPENSEARCH_PATH_CONF}/"
+    cp -r "${SNAP}/etc/opensearch/"* "${OPENSEARCH_PATH_CONF}/"
+    chmod -R 770 "${OPENSEARCH_PATH_CONF}/"
+    find "${OPENSEARCH_PATH_CONF}" -type f -exec chmod 660 {} \;
 
     declare -a folders=("${OPENSEARCH_HOME}" "${OPENSEARCH_VARLIB}" "${OPENSEARCH_VARLOG}" "${OPENSEARCH_TMPDIR}" "${OPENSEARCH_PATH_CERTS}")
     for f in "${folders[@]}"; do
         add_folder "${f}" 770
     done
 
-    "${SNAP}"/usr/bin/setpriv \
-        --clear-groups \
-        --reuid snap_daemon \
-        --regid snap_daemon -- find "${OPENSEARCH_PATH_CONF}" -type f -exec chmod 660 {} \;
-
     declare -a common=(modules plugins lib)
     for dir in "${common[@]}"; do
-        file_copy "usr/share/opensearch/${dir}/." "${OPENSEARCH_HOME}/${dir}" 770
+        add_folder "${SNAP_DATA}/usr/share/opensearch/${dir}" 770
+        cp -r "${SNAP}/usr/share/opensearch/${dir}/"* "${SNAP_DATA}/usr/share/opensearch/${dir}/"
     done
 
     add_folder "${OPENSEARCH_HOME}/extensions" 770
-    add_file "${OPENSEARCH_HOME}/extensions/extensions.yml" 770
-    add_file "${OPENSEARCH_PATH_CONF}/unicast_hosts.txt" 770
-    add_folder "/dev/shm/performanceanalyzer" 770
+    add_file "${OPENSEARCH_HOME}/extensions/extensions.yml" 660
+    add_file "${OPENSEARCH_PATH_CONF}/unicast_hosts.txt" 660
+#    add_folder "/dev/shm/performanceanalyzer" 770
 }
 
 
@@ -45,3 +46,8 @@ function set_base_config_props () {
 
 create_file_structure
 set_base_config_props
+
+chown -R snap_daemon "${SNAP_DATA}/"*
+chgrp root "${SNAP_DATA}/"*
+chown -R snap_daemon "${SNAP_COMMON}/"*
+chgrp root "${SNAP_COMMON}/"*
