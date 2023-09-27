@@ -9,36 +9,43 @@ source "${OPS_ROOT}"/helpers/set-conf.sh
 
 
 function create_file_structure () {
-    # Opensearch install folders and set config
-    dir_copy_if_not_exists "bin" "${SNAP_DATA}" 770
-    dir_copy_if_not_exists "jdk" "${SNAP_DATA}" 770
-    dir_copy_if_not_exists "lib" "${SNAP_DATA}" 550
-    dir_copy_if_not_exists "modules" "${SNAP_DATA}" 550
-    dir_copy_if_not_exists "plugins" "${SNAP_DATA}" 770
 
-    dir_copy_if_not_exists "config" "${SNAP_DATA}" 770
-    add_folder "${SNAP_DATA}/config/certificates" 770
-    add_file "${SNAP_DATA}/config/unicast_hosts.txt" 770
+    # want to use the * here, so not calling dir_copy_if_not_exists
+    # Doing it before OPENSEARCH_PATH_CERTS is created, as it is set as "snap_daemon" user
+    mkdir -p "${OPENSEARCH_PATH_CONF}/"
+    copy_files_between_folder "${SNAP}/etc/opensearch/" "${OPENSEARCH_PATH_CONF}/"
 
-    add_folder "${SNAP_DATA}/extensions" 770
-    add_file "${SNAP_DATA}/extensions/extensions.yml" 770
+    declare -a folders=("${OPENSEARCH_HOME}" "${OPENSEARCH_VARLIB}" "${OPENSEARCH_VARLOG}" "${OPENSEARCH_TMPDIR}" "${OPENSEARCH_PATH_CERTS}")
+    for f in "${folders[@]}"; do
+        add_folder "${f}" 770
+    done
 
-    add_folder "${SNAP_COMMON}/data" 770
-    add_folder "${SNAP_COMMON}/logs" 774
-    add_folder "${SNAP_COMMON}/tmp" 770
+    declare -a common=(modules plugins lib)
+    for dir in "${common[@]}"; do
+        add_folder "${SNAP_DATA}/usr/share/opensearch/${dir}" 770
+        cp -r "${SNAP}/usr/share/opensearch/${dir}/"* "${SNAP_DATA}/usr/share/opensearch/${dir}/"
+    done
 
+    add_folder "${OPENSEARCH_HOME}/extensions" 770
+    add_file "${OPENSEARCH_HOME}/extensions/extensions.yml" 660
+    add_file "${OPENSEARCH_PATH_CONF}/unicast_hosts.txt" 660
     add_folder "/dev/shm/performanceanalyzer" 770
 }
 
 
 function set_base_config_props () {
-    # Change conf to set log and data paths for both opensearch.yaml and jvm.options
-    set_yaml_prop "${SNAP_DATA}/config/opensearch.yml" "path.data" "${SNAP_COMMON}/data"
-    set_yaml_prop "${SNAP_DATA}/config/opensearch.yml" "path.logs" "${SNAP_COMMON}/logs"
+    set_yaml_prop "${OPENSEARCH_PATH_CONF}/opensearch.yml" "path.data" "${OPENSEARCH_VARLIB}"
+    set_yaml_prop "${OPENSEARCH_PATH_CONF}/opensearch.yml" "path.logs" "${OPENSEARCH_VARLOG}"
+    set_yaml_prop "${OPENSEARCH_PATH_CONF}/opensearch.yml" "path.home" "${OPENSEARCH_HOME}"
 
-    replace_in_file "${SNAP_DATA}/config/jvm.options" "=logs/" "=${SNAP_COMMON}/logs/"
+    replace_in_file "${OPENSEARCH_PATH_CONF}/jvm.options" "=logs/" "=${OPENSEARCH_VARLOG}/"
 }
 
 
 create_file_structure
 set_base_config_props
+
+chown -R snap_daemon "${SNAP_DATA}/"*
+chgrp root "${SNAP_DATA}/"*
+chown -R snap_daemon "${SNAP_COMMON}/"*
+chgrp root "${SNAP_COMMON}/"*

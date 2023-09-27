@@ -38,21 +38,35 @@ hooks:
       - network-bind
       - shmem-perf-analyzer
     environment:
-      OPS_ROOT: ${SNAP}/ops
+      OPS_ROOT: ${SNAP_CURRENT}/opt/opensearch
 
   configure:
     environment:
-      OPS_ROOT: ${SNAP}/ops
+      OPS_ROOT: ${SNAP_CURRENT}/opt/opensearch
 
 
 environment:
+  SNAP_CURRENT: /snap/opensearch/current
+  SNAP_DATA_CURRENT: /var/snap/opensearch/current
+
   SNAP_LOG_DIR: ${SNAP_COMMON}/ops/snap/logs
 
-  OPENSEARCH_HOME: ${SNAP_DATA}
-  OPENSEARCH_JAVA_HOME: ${SNAP_DATA}/jdk
-  OPENSEARCH_PATH_CONF: ${SNAP_DATA}/config
-  OPENSEARCH_TMPDIR: ${SNAP_COMMON}/tmp
-  OPENSEARCH_PLUGINS: ${SNAP_DATA}/plugins
+  OPS_ROOT: ${SNAP_CURRENT}/opt/opensearch
+
+  OPENSEARCH_BIN: ${SNAP_CURRENT}/usr/share/opensearch/bin
+  OPENSEARCH_JAVA_HOME: ${SNAP_CURRENT}/usr/share/opensearch/jdk
+
+  OPENSEARCH_HOME: ${SNAP_DATA_CURRENT}/usr/share/opensearch
+  OPENSEARCH_LIB: ${OPENSEARCH_HOME}/lib
+  OPENSEARCH_PLUGINS: ${OPENSEARCH_HOME}/plugins
+  OPENSEARCH_MODULES: ${OPENSEARCH_HOME}/modules
+
+  OPENSEARCH_PATH_CONF: ${SNAP_DATA_CURRENT}/etc/opensearch
+  OPENSEARCH_PATH_CERTS: ${SNAP_DATA_CURRENT}/etc/opensearch/certificates
+
+  OPENSEARCH_VARLIB: ${SNAP_COMMON}/var/lib/opensearch
+  OPENSEARCH_TMPDIR: ${SNAP_COMMON}/usr/share/tmp
+  OPENSEARCH_VARLOG: ${SNAP_COMMON}/var/log/opensearch
 
   KNN_LIB_DIR: ${OPENSEARCH_PLUGINS}/opensearch-knn/lib
 
@@ -60,10 +74,10 @@ apps:
   daemon:
     daemon: simple
     install-mode: disable
-    command: ops/start.sh
+    command: opt/opensearch/start.sh
     restart-condition: always
     restart-delay: 20s
-    # reload-command: ops/start.sh
+    # reload-command: ${SNAP}/usr/share/ops/start.sh
     plugs:
       - network
       - network-bind
@@ -74,54 +88,42 @@ apps:
       - system-observe
       - sys-fs-cgroup-service
     environment:
-      OPS_ROOT: ${SNAP}/ops
-      OPENSEARCH_PATH_CERTS: ${OPENSEARCH_PATH_CONF}/certificates
       LD_LIBRARY_PATH: "${LD_LIBRARY_PATH}:${KNN_LIB_DIR}"
 
   security-init:
-    command: ops/security-init.sh
+    command: opt/opensearch/security-init.sh
     plugs:
       - network
       - network-bind
     environment:
-      OPS_ROOT: ${SNAP}/ops
-      OPENSEARCH_PATH_CERTS: ${OPENSEARCH_PATH_CONF}/certificates
       JAVA_OPTS: ""
 
   setup:
-    command: ops/setup.sh
-    environment:
-      OPS_ROOT: ${SNAP}/ops
-      OPENSEARCH_PATH_CERTS: ${OPENSEARCH_PATH_CONF}/certificates
-
-  set-conf-value:
-    command: ops/change-conf.sh
-    environment:
-      OPS_ROOT: ${SNAP}/ops
+    command: opt/opensearch/setup.sh
 
   plugin-add:
-    command: ops/plugins/add.sh
+    command: opt/opensearch/plugins/add.sh
 
   plugins-list:
-    command: ops/plugins/list.sh
+    command: opt/opensearch/plugins/list.sh
 
   plugins-remove:
-    command: ops/plugins/remove.sh
+    command: opt/opensearch/plugins/remove.sh
 
   test-cluster-health-green:
-    command: ops/tests/test-cluster-health-green.sh
+    command: opt/opensearch/tests/test-cluster-health-green.sh
     plugs:
       - network
       - network-bind
 
   test-node-up:
-    command: ops/tests/test-node-up.sh
+    command: opt/opensearch/tests/test-node-up.sh
     plugs:
       - network
       - network-bind
 
   test-security-index-created:
-    command: ops/tests/test-security-index-created.sh
+    command: opt/opensearch/tests/test-security-index-created.sh
     plugs:
       - network
       - network-bind
@@ -155,10 +157,8 @@ parts:
     source: ./scripts
     source-type: local
     override-build: |
-      target_dir="${CRAFT_PART_INSTALL}/ops"
-      
-      rm -rf "${target_dir}"
-      
+      target_dir="${CRAFT_PART_INSTALL}/opt/opensearch"
+      mkdir -p "${target_dir}"
       cp -r wrappers/. "${target_dir}"
       cp -r helpers/ "${target_dir}/helpers"
 
@@ -171,4 +171,28 @@ parts:
         curl -o "${archive}" "https://artifacts.opensearch.org/releases/bundle/opensearch/${version}/${archive}"
         tar -xzvf "${archive}" -C "${CRAFT_PART_INSTALL}/" --strip-components=1
       
+        mkdir -p "${CRAFT_PART_INSTALL}/usr/share/opensearch"
+
+        mkdir -p "${CRAFT_PART_INSTALL}/etc/opensearch/"
+        mv "${CRAFT_PART_INSTALL}"/config/* "${CRAFT_PART_INSTALL}/etc/opensearch/"
+
+        declare -a resources=(
+            bin jdk lib modules plugins performance-analyzer-rca manifest.yml NOTICE.txt LICENSE.txt README.md
+        )
+        for res in "${resources[@]}"; do
+            mv "${CRAFT_PART_INSTALL}/${res}" "${CRAFT_PART_INSTALL}/usr/share/opensearch/"
+        done
+        chmod -R 755 "${CRAFT_PART_INSTALL}/usr/share/opensearch/bin" "${CRAFT_PART_INSTALL}/usr/share/opensearch/jdk"
+
+        # It is important to correct the user permissions for the opensearch.keystore file, after the script is executed.
+        # Given we know which user is going to be used for the daemon, we can set this correction in the keystore script.
+        # TODO: we should perhaps NOT alter the source script - but until we find a better alternative UX wise we keep it
+        echo 'chown snap_daemon:root /var/snap/opensearch/current/etc/opensearch/opensearch.keystore' >> "${CRAFT_PART_INSTALL}"/usr/share/opensearch/bin/opensearch-keystore
+
+        # Final clean-up
         rm "${archive}"
+      
+        declare -a resources=(logs opensearch-tar-install.sh config)
+        for res in "${resources[@]}"; do
+            rm -rf "${CRAFT_PART_INSTALL}/${res}"
+        done

@@ -74,8 +74,8 @@ sudo snap run opensearch.test-security-index-created
 
 or:
 ```
-sudo cp /var/snap/opensearch/current/config/certificates/node-cm0.pem ./
-curl --cacert node-cm0.pem -XGET https://admin:admin@localhost:9200/_cluster/health
+sudo cp /var/snap/opensearch/current/etc/opensearch/certificates/node-cm0.pem ./
+curl --cacert node-cm0.pem -XGET https://admin:admin@localhost:9200/_cluster/health?pretty
 > {
   "cluster_name": "opensearch-cluster",
   "status": "green",
@@ -95,6 +95,19 @@ curl --cacert node-cm0.pem -XGET https://admin:admin@localhost:9200/_cluster/hea
   "task_max_waiting_in_queue_millis": 0,
   "active_shards_percent_as_number": 100
 }
+```
+
+## Running OpenSearch CLI commands not exposed by the snap:
+In some cases, users may need to run cli commands that are not exposed by the OpenSearch snap. To achieve this, those commands must be run as the `snap_daemon` user with the required environment variables passed: 
+
+```
+$ sudo -u snap_daemon \
+	    OPENSEARCH_JAVA_HOME=/snap/opensearch/current/usr/share/opensearch/jdk \
+	    OPENSEARCH_PATH_CONF=/var/snap/opensearch/current/etc/opensearch \
+	    OPENSEARCH_HOME=/var/snap/opensearch/current/usr/share/opensearch \
+	    OPENSEARCH_LIB=/var/snap/opensearch/current/usr/share/opensearch/lib \
+	    OPENSEARCH_PATH_CERTS=/var/snap/opensearch/current/etc/opensearch/certificates \
+	    /snap/opensearch/current/usr/share/opensearch/bin/<command> [options]
 ```
 
 ## License

@@ -43,12 +43,14 @@ function start_opensearch () {
     exit_if_missing_perm "sys-fs-cgroup-service"
     exit_if_missing_perm "system-observe"
 
+    warn_if_missing_perm "process-control"
+
     # start
     "${SNAP}"/usr/bin/setpriv \
         --clear-groups \
         --reuid snap_daemon \
         --regid snap_daemon -- \
-        "${OPENSEARCH_HOME}"/bin/opensearch
+        "${OPENSEARCH_BIN}"/opensearch
 }
 
 
