@@ -41,3 +41,9 @@ function file_copy () {
         set_access_restrictions "${2}"
     fi
 }
+
+function copy_files_between_folder () {
+    cp -r "$1"* "$2"
+    chmod -R 770 "$2"
+    find "$2" -type f -exec chmod 660 {} \;
+}

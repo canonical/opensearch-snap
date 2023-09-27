@@ -13,9 +13,7 @@ function create_file_structure () {
     # want to use the * here, so not calling dir_copy_if_not_exists
     # Doing it before OPENSEARCH_PATH_CERTS is created, as it is set as "snap_daemon" user
     mkdir -p "${OPENSEARCH_PATH_CONF}/"
-    cp -r "${SNAP}/etc/opensearch/"* "${OPENSEARCH_PATH_CONF}/"
-    chmod -R 770 "${OPENSEARCH_PATH_CONF}/"
-    find "${OPENSEARCH_PATH_CONF}" -type f -exec chmod 660 {} \;
+    copy_files_between_folder "${SNAP}/etc/opensearch/" "${OPENSEARCH_PATH_CONF}/"
 
     declare -a folders=("${OPENSEARCH_HOME}" "${OPENSEARCH_VARLIB}" "${OPENSEARCH_VARLOG}" "${OPENSEARCH_TMPDIR}" "${OPENSEARCH_PATH_CERTS}")
     for f in "${folders[@]}"; do
@@ -31,7 +29,7 @@ function create_file_structure () {
     add_folder "${OPENSEARCH_HOME}/extensions" 770
     add_file "${OPENSEARCH_HOME}/extensions/extensions.yml" 660
     add_file "${OPENSEARCH_PATH_CONF}/unicast_hosts.txt" 660
-#    add_folder "/dev/shm/performanceanalyzer" 770
+    add_folder "/dev/shm/performanceanalyzer" 770
 }
 
 
