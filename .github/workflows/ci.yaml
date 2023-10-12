@@ -149,7 +149,7 @@ jobs:
 
       - name: Install backup plugin and configure it
         env:
-          OPENSEARCH_JAVA_HOME: /snap/opensearch/current/usr/share/opensearch/jdk
+          OPENSEARCH_JAVA_HOME: /snap/opensearch/current/usr/lib/jvm/java-17-openjdk-amd64
           OPENSEARCH_BIN: /snap/opensearch/current/usr/share/opensearch/bin
           OPENSEARCH_PATH_CONF: /var/snap/opensearch/current/etc/opensearch
           OPENSEARCH_HOME: /var/snap/opensearch/current/usr/share/opensearch
@@ -189,7 +189,7 @@ jobs:
 
       - name: Remove backup plugin
         env:
-          OPENSEARCH_JAVA_HOME: /snap/opensearch/current/usr/share/opensearch/jdk
+          OPENSEARCH_JAVA_HOME: /snap/opensearch/current/usr/lib/jvm/java-17-openjdk-amd64
           OPENSEARCH_BIN: /snap/opensearch/current/usr/share/opensearch/bin
           OPENSEARCH_PATH_CONF: /var/snap/opensearch/current/etc/opensearch
           OPENSEARCH_HOME: /var/snap/opensearch/current/usr/share/opensearch
