@@ -116,10 +116,6 @@ jobs:
           # create the security index
           sudo snap run opensearch.security-init --tls-priv-key-admin-pass=admin1234
 
-      - name: Setup tmate session
-        if: ${{ failure() }}
-        uses: mxschmitt/action-tmate@v3
-
       - name: Ensure the cluster is reachable and node created
         run: |
           sudo snap install yq
@@ -227,3 +223,7 @@ jobs:
               curl --cacert ${cert} -XGET https://localhost:9200/_cat/shards -u 'admin:admin'
               exit 1
           fi
+
+      - name: Setup tmate session
+        if: ${{ failure() }}
+        uses: mxschmitt/action-tmate@v3
