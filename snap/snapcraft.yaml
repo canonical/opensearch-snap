@@ -48,13 +48,14 @@ hooks:
 environment:
   SNAP_CURRENT: /snap/opensearch/current
   SNAP_DATA_CURRENT: /var/snap/opensearch/current
+  JAVA_HOME: ${SNAP}/usr/lib/jvm/java-17-openjdk-amd64
 
   SNAP_LOG_DIR: ${SNAP_COMMON}/ops/snap/logs
 
   OPS_ROOT: ${SNAP_CURRENT}/opt/opensearch
 
   OPENSEARCH_BIN: ${SNAP_CURRENT}/usr/share/opensearch/bin
-  OPENSEARCH_JAVA_HOME: ${SNAP}/usr/lib/jvm/java-17-openjdk-amd64
+  OPENSEARCH_JAVA_HOME: ${JAVA_HOME}
 
   OPENSEARCH_HOME: ${SNAP_DATA_CURRENT}/usr/share/opensearch
   OPENSEARCH_LIB: ${OPENSEARCH_HOME}/lib
@@ -151,6 +152,7 @@ parts:
       - libcrypt1
       - libexpat1
       - openjdk-17-jdk-headless
+      - ca-certificates-java
       - zlib1g
 
   wrapper-scripts:
@@ -166,8 +168,9 @@ parts:
   opensearch:
     plugin: nil
     override-build: |
-      # updating installing CA certs
-      apt-get install --reinstall ca-certificates-java      
+      # updating / installing CAs (jdk truststore)
+      apt-get update; apt-get upgrade -y; apt-get autoremove --purge -y; apt-get clean -y
+      update-ca-certificates -f
       
       version="$(craftctl get version)"
         series="${version%%.*}.x"
