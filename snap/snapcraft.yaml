@@ -166,7 +166,10 @@ parts:
   opensearch:
     plugin: nil
     override-build: |
-        version="$(craftctl get version)"
+      # updating installing CA certs
+      apt-get install --reinstall ca-certificates-java      
+      
+      version="$(craftctl get version)"
         series="${version%%.*}.x"
         patch="ubuntu0"
         release_date="20231004122318"
