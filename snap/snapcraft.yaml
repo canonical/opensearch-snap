@@ -166,16 +166,28 @@ parts:
 
   opensearch:
     plugin: nil
+    stage-packages:
+      - ca-certificates
+      - ca-certificates-java
+      - openjdk-17-jdk-headless
+      - ssl-cert
+      - openssl
     override-build: |
-      # updating / installing CAs (jdk truststore)
+      # update deps
       apt-get update; apt-get upgrade -y; apt-get autoremove --purge -y; apt-get clean -y
       update-ca-certificates -f
       
+      # setup trust store
+      trust_store="${CRAFT_PART_INSTALL}/etc/ssl/certs/java/"
+      mkdir -p "${trust_store}"
+      cp /etc/ssl/certs/java/cacerts "${trust_store}"
+      
+      # download opensearch tarball
       version="$(craftctl get version)"
       series="${version%%.*}.x"
       patch="ubuntu0"
       release_date="20231004122318"
-    
+
       archive="opensearch-${version}-${patch}-${release_date}-linux-x64.tar.gz"
       url="https://launchpad.net/opensearch-releases/${series}/${version}-${patch}/+download/${archive}"
       curl -L -o "${archive}" "${url}"
@@ -201,7 +213,7 @@ parts:
 
       # Final clean-up
       rm "${archive}"
-    
+
       declare -a resources=(logs opensearch-tar-install.sh config)
       for res in "${resources[@]}"; do
           rm -rf "${CRAFT_PART_INSTALL}/${res}"
