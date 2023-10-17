@@ -49,6 +49,7 @@ environment:
   SNAP_CURRENT: /snap/opensearch/current
   SNAP_DATA_CURRENT: /var/snap/opensearch/current
   JAVA_HOME: ${SNAP}/usr/lib/jvm/java-17-openjdk-amd64
+  PATH: ${JAVA_HOME}/jre/bin:$PATH
 
   SNAP_LOG_DIR: ${SNAP_COMMON}/ops/snap/logs
 
