@@ -1,7 +1,7 @@
 name: opensearch # you probably want to 'snapcraft register <name>'
 base: core22 # the base snap is the execution environment for this snap
 
-version: '2.9.0' # just for humans, typically '1.2+git' or '1.3.2'
+version: '2.10.0' # just for humans, typically '1.2+git' or '1.3.2'
 
 summary: 'OpenSearch: community-driven, Apache 2.0-licensed search and analytics suite.'
 description: |
@@ -48,13 +48,15 @@ hooks:
 environment:
   SNAP_CURRENT: /snap/opensearch/current
   SNAP_DATA_CURRENT: /var/snap/opensearch/current
+  JAVA_HOME: ${SNAP}/usr/lib/jvm/java-17-openjdk-amd64
+  PATH: ${JAVA_HOME}/jre/bin:$PATH
 
   SNAP_LOG_DIR: ${SNAP_COMMON}/ops/snap/logs
 
   OPS_ROOT: ${SNAP_CURRENT}/opt/opensearch
 
   OPENSEARCH_BIN: ${SNAP_CURRENT}/usr/share/opensearch/bin
-  OPENSEARCH_JAVA_HOME: ${SNAP_CURRENT}/usr/share/opensearch/jdk
+  OPENSEARCH_JAVA_HOME: ${JAVA_HOME}
 
   OPENSEARCH_HOME: ${SNAP_DATA_CURRENT}/usr/share/opensearch
   OPENSEARCH_LIB: ${OPENSEARCH_HOME}/lib
@@ -164,35 +166,56 @@ parts:
 
   opensearch:
     plugin: nil
+    build-packages:
+      - ca-certificates
+      - ca-certificates-java
+      - ssl-cert
+      - openssl
+    stage-packages:
+      - openjdk-17-jdk-headless
     override-build: |
-        version="$(craftctl get version)"
-        archive="opensearch-${version}-linux-x64.tar.gz"
+      # update deps
+      apt-get update; apt-get upgrade -y; apt-get autoremove --purge -y; apt-get clean -y
+      update-ca-certificates -f
       
-        curl -o "${archive}" "https://artifacts.opensearch.org/releases/bundle/opensearch/${version}/${archive}"
-        tar -xzvf "${archive}" -C "${CRAFT_PART_INSTALL}/" --strip-components=1
+      # setup trust store
+      trust_store="${CRAFT_PART_INSTALL}/etc/ssl/certs/java/"
+      mkdir -p "${trust_store}"
+      cp /etc/ssl/certs/java/cacerts "${trust_store}"
       
-        mkdir -p "${CRAFT_PART_INSTALL}/usr/share/opensearch"
+      # download opensearch tarball
+      version="$(craftctl get version)"
+      series="${version%%.*}.x"
+      patch="ubuntu0"
+      release_date="20231004122318"
 
-        mkdir -p "${CRAFT_PART_INSTALL}/etc/opensearch/"
-        mv "${CRAFT_PART_INSTALL}"/config/* "${CRAFT_PART_INSTALL}/etc/opensearch/"
+      archive="opensearch-${version}-${patch}-${release_date}-linux-x64.tar.gz"
+      url="https://launchpad.net/opensearch-releases/${series}/${version}-${patch}/+download/${archive}"
+      curl -L -o "${archive}" "${url}"
+      tar -xzvf "${archive}" -C "${CRAFT_PART_INSTALL}/" --strip-components=1
 
-        declare -a resources=(
-            bin jdk lib modules plugins performance-analyzer-rca manifest.yml NOTICE.txt LICENSE.txt README.md
-        )
-        for res in "${resources[@]}"; do
-            mv "${CRAFT_PART_INSTALL}/${res}" "${CRAFT_PART_INSTALL}/usr/share/opensearch/"
-        done
-        chmod -R 755 "${CRAFT_PART_INSTALL}/usr/share/opensearch/bin" "${CRAFT_PART_INSTALL}/usr/share/opensearch/jdk"
+      mkdir -p "${CRAFT_PART_INSTALL}/usr/share/opensearch"
 
-        # It is important to correct the user permissions for the opensearch.keystore file, after the script is executed.
-        # Given we know which user is going to be used for the daemon, we can set this correction in the keystore script.
-        # TODO: we should perhaps NOT alter the source script - but until we find a better alternative UX wise we keep it
-        echo 'chown snap_daemon:root /var/snap/opensearch/current/etc/opensearch/opensearch.keystore' >> "${CRAFT_PART_INSTALL}"/usr/share/opensearch/bin/opensearch-keystore
+      mkdir -p "${CRAFT_PART_INSTALL}/etc/opensearch/"
+      mv "${CRAFT_PART_INSTALL}"/config/* "${CRAFT_PART_INSTALL}/etc/opensearch/"
 
-        # Final clean-up
-        rm "${archive}"
-      
-        declare -a resources=(logs opensearch-tar-install.sh config)
-        for res in "${resources[@]}"; do
-            rm -rf "${CRAFT_PART_INSTALL}/${res}"
-        done
+      declare -a resources=(
+          bin lib modules plugins performance-analyzer-rca manifest.yml NOTICE.txt LICENSE.txt README.md
+      )
+      for res in "${resources[@]}"; do
+          mv "${CRAFT_PART_INSTALL}/${res}" "${CRAFT_PART_INSTALL}/usr/share/opensearch/"
+      done
+      chmod -R 755 "${CRAFT_PART_INSTALL}/usr/share/opensearch/bin"
+
+      # It is important to correct the user permissions for the opensearch.keystore file, after the script is executed.
+      # Given we know which user is going to be used for the daemon, we can set this correction in the keystore script.
+      # TODO: we should perhaps NOT alter the source script - but until we find a better alternative UX wise we keep it
+      echo 'chown snap_daemon:root /var/snap/opensearch/current/etc/opensearch/opensearch.keystore' >> "${CRAFT_PART_INSTALL}"/usr/share/opensearch/bin/opensearch-keystore
+
+      # Final clean-up
+      rm "${archive}"
+
+      declare -a resources=(logs opensearch-tar-install.sh config)
+      for res in "${resources[@]}"; do
+          rm -rf "${CRAFT_PART_INSTALL}/${res}"
+      done

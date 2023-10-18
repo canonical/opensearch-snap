@@ -29,7 +29,7 @@ function create_file_structure () {
     add_folder "${OPENSEARCH_HOME}/extensions" 770
     add_file "${OPENSEARCH_HOME}/extensions/extensions.yml" 660
     add_file "${OPENSEARCH_PATH_CONF}/unicast_hosts.txt" 660
-    add_folder "/dev/shm/performanceanalyzer" 770
+    [ -d "/dev/shm/performanceanalyzer" ] || add_folder "/dev/shm/performanceanalyzer" 770
 }
 
 
@@ -45,7 +45,9 @@ function set_base_config_props () {
 create_file_structure
 set_base_config_props
 
-chown -R snap_daemon "${SNAP_DATA}/"*
-chgrp root "${SNAP_DATA}/"*
-chown -R snap_daemon "${SNAP_COMMON}/"*
-chgrp root "${SNAP_COMMON}/"*
+#  "${SNAP_COMMON}"
+declare -a folders=("${SNAP_DATA}")
+for f in "${folders[@]}"; do
+    chown -R snap_daemon "${f}/"*
+    chgrp root "${f}/"*
+done
