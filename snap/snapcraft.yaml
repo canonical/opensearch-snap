@@ -166,12 +166,13 @@ parts:
 
   opensearch:
     plugin: nil
-    stage-packages:
+    build-packages:
       - ca-certificates
       - ca-certificates-java
-      - openjdk-17-jdk-headless
       - ssl-cert
       - openssl
+    stage-packages:
+      - openjdk-17-jdk-headless
     override-build: |
       # update deps
       apt-get update; apt-get upgrade -y; apt-get autoremove --purge -y; apt-get clean -y
