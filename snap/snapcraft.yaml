@@ -238,3 +238,22 @@ parts:
 
       # Final clean-up
       rm "${archive}"
+
+  jmx_exporter:
+    plugin: nil
+    after: [opensearch]
+    override-build: |
+      version="0.19.0"
+      archive="jmx_prometheus_javaagent-${version}.jar"
+
+      curl -o ${archive} "https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/${version}/${archive}"
+
+      EXPECTED_SHA="fb507001996c9af38709c110de32517f7592c818bb33e18bc5fe94e076d24c1f"
+      JAR_SHA=$(sha256sum ${archive} | cut -d " " -f1)
+      if [ $JAR_SHA != $EXPECTED_SHA ]; then exit 1; fi
+
+      mkdir -p "${CRAFT_PART_INSTALL}/usr/share/opensearch/lib/"
+      cp ${archive} "${CRAFT_PART_INSTALL}/usr/share/opensearch/lib/"
+
+      # Final clean-up
+      rm "${archive}"
