@@ -247,6 +247,12 @@ jobs:
             exit 1
           fi
 
+          # Checking that Prometheus configuration is correct
+          prometheus_lines=$(sudo grep prometheus ${OPENSEARCH_PATH_CONF}/opensearch.yml | wc -l)
+          if [ "$prometheus_lines" != "4" ]; then
+            exit 1
+          fi
+
       - name: Setup tmate session
         if: ${{ failure() }}
         uses: mxschmitt/action-tmate@v3
