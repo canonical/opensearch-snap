@@ -219,3 +219,22 @@ parts:
       for res in "${resources[@]}"; do
           rm -rf "${CRAFT_PART_INSTALL}/${res}"
       done
+
+  opensearch-plugin-prometheus-exporter:
+    plugin: nil
+    after: [opensearch]
+    override-build: |
+      # update deps
+      apt-get install unzip
+
+      version="$(craftctl get version).0"
+      archive="prometheus-exporter-${version}.zip"
+      url="https://github.com/aiven/prometheus-exporter-plugin-for-opensearch/releases/download/${version}/${archive}"
+      curl -L -o "${archive}" "${url}"
+
+      unzip "${archive}" -d "${CRAFT_PART_INSTALL}/prometheus-exporter"
+      mkdir -p "${CRAFT_PART_INSTALL}/usr/share/opensearch/plugins"
+      mv "${CRAFT_PART_INSTALL}/prometheus-exporter" "${CRAFT_PART_INSTALL}/usr/share/opensearch/plugins"
+
+      # Final clean-up
+      rm "${archive}"

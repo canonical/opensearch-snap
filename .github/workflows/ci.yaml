@@ -224,6 +224,29 @@ jobs:
               exit 1
           fi
 
+      - name: Check if Prometheus Exporter plugin is available
+        env:
+          OPENSEARCH_JAVA_HOME: /snap/opensearch/current/usr/lib/jvm/java-17-openjdk-amd64
+          OPENSEARCH_BIN: /snap/opensearch/current/usr/share/opensearch/bin
+          OPENSEARCH_PATH_CONF: /var/snap/opensearch/current/etc/opensearch
+          OPENSEARCH_HOME: /var/snap/opensearch/current/usr/share/opensearch
+          OPENSEARCH_LIB: /var/snap/opensearch/current/usr/share/opensearch/lib
+          OPENSEARCH_PATH_CERTS: /var/snap/opensearch/current/etc/opensearch/certificates
+        run: |
+          # Prometheus Exporter appears in plugins listing
+          prometheus_is_there=$(sudo -E "${OPENSEARCH_BIN}"/opensearch-plugin list | grep prometheus-exporter)
+          if [ ! "$prometheus_is_there" ]; then
+            exit 1
+          fi
+
+          # Prometheus exporter can be queried
+          sudo cp /var/snap/opensearch/current/etc/opensearch/certificates/node-cm0.pem ./
+          cert=./node-cm0.pem
+          resp=$(curl -I --cacert ${cert} -XGET https://localhost:9200/_prometheus/metrics -u 'admin:admin')
+          if [[ "$resp" != *"200 OK"* ]]; then
+            exit 1
+          fi
+
       - name: Setup tmate session
         if: ${{ failure() }}
         uses: mxschmitt/action-tmate@v3
