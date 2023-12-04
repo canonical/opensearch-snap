@@ -42,8 +42,17 @@ function set_base_config_props () {
 }
 
 
+function set_prometheus_exporter_config_props() {
+    set_yaml_prop "${OPENSEARCH_PATH_CONF}/opensearch.yml" "prometheus.metric_name.prefix" "opensearch_"
+    set_yaml_prop "${OPENSEARCH_PATH_CONF}/opensearch.yml" "prometheus.indices" "false"
+    set_yaml_prop "${OPENSEARCH_PATH_CONF}/opensearch.yml" "prometheus.cluster.settings" "false"
+    set_yaml_prop "${OPENSEARCH_PATH_CONF}/opensearch.yml" "prometheus.nodes.filter" "_local"
+}
+
+
 create_file_structure
 set_base_config_props
+set_prometheus_exporter_config_props
 
 #  "${SNAP_COMMON}"
 declare -a folders=("${SNAP_DATA}")
