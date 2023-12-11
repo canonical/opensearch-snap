@@ -237,7 +237,7 @@ parts:
       # update deps
       apt-get install unzip
 
-      version="$(craftctl get version).0"
+      version="$(craftctl get version)"
       archive="repository-s3-${version}.zip"
       url="https://artifacts.opensearch.org/releases/plugins/repository-s3/${version}/${archive}"
       curl -L -o "${archive}" "${url}"
