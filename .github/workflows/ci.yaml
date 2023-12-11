@@ -253,6 +253,13 @@ jobs:
             exit 1
           fi
 
+      - name: Check COS logs slot is available
+        run: |
+          snap_slot=$( sudo snap connections opensearch | grep content )
+          if [ ! "$snap_slot" ]; then
+            exit 1
+          fi 
+
       - name: Setup tmate session
         if: ${{ failure() }}
         uses: mxschmitt/action-tmate@v3

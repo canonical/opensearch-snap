@@ -31,6 +31,15 @@ plugs:
     read:
       - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service
 
+
+slots:
+  logs:
+    interface: content
+    source:
+      read:
+        - $SNAP_COMMON/var/log/opensearch
+
+
 hooks:
   install:
     plugs:
@@ -71,6 +80,7 @@ environment:
   OPENSEARCH_VARLOG: ${SNAP_COMMON}/var/log/opensearch
 
   KNN_LIB_DIR: ${OPENSEARCH_PLUGINS}/opensearch-knn/lib
+
 
 apps:
   daemon:
