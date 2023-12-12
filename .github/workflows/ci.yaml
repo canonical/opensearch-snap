@@ -143,7 +143,7 @@ jobs:
               exit 1
           fi
 
-      - name: Install backup plugin and configure it
+      - name: Check if Prometheus Exporter and repository-s3 plugins are available
         env:
           OPENSEARCH_JAVA_HOME: /snap/opensearch/current/usr/lib/jvm/java-17-openjdk-amd64
           OPENSEARCH_BIN: /snap/opensearch/current/usr/share/opensearch/bin
@@ -152,8 +152,47 @@ jobs:
           OPENSEARCH_LIB: /var/snap/opensearch/current/usr/share/opensearch/lib
           OPENSEARCH_PATH_CERTS: /var/snap/opensearch/current/etc/opensearch/certificates
         run: |
-          sudo -E "${OPENSEARCH_BIN}"/opensearch-plugin install --batch repository-s3
+          # Prometheus Exporter appears in plugins listing
+          prometheus_is_there=$(sudo -E "${OPENSEARCH_BIN}"/opensearch-plugin list | grep prometheus-exporter)
+          if [ ! "$prometheus_is_there" ]; then
+            exit 1
+          fi
+          # repository-s3 appears in plugins listing
+          repository_s3_is_there=$(sudo -E "${OPENSEARCH_BIN}"/opensearch-plugin list | grep repository-s3)
+          if [ ! "$repository_s3_is_there" ]; then
+            exit 1
+          fi
 
+          # Prometheus exporter can be queried
+          sudo cp /var/snap/opensearch/current/etc/opensearch/certificates/node-cm0.pem ./
+          cert=./node-cm0.pem
+          resp=$(curl -I --cacert ${cert} -XGET https://localhost:9200/_prometheus/metrics -u 'admin:admin')
+          if [[ "$resp" != *"200 OK"* ]]; then
+            exit 1
+          fi
+
+          # Checking that Prometheus configuration is correct
+          prometheus_lines=$(sudo grep prometheus ${OPENSEARCH_PATH_CONF}/opensearch.yml | wc -l)
+          if [ "$prometheus_lines" != "4" ]; then
+            exit 1
+          fi
+
+      - name: Check COS logs slot is available
+        run: |
+          snap_slot=$( sudo snap connections opensearch | grep content )
+          if [ ! "$snap_slot" ]; then
+            exit 1
+          fi 
+
+      - name: Configure backup plugin 
+        env:
+          OPENSEARCH_JAVA_HOME: /snap/opensearch/current/usr/lib/jvm/java-17-openjdk-amd64
+          OPENSEARCH_BIN: /snap/opensearch/current/usr/share/opensearch/bin
+          OPENSEARCH_PATH_CONF: /var/snap/opensearch/current/etc/opensearch
+          OPENSEARCH_HOME: /var/snap/opensearch/current/usr/share/opensearch
+          OPENSEARCH_LIB: /var/snap/opensearch/current/usr/share/opensearch/lib
+          OPENSEARCH_PATH_CERTS: /var/snap/opensearch/current/etc/opensearch/certificates
+        run: |
           echo "TEST" | sudo tee -a testkey
 
           sudo -E "${OPENSEARCH_BIN}"/opensearch-keystore add-file s3.client.default.access_key ${PWD}/testkey
@@ -183,19 +222,6 @@ jobs:
               exit 1
           fi
 
-      - name: Remove backup plugin
-        env:
-          OPENSEARCH_JAVA_HOME: /snap/opensearch/current/usr/lib/jvm/java-17-openjdk-amd64
-          OPENSEARCH_BIN: /snap/opensearch/current/usr/share/opensearch/bin
-          OPENSEARCH_PATH_CONF: /var/snap/opensearch/current/etc/opensearch
-          OPENSEARCH_HOME: /var/snap/opensearch/current/usr/share/opensearch
-          OPENSEARCH_LIB: /var/snap/opensearch/current/usr/share/opensearch/lib
-          OPENSEARCH_PATH_CERTS: /var/snap/opensearch/current/etc/opensearch/certificates
-        run: |
-          sudo -E "${OPENSEARCH_BIN}"/opensearch-plugin remove repository-s3
-          sudo -E "${OPENSEARCH_BIN}"/opensearch-keystore remove s3.client.default.access_key
-          sudo -E "${OPENSEARCH_BIN}"/opensearch-keystore remove s3.client.default.secret_key
-
       - name: Ensure the cluster is reachable and node created after upgrade
         run: |
           # start opensearch after upgrade
@@ -224,7 +250,7 @@ jobs:
               exit 1
           fi
 
-      - name: Check if Prometheus Exporter plugin is available
+      - name: Remove backup plugin
         env:
           OPENSEARCH_JAVA_HOME: /snap/opensearch/current/usr/lib/jvm/java-17-openjdk-amd64
           OPENSEARCH_BIN: /snap/opensearch/current/usr/share/opensearch/bin
@@ -233,33 +259,6 @@ jobs:
           OPENSEARCH_LIB: /var/snap/opensearch/current/usr/share/opensearch/lib
           OPENSEARCH_PATH_CERTS: /var/snap/opensearch/current/etc/opensearch/certificates
         run: |
-          # Prometheus Exporter appears in plugins listing
-          prometheus_is_there=$(sudo -E "${OPENSEARCH_BIN}"/opensearch-plugin list | grep prometheus-exporter)
-          if [ ! "$prometheus_is_there" ]; then
-            exit 1
-          fi
-
-          # Prometheus exporter can be queried
-          sudo cp /var/snap/opensearch/current/etc/opensearch/certificates/node-cm0.pem ./
-          cert=./node-cm0.pem
-          resp=$(curl -I --cacert ${cert} -XGET https://localhost:9200/_prometheus/metrics -u 'admin:admin')
-          if [[ "$resp" != *"200 OK"* ]]; then
-            exit 1
-          fi
-
-          # Checking that Prometheus configuration is correct
-          prometheus_lines=$(sudo grep prometheus ${OPENSEARCH_PATH_CONF}/opensearch.yml | wc -l)
-          if [ "$prometheus_lines" != "4" ]; then
-            exit 1
-          fi
-
-      - name: Check COS logs slot is available
-        run: |
-          snap_slot=$( sudo snap connections opensearch | grep content )
-          if [ ! "$snap_slot" ]; then
-            exit 1
-          fi 
-
-      - name: Setup tmate session
-        if: ${{ failure() }}
-        uses: mxschmitt/action-tmate@v3
+          sudo -E "${OPENSEARCH_BIN}"/opensearch-plugin remove repository-s3
+          sudo -E "${OPENSEARCH_BIN}"/opensearch-keystore remove s3.client.default.access_key
+          sudo -E "${OPENSEARCH_BIN}"/opensearch-keystore remove s3.client.default.secret_key
