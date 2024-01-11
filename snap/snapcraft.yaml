@@ -230,6 +230,22 @@ parts:
           rm -rf "${CRAFT_PART_INSTALL}/${res}"
       done
 
+  opensearch-plugin-repository-gcs:
+    plugin: nil
+    after: [opensearch]
+    override-build: |
+      # update deps
+      apt-get install unzip
+      version="$(craftctl get version)"
+      archive="repository-gcs-${version}.zip"
+      url="https://artifacts.opensearch.org/releases/plugins/repository-gcs/${version}/${archive}"
+      curl -L -o "${archive}" "${url}"
+      unzip "${archive}" -d "${CRAFT_PART_INSTALL}/repository-gcs"
+      mkdir -p "${CRAFT_PART_INSTALL}/usr/share/opensearch/plugins"
+      mv "${CRAFT_PART_INSTALL}/repository-gcs" "${CRAFT_PART_INSTALL}/usr/share/opensearch/plugins"
+      # Final clean-up
+      rm "${archive}"
+
   opensearch-plugin-repository-s3:
     plugin: nil
     after: [opensearch]
