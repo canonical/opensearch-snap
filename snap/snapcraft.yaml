@@ -272,10 +272,10 @@ parts:
       # update deps
       apt-get install unzip
 
-      version="$(craftctl get version).0"
-      archive="prometheus-exporter-${version}.zip"
-      url="https://github.com/aiven/prometheus-exporter-plugin-for-opensearch/releases/download/${version}/${archive}"
-      curl -L -o "${archive}" "${url}"
+      version="$(craftctl get version)"
+      archive="prometheus-exporter-${version}-ubuntu0-20240119181708.zip"
+      url="https://launchpad.net/opensearch-plugin-prometheus-exporter-releases/2.x/exporter-${version}-ubuntu0/+download/"
+      curl  -L -o "${archive}" "${url}${archive}"
 
       unzip "${archive}" -d "${CRAFT_PART_INSTALL}/prometheus-exporter"
       mkdir -p "${CRAFT_PART_INSTALL}/usr/share/opensearch/plugins"
