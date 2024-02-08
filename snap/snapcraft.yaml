@@ -181,6 +181,7 @@ parts:
       - ca-certificates-java
       - ssl-cert
       - openssl
+      - unzip
     stage-packages:
       - openjdk-17-jdk-headless
     override-build: |
@@ -196,14 +197,21 @@ parts:
       # download opensearch tarball
       version="$(craftctl get version)"
       series="${version%%.*}.x"
-      patch="ubuntu0"
-      release_date="20231004122318"
+      patch="ubuntu1"
+      release_date="20240208080925"
 
       archive="opensearch-${version}-${patch}-${release_date}-linux-x64.tar.gz"
       url="https://launchpad.net/opensearch-releases/${series}/${version}-${patch}/+download/${archive}"
       curl -L -o "${archive}" "${url}"
-      tar -xzvf "${archive}" -C "${CRAFT_PART_INSTALL}/" --strip-components=1
+      # Returns the ensemble of zip/tarballs containing opensearch + its core-plugins
+      # .
+      # |
+      # +-- dist/opensearch/opensearch-${OPENSEARCH_VERSION}-linux-x64.tar.gz
+      # +-- builds/opensearch/core-plugins/
+      tar -xzvf "${archive}" -C "." --strip-components=1
 
+      # Process the main tarball
+      tar -xzvf "./dist/opensearch/opensearch-${version}-linux-x64.tar.gz" -C "${CRAFT_PART_INSTALL}/" --strip-components=1
       mkdir -p "${CRAFT_PART_INSTALL}/usr/share/opensearch"
 
       mkdir -p "${CRAFT_PART_INSTALL}/etc/opensearch/"
@@ -213,7 +221,7 @@ parts:
           bin lib modules plugins performance-analyzer-rca manifest.yml NOTICE.txt LICENSE.txt README.md
       )
       for res in "${resources[@]}"; do
-          mv "${CRAFT_PART_INSTALL}/${res}" "${CRAFT_PART_INSTALL}/usr/share/opensearch/"
+          mv "${CRAFT_PART_INSTALL}"/${res} "${CRAFT_PART_INSTALL}/usr/share/opensearch/"
       done
       chmod -R 755 "${CRAFT_PART_INSTALL}/usr/share/opensearch/bin"
 
@@ -222,6 +230,19 @@ parts:
       # TODO: we should perhaps NOT alter the source script - but until we find a better alternative UX wise we keep it
       echo 'chown snap_daemon:root /var/snap/opensearch/current/etc/opensearch/opensearch.keystore' >> "${CRAFT_PART_INSTALL}"/usr/share/opensearch/bin/opensearch-keystore
 
+      # Now, process the core-plugins
+      pushd ./builds/opensearch/core-plugins/
+      mkdir -p "${CRAFT_PART_INSTALL}/usr/share/opensearch/plugins"
+
+      declare -a coreplugins=(
+          repository-s3 repository-gcs
+      )
+      for plugin in "${coreplugins[@]}"; do
+          unzip "./${plugin}-${version}.zip" -d "${CRAFT_PART_INSTALL}/${plugin}"
+          mv "${CRAFT_PART_INSTALL}/${plugin}" "${CRAFT_PART_INSTALL}/usr/share/opensearch/plugins"
+      done
+      popd
+
       # Final clean-up
       rm "${archive}"
 
@@ -229,41 +250,6 @@ parts:
       for res in "${resources[@]}"; do
           rm -rf "${CRAFT_PART_INSTALL}/${res}"
       done
-
-  opensearch-plugin-repository-gcs:
-    plugin: nil
-    after: [opensearch]
-    override-build: |
-      # update deps
-      apt-get install unzip
-      version="$(craftctl get version)"
-      archive="repository-gcs-${version}.zip"
-      url="https://artifacts.opensearch.org/releases/plugins/repository-gcs/${version}/${archive}"
-      curl -L -o "${archive}" "${url}"
-      unzip "${archive}" -d "${CRAFT_PART_INSTALL}/repository-gcs"
-      mkdir -p "${CRAFT_PART_INSTALL}/usr/share/opensearch/plugins"
-      mv "${CRAFT_PART_INSTALL}/repository-gcs" "${CRAFT_PART_INSTALL}/usr/share/opensearch/plugins"
-      # Final clean-up
-      rm "${archive}"
-
-  opensearch-plugin-repository-s3:
-    plugin: nil
-    after: [opensearch]
-    override-build: |
-      # update deps
-      apt-get install unzip
-
-      version="$(craftctl get version)"
-      archive="repository-s3-${version}.zip"
-      url="https://artifacts.opensearch.org/releases/plugins/repository-s3/${version}/${archive}"
-      curl -L -o "${archive}" "${url}"
-
-      unzip "${archive}" -d "${CRAFT_PART_INSTALL}/repository-s3"
-      mkdir -p "${CRAFT_PART_INSTALL}/usr/share/opensearch/plugins"
-      mv "${CRAFT_PART_INSTALL}/repository-s3" "${CRAFT_PART_INSTALL}/usr/share/opensearch/plugins"
-
-      # Final clean-up
-      rm "${archive}"
 
   opensearch-plugin-prometheus-exporter:
     plugin: nil
