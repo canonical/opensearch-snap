@@ -189,6 +189,13 @@ jobs:
             exit 1
           fi 
 
+      - name: Microceph setup
+        uses: canonical/microceph-action@main
+        with:
+          accesskey: 'testtesttest'
+          secretkey: 'testtesttest'
+          bucket: 'testbucket'
+          osdsize: "3G"
       - name: Configure backup plugin 
         env:
           OPENSEARCH_JAVA_HOME: /snap/opensearch/current/usr/lib/jvm/java-17-openjdk-amd64
@@ -198,16 +205,20 @@ jobs:
           OPENSEARCH_LIB: /var/snap/opensearch/current/usr/share/opensearch/lib
           OPENSEARCH_PATH_CERTS: /var/snap/opensearch/current/etc/opensearch/certificates
         run: |
-          echo "TEST" | sudo tee -a testkey
+          echo "testtesttest" | sudo tee -a ${PWD}/testkey
 
           sudo -E "${OPENSEARCH_BIN}"/opensearch-keystore add-file s3.client.default.access_key ${PWD}/testkey
           sudo -E "${OPENSEARCH_BIN}"/opensearch-keystore add-file s3.client.default.secret_key ${PWD}/testkey
 
-          sudo snap restart opensearch.daemon
-          sleep 20s
-
           sudo cp /var/snap/opensearch/current/etc/opensearch/certificates/node-cm0.pem ./
           cert=./node-cm0.pem
+
+          curl --cacert ${cert} -XPUT https://localhost:9200/_snapshot/s3repo -u 'admin:admin' \
+              -H "Content-Type: application/json" \
+              -d '{"type": "s3", "settings": {"endpoint": "http://localhost:80", "protocol": "http", "bucket": "testbucket", "base_path": "/", "region": "default"} }'
+
+          sudo snap restart opensearch.daemon
+          sleep 20s
 
           cluster_resp=$(curl --cacert ${cert} -XGET https://localhost:9200 -u 'admin:admin')
           echo -e "Cluster Response: \n ${cluster_resp}"
@@ -216,6 +227,11 @@ jobs:
               exit 1
           fi
 
+          curl --cacert ${cert} -XGET https://localhost:9200/_snapshot/s3repo -u 'admin:admin'
+          if [ "$?" -ne 0 ]; then
+              exit 1
+          fi
+      
       - name: Upgrade snap
         run: |
           version="$(cat snap/snapcraft.yaml | yq .version)"
