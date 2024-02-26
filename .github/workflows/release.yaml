@@ -1,4 +1,4 @@
-name: Build OpenSearch from source, run tests and release.
+name: Publish to Snap Store
 
 env:
   RELEASE: edge
