@@ -1,4 +1,6 @@
 # OpenSearch-Snap
+[![Build and Test](https://github.com/canonical/opensearch-snap/actions/workflows/ci.yaml/badge.svg)](https://github.com/canonical/opensearch-snap/actions/workflows/ci.yaml)
+[![Publish](https://github.com/canonical/opensearch-snap/actions/workflows/release.yaml/badge.svg)](https://github.com/canonical/opensearch-snap/actions/workflows/release.yaml)
 
 [//]: # (<h1 align="center">)
 [//]: # (  <a href="https://opensearch.org/">)
