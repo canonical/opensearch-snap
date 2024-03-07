@@ -1,7 +1,7 @@
 name: opensearch # you probably want to 'snapcraft register <name>'
 base: core22 # the base snap is the execution environment for this snap
 
-version: '2.11.1' # just for humans, typically '1.2+git' or '1.3.2'
+version: '2.12.0' # just for humans, typically '1.2+git' or '1.3.2'
 
 summary: 'OpenSearch: community-driven, Apache 2.0-licensed search and analytics suite.'
 description: |
@@ -57,7 +57,7 @@ hooks:
 environment:
   SNAP_CURRENT: /snap/opensearch/current
   SNAP_DATA_CURRENT: /var/snap/opensearch/current
-  JAVA_HOME: ${SNAP}/usr/lib/jvm/java-17-openjdk-amd64
+  JAVA_HOME: ${SNAP}/usr/lib/jvm/java-21-openjdk-amd64
   PATH: ${JAVA_HOME}/jre/bin:$PATH
 
   SNAP_LOG_DIR: ${SNAP_COMMON}/ops/snap/logs
@@ -182,7 +182,7 @@ parts:
       - ssl-cert
       - openssl
     stage-packages:
-      - openjdk-17-jdk-headless
+      - openjdk-21-jdk-headless
     override-build: |
       # update deps
       apt-get update; apt-get upgrade -y; apt-get autoremove --purge -y; apt-get clean -y
