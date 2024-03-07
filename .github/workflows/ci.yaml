@@ -111,10 +111,10 @@ jobs:
           sudo snap start opensearch.daemon
 
           # wait a bit for it to fully initialize
-          sleep 45s
-
+          sleep 40s
           # create the security index
           sudo snap run opensearch.security-init --tls-priv-key-admin-pass=admin1234
+          sleep 15s
 
       - name: Ensure the cluster is reachable and node created
         run: |
