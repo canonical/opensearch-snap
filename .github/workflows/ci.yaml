@@ -111,7 +111,7 @@ jobs:
           sudo snap start opensearch.daemon
 
           # wait a bit for it to fully initialize
-          sleep 15s
+          sleep 45s
 
           # create the security index
           sudo snap run opensearch.security-init --tls-priv-key-admin-pass=admin1234
