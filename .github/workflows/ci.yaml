@@ -111,10 +111,10 @@ jobs:
           sudo snap start opensearch.daemon
 
           # wait a bit for it to fully initialize
-          sleep 15s
-
+          sleep 40s
           # create the security index
           sudo snap run opensearch.security-init --tls-priv-key-admin-pass=admin1234
+          sleep 15s
 
       - name: Ensure the cluster is reachable and node created
         run: |
@@ -145,7 +145,7 @@ jobs:
 
       - name: Check if Prometheus Exporter and repository plugins are available
         env:
-          OPENSEARCH_JAVA_HOME: /snap/opensearch/current/usr/lib/jvm/java-17-openjdk-amd64
+          OPENSEARCH_JAVA_HOME: /snap/opensearch/current/usr/lib/jvm/java-21-openjdk-amd64
           OPENSEARCH_BIN: /snap/opensearch/current/usr/share/opensearch/bin
           OPENSEARCH_PATH_CONF: /var/snap/opensearch/current/etc/opensearch
           OPENSEARCH_HOME: /var/snap/opensearch/current/usr/share/opensearch
@@ -191,7 +191,7 @@ jobs:
 
       - name: Configure backup plugin 
         env:
-          OPENSEARCH_JAVA_HOME: /snap/opensearch/current/usr/lib/jvm/java-17-openjdk-amd64
+          OPENSEARCH_JAVA_HOME: /snap/opensearch/current/usr/lib/jvm/java-21-openjdk-amd64
           OPENSEARCH_BIN: /snap/opensearch/current/usr/share/opensearch/bin
           OPENSEARCH_PATH_CONF: /var/snap/opensearch/current/etc/opensearch
           OPENSEARCH_HOME: /var/snap/opensearch/current/usr/share/opensearch
@@ -257,7 +257,7 @@ jobs:
 
       - name: Remove backup plugin
         env:
-          OPENSEARCH_JAVA_HOME: /snap/opensearch/current/usr/lib/jvm/java-17-openjdk-amd64
+          OPENSEARCH_JAVA_HOME: /snap/opensearch/current/usr/lib/jvm/java-21-openjdk-amd64
           OPENSEARCH_BIN: /snap/opensearch/current/usr/share/opensearch/bin
           OPENSEARCH_PATH_CONF: /var/snap/opensearch/current/etc/opensearch
           OPENSEARCH_HOME: /var/snap/opensearch/current/usr/share/opensearch
