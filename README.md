@@ -116,4 +116,4 @@ $ sudo -u snap_daemon \
 The Opensearch Snap is free software, distributed under the Apache
 Software License, version 2.0. See
 [LICENSE](https://github.com/canonical/opensearch-snap/blob/main/licenses/LICENSE-snap)
-for more information.
+for more information. 
