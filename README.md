@@ -104,7 +104,7 @@ In some cases, users may need to run cli commands that are not exposed by the Op
 
 ```
 $ sudo -u snap_daemon \
-	    OPENSEARCH_JAVA_HOME=/snap/opensearch/current/usr/share/opensearch/jdk \
+	    OPENSEARCH_JAVA_HOME=/snap/opensearch/current/usr/lib/jvm/java-21-openjdk-amd64 \
 	    OPENSEARCH_PATH_CONF=/var/snap/opensearch/current/etc/opensearch \
 	    OPENSEARCH_HOME=/var/snap/opensearch/current/usr/share/opensearch \
 	    OPENSEARCH_LIB=/var/snap/opensearch/current/usr/share/opensearch/lib \
