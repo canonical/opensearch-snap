@@ -15,7 +15,7 @@ function create_file_structure () {
     mkdir -p "${OPENSEARCH_PATH_CONF}/"
     copy_files_between_folder "${SNAP}/etc/opensearch/" "${OPENSEARCH_PATH_CONF}/"
 
-    declare -a folders=("${OPENSEARCH_VARLIB}" "${OPENSEARCH_HOME}" "${OPENSEARCH_VARLOG}" "${OPENSEARCH_TMPDIR}" "${OPENSEARCH_PATH_CERTS}")
+    declare -a folders=("${OPENSEARCH_HOME}" "${OPENSEARCH_VARLIB}" "${OPENSEARCH_VARLOG}" "${OPENSEARCH_TMPDIR}" "${OPENSEARCH_PATH_CERTS}")
     for f in "${folders[@]}"; do
         add_folder "${f}" 770
     done
