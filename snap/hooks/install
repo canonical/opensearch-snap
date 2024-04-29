@@ -17,7 +17,9 @@ function create_file_structure () {
 
     declare -a folders=("${OPENSEARCH_HOME}" "${OPENSEARCH_VARLIB}" "${OPENSEARCH_VARLOG}" "${OPENSEARCH_TMPDIR}" "${OPENSEARCH_PATH_CERTS}")
     for f in "${folders[@]}"; do
-        add_folder "${f}" 770
+        if [ ! -d "${f}" ]; then
+            add_folder "${f}" 770
+        fi
     done
 
     declare -a common=(modules plugins lib)
