@@ -14,9 +14,7 @@ function create_file_structure () {
     # Doing it before OPENSEARCH_PATH_CERTS is created, as it is set as "snap_daemon" user
     mkdir -p "${OPENSEARCH_PATH_CONF}/"
     copy_files_between_folder "${SNAP}/etc/opensearch/" "${OPENSEARCH_PATH_CONF}/"
-    # [ -d  "${OPENSEARCH_VARLIB}" ] || mkdir -p "${OPENSEARCH_VARLIB}"
-    # chown -R snap_daemon "${OPENSEARCH_VARLIB}"
-    
+
     declare -a folders=("${OPENSEARCH_VARLIB}" "${OPENSEARCH_HOME}" "${OPENSEARCH_VARLOG}" "${OPENSEARCH_TMPDIR}" "${OPENSEARCH_PATH_CERTS}")
     for f in "${folders[@]}"; do
         add_folder "${f}" 770
@@ -57,7 +55,7 @@ set_base_config_props
 set_prometheus_exporter_config_props
 
 #  "${SNAP_COMMON}"
-declare -a folders=("${SNAP_DATA}" "${SNAP_COMMON}")
+declare -a folders=("${SNAP_DATA}")
 for f in "${folders[@]}"; do
     chown -R snap_daemon "${f}/"*
     chgrp root "${f}/"*
