@@ -4,6 +4,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  RELEASE: edge
+
 on:
   workflow_call:
   pull_request:
@@ -52,6 +55,22 @@ jobs:
           name: opensearch_snap_amd64
           path: "opensearch_*.snap"
 
+      - name: Set snap release channel
+        run: |
+          version="$(cat snap/snapcraft.yaml | yq .version)"
+          channel="${version%%.*}/${{env.RELEASE}}"
+          
+          echo "version=${version}" >> $GITHUB_ENV
+          echo "channel=${channel}" >> $GITHUB_ENV
+
+      - name: Publish snap to Store
+        uses: snapcore/action-publish@v1
+        env:
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.STORE_LOGIN }}
+        with:
+          snap: opensearch_${{env.version}}_amd64.snap
+          release: ${{env.channel}}/dpe-2119
+          
   test:
     name: Test Snap
     runs-on: ubuntu-latest
