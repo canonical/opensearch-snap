@@ -12,7 +12,7 @@ function create_file_structure () {
 
     # want to use the * here, so not calling dir_copy_if_not_exists
     # Doing it before OPENSEARCH_PATH_CERTS is created, as it is set as "snap_daemon" user
-    if [ ! -d "${OPENSEARCH_PATH_CONF}"]; then
+    if [ ! -d "${OPENSEARCH_PATH_CONF}" ]; then
         mkdir -p "${OPENSEARCH_PATH_CONF}/"
         copy_files_between_folder "${SNAP}/etc/opensearch/" "${OPENSEARCH_PATH_CONF}/"
     fi

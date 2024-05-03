@@ -70,7 +70,7 @@ jobs:
         with:
           snap: opensearch_${{env.version}}_amd64.snap
           release: ${{env.channel}}/dpe-2119
-          
+
   test:
     name: Test Snap
     runs-on: ubuntu-latest
