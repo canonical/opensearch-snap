@@ -30,6 +30,10 @@ plugs:
     interface: system-files
     read:
       - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service
+  sys-fs-hugepages-folder:
+    interface: system-files
+    read:
+      - /sys/kernel/mm/hugepages
 
 
 slots:
@@ -99,6 +103,7 @@ apps:
       - shmem-perf-analyzer
       - system-observe
       - sys-fs-cgroup-service
+      - sys-fs-hugepages-folder
     environment:
       LD_LIBRARY_PATH: "${LD_LIBRARY_PATH}:${KNN_LIB_DIR}"
 

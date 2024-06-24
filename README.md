@@ -20,6 +20,7 @@ or:
 ```
 sudo snap install opensearch --channel=2/candidate
 sudo snap connect opensearch:process-control
+sudo snap connect opensearch:sys-fs-hugepages-folder
 ```
 
 ### Environment configuration:
@@ -41,6 +42,15 @@ sudo snap run opensearch.setup          \
     --tls-priv-key-admin-pass admin1234 \
     --tls-priv-key-node-pass node1234   \
     --tls-init-setup yes    # this creates the root and admin certs as well.
+```
+
+#### (Optional) Set `snap_daemon` homedir:
+
+If your machine will be running only OpenSearch snap, or running it alongside other snaps that do not need homedir for snap_daemon, then set it as follows:
+```
+sudo mkdir /var/snap/opensearch/common/home
+sudo chown -R snap_daemon:snap_daemon /var/snap/opensearch/common/home
+sudo usermod -d /var/snap/opensearch/common/home snap_daemon
 ```
 
 #### Starting OpenSearch:
