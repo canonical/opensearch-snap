@@ -44,15 +44,6 @@ sudo snap run opensearch.setup          \
     --tls-init-setup yes    # this creates the root and admin certs as well.
 ```
 
-#### (Optional) Set `snap_daemon` homedir:
-
-If your machine will be running only OpenSearch snap, or running it alongside other snaps that do not need homedir for snap_daemon, then set it as follows:
-```
-sudo mkdir /var/snap/opensearch/common/home
-sudo chown -R snap_daemon:snap_daemon /var/snap/opensearch/common/home
-sudo usermod -d /var/snap/opensearch/common/home snap_daemon
-```
-
 #### Starting OpenSearch:
 ```
 sudo snap start opensearch.daemon
