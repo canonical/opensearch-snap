@@ -20,7 +20,6 @@ or:
 ```
 sudo snap install opensearch --channel=2/candidate
 sudo snap connect opensearch:process-control
-sudo snap connect opensearch:hardware-observe
 ```
 
 ### Environment configuration:
