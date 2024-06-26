@@ -15,7 +15,7 @@ function create_file_structure () {
     mkdir -p "${OPENSEARCH_PATH_CONF}/"
     copy_files_between_folder "${SNAP}/etc/opensearch/" "${OPENSEARCH_PATH_CONF}/"
 
-    declare -a folders=("${OPENSEARCH_HOME}" "${OPENSEARCH_VARLIB}" "${OPENSEARCH_VARLOG}" "${OPENSEARCH_TMPDIR}" "${OPENSEARCH_PATH_CERTS}")
+    declare -a folders=("${OPENSEARCH_HOME}" "${OPENSEARCH_VARLIB}" "${OPENSEARCH_VARLOG}" "${OPENSEARCH_TMPDIR}" "${OPENSEARCH_PATH_CERTS}" "${HOME}")
     for f in "${folders[@]}"; do
         if [ ! -d "${f}" ]; then
             add_folder "${f}" 770
@@ -41,6 +41,7 @@ function set_base_config_props () {
     set_yaml_prop "${OPENSEARCH_PATH_CONF}/opensearch.yml" "path.home" "${OPENSEARCH_HOME}"
 
     replace_in_file "${OPENSEARCH_PATH_CONF}/jvm.options" "=logs/" "=${OPENSEARCH_VARLOG}/"
+    echo "-Duser.home=${HOME}" | tee -a "${OPENSEARCH_PATH_CONF}/jvm.options"
 }
 
 
