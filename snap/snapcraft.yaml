@@ -59,6 +59,7 @@ environment:
   SNAP_DATA_CURRENT: /var/snap/opensearch/current
   JAVA_HOME: ${SNAP}/usr/lib/jvm/java-21-openjdk-amd64
   PATH: ${JAVA_HOME}/jre/bin:$PATH
+  HOME: ${SNAP_COMMON}/home/snap_daemon
 
   SNAP_LOG_DIR: ${SNAP_COMMON}/ops/snap/logs
 
@@ -89,7 +90,6 @@ apps:
     command: opt/opensearch/start.sh
     restart-condition: always
     restart-delay: 20s
-    # reload-command: ${SNAP}/usr/share/ops/start.sh
     plugs:
       - network
       - network-bind
