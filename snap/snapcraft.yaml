@@ -3,7 +3,7 @@ base: core24
 
 version: '4.8.2'
 
-summary: OpenSearch with additional changes for easier use along Wazuh.
+summary: OpenSearch with additional changes for easier use alongside Wazuh.
 description: |
     Wazuh Indexer is a community-driven, Apache 2.0-licensed open source search and 
     analytics suite that makes it easy to ingest, search, visualize, and analyze data
@@ -196,10 +196,8 @@ parts:
       update-ca-certificates -f
     override-stage: |
       craftctl default
-      ls -la etc/wazuh-indexer/
-      ls -la usr/share/wazuh-indexer/bin/
-      find . -name '*keystore'
-      chmod -R 755 usr/share/wazuh-indexer/bin
+      chmod -R 755 usr/share/wazuh-indexer
+      chmod -R 755 var/log/wazuh-indexer
       usr/share/wazuh-indexer/bin/opensearch-keystore create
       # It is important to correct the user permissions for the opensearch.keystore file, after the script is executed.
       # Given we know which user is going to be used for the daemon, we can set this correction in the keystore script.
