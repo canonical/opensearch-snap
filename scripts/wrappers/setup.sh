@@ -254,3 +254,5 @@ if [ "${tls_self_managed}" ]; then
         set_access_restrictions "${OPENSEARCH_PATH_CERTS}/${key}.pem" 664
     done
 fi
+
+set_access_restrictions "${SNAP_DATA_CURRENT}/var/log"
