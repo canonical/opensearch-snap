@@ -1,26 +1,32 @@
-name: opensearch # you probably want to 'snapcraft register <name>'
-base: core22 # the base snap is the execution environment for this snap
+name: wazuh-indexer
+base: core24
 
-version: '2.14.0' # just for humans, typically '1.2+git' or '1.3.2'
+version: '4.8.2'
 
-summary: 'OpenSearch: community-driven, Apache 2.0-licensed search and analytics suite.'
+summary: OpenSearch with additional changes for easier use along Wazuh.
 description: |
-    OpenSearch is a community-driven, Apache 2.0-licensed open source search and 
-    analytics suite that makes it easy to ingest, search, visualize, and analyze data. 
-    Developers build with OpenSearch for use cases such as application search, 
-    log analytics, data observability, data ingestion, and more.
+    Wazuh Indexer is a community-driven, Apache 2.0-licensed open source search and 
+    analytics suite that makes it easy to ingest, search, visualize, and analyze data
+    tailored for Wazuh.
 
-grade: stable # must be 'stable' to release into candidate/stable channels
+grade: stable
 
-confinement: strict # use 'strict' once you have the right plugs and slots
+confinement: strict
 
-architectures:
-  - build-on: amd64
-
+platforms:
+  amd64:
 
 system-usernames:
   snap_daemon: shared
 
+# TODO: build from sources
+package-repositories:
+  - type: apt
+    components: [main]
+    suites: [stable]
+    key-id: 0DCFCA5547B19D2A6099506096B3EE5F29111145
+    key-server: https://packages.wazuh.com/key/GPG-KEY-WAZUH
+    url: https://packages.wazuh.com/4.x/apt/
 
 plugs:
   shmem-perf-analyzer:
@@ -29,7 +35,7 @@ plugs:
   sys-fs-cgroup-service:
     interface: system-files
     read:
-      - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service
+      - /sys/fs/cgroup/system.slice/snap.wazuh-indexer.daemon.service
 
 
 slots:
@@ -37,7 +43,7 @@ slots:
     interface: content
     source:
       read:
-        - $SNAP_COMMON/var/log/opensearch
+        - $SNAP_COMMON/var/log/wazuh-indexer
 
 
 hooks:
@@ -55,8 +61,8 @@ hooks:
 
 
 environment:
-  SNAP_CURRENT: /snap/opensearch/current
-  SNAP_DATA_CURRENT: /var/snap/opensearch/current
+  SNAP_CURRENT: /snap/wazuh-indexer/current
+  SNAP_DATA_CURRENT: /var/snap/wazuh-indexer/current
   JAVA_HOME: ${SNAP}/usr/lib/jvm/java-21-openjdk-amd64
   PATH: ${JAVA_HOME}/jre/bin:$PATH
   HOME: ${SNAP_COMMON}/home/snap_daemon
@@ -65,18 +71,18 @@ environment:
 
   OPS_ROOT: ${SNAP_CURRENT}/opt/opensearch
 
-  OPENSEARCH_BIN: ${SNAP_CURRENT}/usr/share/opensearch/bin
+  OPENSEARCH_BIN: ${SNAP_CURRENT}/usr/share/wazuh-indexer/bin
   OPENSEARCH_JAVA_HOME: ${JAVA_HOME}
 
-  OPENSEARCH_HOME: ${SNAP_DATA_CURRENT}/usr/share/opensearch
+  OPENSEARCH_HOME: ${SNAP_DATA_CURRENT}/usr/share/wazuh-indexer
   OPENSEARCH_LIB: ${OPENSEARCH_HOME}/lib
   OPENSEARCH_PLUGINS: ${OPENSEARCH_HOME}/plugins
   OPENSEARCH_MODULES: ${OPENSEARCH_HOME}/modules
 
-  OPENSEARCH_PATH_CONF: ${SNAP_DATA_CURRENT}/etc/opensearch
-  OPENSEARCH_PATH_CERTS: ${SNAP_DATA_CURRENT}/etc/opensearch/certificates
+  OPENSEARCH_PATH_CONF: ${SNAP_DATA_CURRENT}/etc/wazuh-indexer
+  OPENSEARCH_PATH_CERTS: ${SNAP_DATA_CURRENT}/etc/wazuh-indexer/certificates
 
-  OPENSEARCH_VARLIB: ${SNAP_COMMON}/var/lib/opensearch
+  OPENSEARCH_VARLIB: ${SNAP_COMMON}/var/lib/wazuh-indexer
   OPENSEARCH_TMPDIR: ${SNAP_COMMON}/usr/share/tmp
   OPENSEARCH_VARLOG: ${SNAP_COMMON}/var/log/opensearch
 
@@ -175,58 +181,28 @@ parts:
       cp -r wrappers/. "${target_dir}"
       cp -r helpers/ "${target_dir}/helpers"
 
-  opensearch:
+  wazuh-indexer:
     plugin: nil
     build-packages:
       - ca-certificates
       - ca-certificates-java
-      - ssl-cert
       - openssl
+      - ssl-cert
     stage-packages:
       - openjdk-21-jdk-headless
+      - wazuh-indexer
     override-build: |
-      # update deps
-      apt-get update; apt-get upgrade -y; apt-get autoremove --purge -y; apt-get clean -y
+      craftctl default
       update-ca-certificates -f
-      
-      # setup trust store
-      trust_store="${CRAFT_PART_INSTALL}/etc/ssl/certs/java/"
-      mkdir -p "${trust_store}"
-      cp /etc/ssl/certs/java/cacerts "${trust_store}"
-      
-      # download opensearch tarball
-      version="$(craftctl get version)"
-      series="${version%%.*}.x"
-      patch="ubuntu1"
-      release_date="20240805164805"
-
-      archive="opensearch-${version}-${patch}-${release_date}-linux-x64.tar.gz"
-      url="https://launchpad.net/opensearch-releases/${series}/${version}-${patch}/+download/${archive}"
-      curl -L -o "${archive}" "${url}"
-      tar -xzvf "${archive}" -C "${CRAFT_PART_INSTALL}/" --strip-components=1
-
-      mkdir -p "${CRAFT_PART_INSTALL}/usr/share/opensearch"
-
-      mkdir -p "${CRAFT_PART_INSTALL}/etc/opensearch/"
-      mv "${CRAFT_PART_INSTALL}"/config/* "${CRAFT_PART_INSTALL}/etc/opensearch/"
-
-      declare -a resources=(
-          bin lib modules plugins performance-analyzer-rca manifest.yml NOTICE.txt LICENSE.txt README.md
-      )
-      for res in "${resources[@]}"; do
-          mv "${CRAFT_PART_INSTALL}/${res}" "${CRAFT_PART_INSTALL}/usr/share/opensearch/"
-      done
-      chmod -R 755 "${CRAFT_PART_INSTALL}/usr/share/opensearch/bin"
-
+    override-stage: |
+      craftctl default
+      ls -la etc/wazuh-indexer/
+      ls -la usr/share/wazuh-indexer/bin/
+      find . -name '*keystore'
+      chmod -R 755 usr/share/wazuh-indexer/bin
+      usr/share/wazuh-indexer/bin/opensearch-keystore create
       # It is important to correct the user permissions for the opensearch.keystore file, after the script is executed.
       # Given we know which user is going to be used for the daemon, we can set this correction in the keystore script.
       # TODO: we should perhaps NOT alter the source script - but until we find a better alternative UX wise we keep it
-      echo 'chown snap_daemon:root /var/snap/opensearch/current/etc/opensearch/opensearch.keystore' >> "${CRAFT_PART_INSTALL}"/usr/share/opensearch/bin/opensearch-keystore
+      echo 'chown snap_daemon:root /var/snap/wazuh-indexer/current/etc/wazuh-indexer/opensearch.keystore' >> "${CRAFT_PART_INSTALL}"/usr/share/wazuh-indexer/bin/opensearch-keystore
 
-      # Final clean-up
-      rm "${archive}"
-
-      declare -a resources=(logs opensearch-tar-install.sh config)
-      for res in "${resources[@]}"; do
-          rm -rf "${CRAFT_PART_INSTALL}/${res}"
-      done

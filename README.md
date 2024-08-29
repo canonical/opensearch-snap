@@ -1,25 +1,25 @@
-# OpenSearch-Snap
-[![Build and Test](https://github.com/canonical/opensearch-snap/actions/workflows/ci.yaml/badge.svg)](https://github.com/canonical/opensearch-snap/actions/workflows/ci.yaml)
-[![Publish](https://github.com/canonical/opensearch-snap/actions/workflows/release.yaml/badge.svg)](https://github.com/canonical/opensearch-snap/actions/workflows/release.yaml)
+# Wazuh-Indexer-Snap
+[![Build and Test](https://github.com/canonical/wazuh-indexer-snap/actions/workflows/ci.yaml/badge.svg)](https://github.com/canonical/wazuh-indexer-snap/actions/workflows/ci.yaml)
+[![Publish](https://github.com/canonical/wazuh-indexer-snap/actions/workflows/release.yaml/badge.svg)](https://github.com/canonical/wazuh-indexer-snap/actions/workflows/release.yaml)
 
 [//]: # (<h1 align="center">)
-[//]: # (  <a href="https://opensearch.org/">)
-[//]: # (    <img src="https://opensearch.org/assets/brand/PNG/Logo/opensearch_logo_default.png" alt="OpenSearch" />)
+[//]: # (  <a href="wazuh.com/">)
+[//]: # (    <img src="https://wazuh.com/uploads/2022/05/WAZUH.png" alt="Wazuh" />)
 [//]: # (  </a>)
 [//]: # (  <br />)
 [//]: # (</h1>)
 
-This is the snap for [OpenSearch](https://opensearch.org), a community-driven, Apache 2.0-licensed open source search and
+This is the snap for [Wazuh Indexer](https://documentation.wazuh.com/current/getting-started/components/wazuh-indexer.html), a community-driven, Apache 2.0-licensed open source search and
 analytics suite that makes it easy to ingest, search, visualize, and analyze data.
 
 
 ### Installation:
-[![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-black.svg)](https://snapcraft.io/opensearch)
+[![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-black.svg)](https://snapcraft.io/wazuh-indexer)
 
 or:
 ```
-sudo snap install opensearch --channel=2/candidate
-sudo snap connect opensearch:process-control
+sudo snap install wazuh-indexer --channel=latest/edge
+sudo snap connect wazuh-indexer:process-control
 ```
 
 ### Environment configuration:
@@ -30,11 +30,11 @@ sudo sysctl -w vm.max_map_count=262144
 sudo sysctl -w net.ipv4.tcp_retries2=5
 ```
 
-### Starting OpenSearch:
+### Starting Wazuh Indexer:
 #### Creating certificates:
 ```
 # create the certificates
-sudo snap run opensearch.setup          \
+sudo snap run wazuh-indexer.setup          \
     --node-name cm0                     \
     --node-roles cluster_manager,data   \
     --tls-priv-key-root-pass root1234   \
@@ -43,40 +43,40 @@ sudo snap run opensearch.setup          \
     --tls-init-setup yes    # this creates the root and admin certs as well.
 ```
 
-#### Starting OpenSearch:
+#### Starting Wazuh Indexer:
 ```
-sudo snap start opensearch.daemon
+sudo snap start wazuh-indexer.daemon
 ```
 
 #### Creating the Security Index:
 ```
-sudo snap run opensearch.security-init --tls-priv-key-admin-pass=admin1234
+sudo snap run wazuh-indexer.security-init --tls-priv-key-admin-pass=admin1234
 ```
 
-### Testing the OpenSearch setup:
+### Testing the Wazuh Indexer setup:
 You can either consume the REST API yourself or see if the below commands succeed, and you see that the tests `"PASSED"` successfully: 
 ```
 # Check if cluster is healthy (green):
-sudo snap run opensearch.test-cluster-health-green
+sudo snap run wazuh-indexer.test-cluster-health-green
 > ....
 > PASSED
 
 
 # Check if node is up:
-sudo snap run opensearch.test-node-up
+sudo snap run wazuh-indexer.test-node-up
 > ....
 > PASSED
 
 
 # Check if the security index is well initialised:
-sudo snap run opensearch.test-security-index-created
+sudo snap run wazuh-indexer.test-security-index-created
 > ....
 > PASSED
 ```
 
 or:
 ```
-sudo cp /var/snap/opensearch/current/etc/opensearch/certificates/node-cm0.pem ./
+sudo cp /var/snap/wazuh-indexer/current/etc/wazuh-indexer/certificates/node-cm0.pem ./
 curl --cacert node-cm0.pem -XGET https://admin:admin@localhost:9200/_cluster/health?pretty
 > {
   "cluster_name": "opensearch-cluster",
@@ -100,20 +100,20 @@ curl --cacert node-cm0.pem -XGET https://admin:admin@localhost:9200/_cluster/hea
 ```
 
 ## Running OpenSearch CLI commands not exposed by the snap:
-In some cases, users may need to run cli commands that are not exposed by the OpenSearch snap. To achieve this, those commands must be run as the `snap_daemon` user with the required environment variables passed: 
+In some cases, users may need to run cli commands that are not exposed by the Wazuh Indexer snap. To achieve this, those commands must be run as the `snap_daemon` user with the required environment variables passed: 
 
 ```
 $ sudo -u snap_daemon \
-	    OPENSEARCH_JAVA_HOME=/snap/opensearch/current/usr/lib/jvm/java-21-openjdk-amd64 \
-	    OPENSEARCH_PATH_CONF=/var/snap/opensearch/current/etc/opensearch \
-	    OPENSEARCH_HOME=/var/snap/opensearch/current/usr/share/opensearch \
-	    OPENSEARCH_LIB=/var/snap/opensearch/current/usr/share/opensearch/lib \
-	    OPENSEARCH_PATH_CERTS=/var/snap/opensearch/current/etc/opensearch/certificates \
-	    /snap/opensearch/current/usr/share/opensearch/bin/<command> [options]
+	    OPENSEARCH_JAVA_HOME=/snap/wazuh-indexer/current/usr/lib/jvm/java-21-openjdk-amd64 \
+	    OPENSEARCH_PATH_CONF=/var/snap/wazuh-indexer/current/etc/wazuh-indexer \
+	    OPENSEARCH_HOME=/var/snap/wazuh-indexer/current/usr/share/wazuh-indexer \
+	    OPENSEARCH_LIB=/var/snap/wazuh-indexer/current/usr/share/wazuh-indexer/lib \
+	    OPENSEARCH_PATH_CERTS=/var/snap/wazuh-indexer/current/etc/wazuh-indexer/certificates \
+	    /snap/wazuh-indexer/current/usr/share/wazuh-indexer/bin/<command> [options]
 ```
 
 ## License
-The Opensearch Snap is free software, distributed under the Apache
+The Wazuh Indexer Snap is free software, distributed under the Apache
 Software License, version 2.0. See
-[LICENSE](https://github.com/canonical/opensearch-snap/blob/main/licenses/LICENSE-snap)
+[LICENSE](https://github.com/canonical/wazuh-indexer-snap/blob/main/licenses/LICENSE-snap)
 for more information.

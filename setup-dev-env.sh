@@ -2,17 +2,17 @@
 
 
 function connect_interfaces () {
-    sudo snap connect opensearch:log-observe
-    sudo snap connect opensearch:mount-observe
-    sudo snap connect opensearch:process-control
-    sudo snap connect opensearch:system-observe
-    sudo snap connect opensearch:sys-fs-cgroup-service
-    sudo snap connect opensearch:shmem-perf-analyzer
+    sudo snap connect wazuh-indexer:log-observe
+    sudo snap connect wazuh-indexer:mount-observe
+    sudo snap connect wazuh-indexer:process-control
+    sudo snap connect wazuh-indexer:system-observe
+    sudo snap connect wazuh-indexer:sys-fs-cgroup-service
+    sudo snap connect wazuh-indexer:shmem-perf-analyzer
 }
 
 
 function set_kernel_conf () {
-    # 1. Allow the opensearch user to Disable all swap files:
+    # 1. Allow the wazuh-indexer user to Disable all swap files:
     # swapon -a -- default in local machine
     sudo sysctl -w vm.swappiness=0
 
