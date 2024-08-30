@@ -197,7 +197,7 @@ parts:
     override-stage: |
       craftctl default
       chmod -R 755 usr/share/wazuh-indexer
-      usr/share/wazuh-indexer/bin/opensearch-keystore create
+      # usr/share/wazuh-indexer/bin/opensearch-keystore create
       # It is important to correct the user permissions for the opensearch.keystore file, after the script is executed.
       # Given we know which user is going to be used for the daemon, we can set this correction in the keystore script.
       # TODO: we should perhaps NOT alter the source script - but until we find a better alternative UX wise we keep it
