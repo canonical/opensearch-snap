@@ -41,6 +41,9 @@ function set_base_config_props () {
     set_yaml_prop "${OPENSEARCH_PATH_CONF}/opensearch.yml" "path.home" "${OPENSEARCH_HOME}"
 
     replace_in_file "${OPENSEARCH_PATH_CONF}/jvm.options" "=logs/" "=${OPENSEARCH_VARLOG}/"
+    replace_in_file "${OPENSEARCH_PATH_CONF}/jvm.options" "/var/log/wazuh-indexer/" "${OPENSEARCH_VARLOG}/"
+    replace_in_file "${OPENSEARCH_PATH_CONF}/jvm.options" "/var/lib/wazuh-indexer/" "${OPENSEARCH_LIB}/"
+    replace_in_file "${OPENSEARCH_PATH_CONF}/jvm.options" "/etc/wazuh-indexer/" "${OPENSEARCH_PATH_CONF}/"
     echo "-Duser.home=${HOME}" | tee -a "${OPENSEARCH_PATH_CONF}/jvm.options"
 }
 

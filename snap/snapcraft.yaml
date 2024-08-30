@@ -84,7 +84,7 @@ environment:
 
   OPENSEARCH_VARLIB: ${SNAP_COMMON}/var/lib/wazuh-indexer
   OPENSEARCH_TMPDIR: ${SNAP_COMMON}/usr/share/tmp
-  OPENSEARCH_VARLOG: ${SNAP_COMMON}/var/log/opensearch
+  OPENSEARCH_VARLOG: ${SNAP_COMMON}/var/log/wazuh-indexer
 
   KNN_LIB_DIR: ${OPENSEARCH_PLUGINS}/opensearch-knn/lib
 
@@ -197,8 +197,10 @@ parts:
     override-stage: |
       craftctl default
       chmod -R 755 usr/share/wazuh-indexer
-      # usr/share/wazuh-indexer/bin/opensearch-keystore create
+      usr/share/wazuh-indexer/bin/opensearch-keystore create
       # It is important to correct the user permissions for the opensearch.keystore file, after the script is executed.
       # Given we know which user is going to be used for the daemon, we can set this correction in the keystore script.
       # TODO: we should perhaps NOT alter the source script - but until we find a better alternative UX wise we keep it
       echo 'chown snap_daemon:root /var/snap/wazuh-indexer/current/etc/wazuh-indexer/opensearch.keystore' >> "${CRAFT_STAGE}/usr/share/wazuh-indexer/bin/opensearch-keystore"
+      sed -i 's/#!\/usr\/bin\/env bash/#!\/usr\/bin\/env bash\nunset OPENSEARCH_HOME\n/' ${CRAFT_STAGE}/usr/share/wazuh-indexer/bin/opensearch-env
+      
