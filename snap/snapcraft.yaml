@@ -203,4 +203,4 @@ parts:
       # TODO: we should perhaps NOT alter the source script - but until we find a better alternative UX wise we keep it
       echo 'chown snap_daemon:root /var/snap/wazuh-indexer/current/etc/wazuh-indexer/opensearch.keystore' >> "${CRAFT_STAGE}/usr/share/wazuh-indexer/bin/opensearch-keystore"
       sed -i 's/#!\/usr\/bin\/env bash/#!\/usr\/bin\/env bash\nunset OPENSEARCH_HOME\n/' ${CRAFT_STAGE}/usr/share/wazuh-indexer/bin/opensearch-env
-      
+      sed -i -e 's/^\([^#].*\)/# \1/g' etc/wazuh-indexer/opensearch.yml
