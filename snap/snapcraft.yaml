@@ -186,20 +186,29 @@ parts:
     build-packages:
       - ca-certificates
       - ca-certificates-java
+      - openjdk-21-jre
       - openssl
       - ssl-cert
     stage-packages:
       - openjdk-21-jdk-headless
       - wazuh-indexer
     override-build: |
-      craftctl default
+      # update deps
+      apt-get update; apt-get upgrade -y; apt-get autoremove --purge -y; apt-get clean -y
       update-ca-certificates -f
+
+      # setup trust store
+      trust_store="${CRAFT_PART_INSTALL}/etc/ssl/certs/java/"
+      mkdir -p "${trust_store}"
+      cp /etc/ssl/certs/java/cacerts "${trust_store}"
     override-stage: |
       craftctl default
       chmod -R 755 usr/share/wazuh-indexer
       sed -i 's/#!\/usr\/bin\/env bash/#!\/usr\/bin\/env bash\nunset OPENSEARCH_HOME\n/' ${CRAFT_STAGE}/usr/share/wazuh-indexer/bin/opensearch-env
-      # OPENSEARCH_PATH_CONF=${CRAFT_STAGE}/etc/wazuh-indexer usr/share/wazuh-indexer/bin/opensearch-plugin install anomalyDetection
-      # It is important to correct the user permissions for the opensearch.keystore file, after the script is executed.
+      cat  usr/share/wazuh-indexer/bin/opensearch-plugin
+      # OPENSEARCH_PATH_CONF=${CRAFT_STAGE}/etc/wazuh-indexer https://github.com/Aiven-Open/prometheus-exporter-plugin-for-opensearch/releases/download/2.16.0.0/prometheus-exporter-2.16.0.0.zip
+      # OPENSEARCH_PATH_CONF=${CRAFT_STAGE}/etc/wazuh-indexer usr/share/wazuh-indexer/bin/opensearch-plugin install https://github.com/opensearch-project/anomaly-detection/archive/refs/tags/2.16.0.0.tar.gz
+      # It is important to correnct the user permissions for the opensearch.keystore file, after the script is executed.
       # Given we know which user is going to be used for the daemon, we can set this correction in the keystore script.
       # TODO: we should perhaps NOT alter the source script - but until we find a better alternative UX wise we keep it
       echo 'chown snap_daemon:root /var/snap/wazuh-indexer/current/etc/wazuh-indexer/opensearch.keystore' >> "${CRAFT_STAGE}/usr/share/wazuh-indexer/bin/opensearch-keystore"
