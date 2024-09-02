@@ -205,9 +205,8 @@ parts:
       craftctl default
       chmod -R 755 usr/share/wazuh-indexer
       sed -i 's/#!\/usr\/bin\/env bash/#!\/usr\/bin\/env bash\nunset OPENSEARCH_HOME\n/' ${CRAFT_STAGE}/usr/share/wazuh-indexer/bin/opensearch-env
-      cat  usr/share/wazuh-indexer/bin/opensearch-plugin
+      ls -la usr/share/wazuh-indexer/plugins/
       OPENSEARCH_PATH_CONF=${CRAFT_STAGE}/etc/wazuh-indexer usr/share/wazuh-indexer/bin/opensearch-plugin install https://github.com/Aiven-Open/prometheus-exporter-plugin-for-opensearch/releases/download/2.10.0.0/prometheus-exporter-2.10.0.0.zip
-      OPENSEARCH_PATH_CONF=${CRAFT_STAGE}/etc/wazuh-indexer usr/share/wazuh-indexer/bin/opensearch-plugin install https://github.com/opensearch-project/anomaly-detection/archive/refs/tags/2.10.0.0.tar.gz
       # It is important to correnct the user permissions for the opensearch.keystore file, after the script is executed.
       # Given we know which user is going to be used for the daemon, we can set this correction in the keystore script.
       # TODO: we should perhaps NOT alter the source script - but until we find a better alternative UX wise we keep it
