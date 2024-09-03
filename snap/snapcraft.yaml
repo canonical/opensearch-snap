@@ -156,7 +156,6 @@ parts:
       - util-linux
       - curl
       - procps
-      - libc6
       - libfreetype6
       - libpng16-16
       - libxrender1
@@ -191,6 +190,7 @@ parts:
       - openssl
       - ssl-cert
     stage-packages:
+      - libc6
       - openjdk-21-jdk-headless
       - wazuh-indexer
     override-build: |
