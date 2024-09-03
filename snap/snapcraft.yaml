@@ -1,5 +1,5 @@
 name: wazuh-indexer
-base: core22
+base: core24
 
 version: '4.8.2'
 
@@ -13,8 +13,8 @@ grade: stable
 
 confinement: strict
 
-architectures:
-  - build-on: amd64
+platforms:
+  amd64:
 
 system-usernames:
   snap_daemon: shared
@@ -156,6 +156,7 @@ parts:
       - util-linux
       - curl
       - procps
+      - libc6-dev
       - libfreetype6
       - libpng16-16
       - libxrender1
