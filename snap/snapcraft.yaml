@@ -186,7 +186,7 @@ parts:
     build-packages:
       - ca-certificates
       - ca-certificates-java
-      - openjdk-21-jdk-headless
+      - openjdk-21-jdk
       - openssl
       - ssl-cert
     stage-packages:
