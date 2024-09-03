@@ -153,6 +153,7 @@ jobs:
           OPENSEARCH_PATH_CERTS: /var/snap/wazuh-indexer/current/etc/wazuh-indexer/certificates
         run: |
           # Prometheus Exporter appears in plugins listing
+          sudo -E "${OPENSEARCH_BIN}"/opensearch-plugin list
           prometheus_is_there=$(sudo -E "${OPENSEARCH_BIN}"/opensearch-plugin list | grep prometheus-exporter)
           if [ ! "$prometheus_is_there" ]; then
             exit 1
