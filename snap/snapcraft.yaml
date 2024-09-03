@@ -1,5 +1,5 @@
 name: wazuh-indexer
-base: core24
+base: core22
 
 version: '4.8.2'
 
@@ -13,8 +13,8 @@ grade: stable
 
 confinement: strict
 
-platforms:
-  amd64:
+architectures:
+  - build-on: amd64
 
 system-usernames:
   snap_daemon: shared
@@ -186,11 +186,9 @@ parts:
     build-packages:
       - ca-certificates
       - ca-certificates-java
-      - openjdk-21-jdk-headless
       - openssl
       - ssl-cert
     stage-packages:
-      - libc6
       - openjdk-21-jdk-headless
       - wazuh-indexer
     override-build: |
