@@ -178,6 +178,7 @@ jobs:
 
           # Checking that Prometheus configuration is correct
           prometheus_lines=$(sudo grep prometheus ${OPENSEARCH_PATH_CONF}/opensearch.yml | wc -l)
+          sudo grep prometheus ${OPENSEARCH_PATH_CONF}/opensearch.yml
           if [ "$prometheus_lines" != "4" ]; then
             exit 1
           fi
