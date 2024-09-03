@@ -71,7 +71,7 @@ jobs:
       - name: Download snap file
         uses: actions/download-artifact@v3
         with:
-          name: wazuh-indexer_amd64
+          name: wazuh-indexer_snap_amd64
           path: .
 
       - name: Install snap file
