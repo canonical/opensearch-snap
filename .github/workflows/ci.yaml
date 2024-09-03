@@ -50,7 +50,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: wazuh_indexer_snap_amd64
-          path: "wazuh_indexer*.snap"
+          path: "wazuh-indexer*.snap"
 
   test:
     name: Test Snap
@@ -79,7 +79,7 @@ jobs:
           version="$(cat snap/snapcraft.yaml | yq .version)"
           
           sudo snap remove --purge wazuh-indexer
-          sudo snap install wazuh_indexer_${version}_amd64.snap --dangerous --jailmode
+          sudo snap install wazuh-indexer_${version}_amd64.snap --dangerous --jailmode
 
       - name: Setup the required system configs
         run: |
@@ -219,7 +219,7 @@ jobs:
       - name: Upgrade snap
         run: |
           version="$(cat snap/snapcraft.yaml | yq .version)"
-          sudo snap install wazuh_indexer_${version}_amd64.snap --dangerous --jailmode
+          sudo snap install wazuh-indexer_${version}_amd64.snap --dangerous --jailmode
 
           if [ "$(ls /var/snap/wazuh-indexer/x2)" ]; then
               echo "Snap upgraded."
