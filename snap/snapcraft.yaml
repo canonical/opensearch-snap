@@ -189,7 +189,6 @@ parts:
       - openssl
       - ssl-cert
     stage-packages:
-      - openjdk-21-jdk
       - wazuh-indexer
     override-build: |
       # update deps
@@ -211,4 +210,3 @@ parts:
       # TODO: we should perhaps NOT alter the source script - but until we find a better alternative UX wise we keep it
       echo 'chown snap_daemon:root /var/snap/wazuh-indexer/current/etc/wazuh-indexer/opensearch.keystore' >> "${CRAFT_STAGE}/usr/share/wazuh-indexer/bin/opensearch-keystore"
       sed -i -e 's/^\([^#].*\)/# \1/g' etc/wazuh-indexer/opensearch.yml
-
