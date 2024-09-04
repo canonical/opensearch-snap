@@ -157,19 +157,16 @@ jobs:
           if [ ! "$prometheus_is_there" ]; then
             exit 2
           fi
-          echo "PASO1"
           # repository-s3 appears in plugins listing
           repository_s3_is_there=$(sudo -E "${OPENSEARCH_BIN}"/opensearch-plugin list | grep repository-s3)
           if [ ! "$repository_s3_is_there" ]; then
             exit 3
           fi
-          echo "PASO2"
           # repository-gcs appears in plugins listing
           repository_gcs_is_there=$(sudo -E "${OPENSEARCH_BIN}"/opensearch-plugin list | grep repository-gcs)
           if [ ! "$repository_gcs_is_there" ]; then
             exit 4
           fi
-          echo "PASO3"
           # Prometheus exporter can be queried
           sudo cp /var/snap/wazuh-indexer/current/etc/wazuh-indexer/certificates/node-cm0.pem ./
           cert=./node-cm0.pem
@@ -177,13 +174,11 @@ jobs:
           if [[ "$resp" != *"200 OK"* ]]; then
             exit 5
           fi
-          echo "PASO4"
           # Checking that Prometheus configuration is correct
           prometheus_lines=$(sudo grep prometheus ${OPENSEARCH_PATH_CONF}/opensearch.yml | wc -l)
           if [ "$prometheus_lines" != "4" ]; then
             exit 6
           fi
-          echo "PASO5"
 
       - name: Check COS logs slot is available
         run: |
