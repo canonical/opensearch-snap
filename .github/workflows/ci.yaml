@@ -155,17 +155,17 @@ jobs:
           # Prometheus Exporter appears in plugins listing
           prometheus_is_there=$(sudo -E "${OPENSEARCH_BIN}"/opensearch-plugin list | grep prometheus-exporter)
           if [ ! "$prometheus_is_there" ]; then
-            exit 1
+            exit 2
           fi
           # repository-s3 appears in plugins listing
           repository_s3_is_there=$(sudo -E "${OPENSEARCH_BIN}"/opensearch-plugin list | grep repository-s3)
           if [ ! "$repository_s3_is_there" ]; then
-            exit 2
+            exit 3
           fi
           # repository-gcs appears in plugins listing
           repository_gcs_is_there=$(sudo -E "${OPENSEARCH_BIN}"/opensearch-plugin list | grep repository-gcs)
           if [ ! "$repository_gcs_is_there" ]; then
-            exit 3
+            exit 4
           fi
 
           # Prometheus exporter can be queried
@@ -173,13 +173,13 @@ jobs:
           cert=./node-cm0.pem
           resp=$(curl -I --cacert ${cert} -XGET https://localhost:9200/_prometheus/metrics -u 'admin:admin')
           if [[ "$resp" != *"200 OK"* ]]; then
-            exit 4
+            exit 5
           fi
 
           # Checking that Prometheus configuration is correct
           prometheus_lines=$(sudo grep prometheus ${OPENSEARCH_PATH_CONF}/opensearch.yml | wc -l)
           if [ "$prometheus_lines" != "4" ]; then
-            exit 5
+            exit 6
           fi
 
       - name: Check COS logs slot is available
