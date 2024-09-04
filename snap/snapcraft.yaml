@@ -107,7 +107,7 @@ apps:
       - system-observe
       - sys-fs-cgroup-service
     environment:
-      LD_LIBRARY_PATH: "${LD_LIBRARY_PATH}:${KNN_LIB_DIR}"
+      LD_LIBRARY_PATH: "${LD_LIBRARY_PATH}:${KNN_LIB_DIR}:${SNAP_CURRENT}/usr/lib/x86_64-linux-gnu:"
 
   security-init:
     command: opt/opensearch/security-init.sh
