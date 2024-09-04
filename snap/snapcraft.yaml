@@ -1,5 +1,5 @@
 name: wazuh-indexer
-base: core24
+base: core22
 
 version: '4.8.2'
 
@@ -13,8 +13,8 @@ grade: stable
 
 confinement: strict
 
-platforms:
-  amd64:
+architectures:
+  - build-on: amd64
 
 system-usernames:
   snap_daemon: shared
