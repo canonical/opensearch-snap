@@ -188,8 +188,6 @@ parts:
       - openjdk-21-jdk
       - openssl
       - ssl-cert
-    stage-packages:
-      - wazuh-indexer
     override-build: |
       # update deps
       apt-get update; apt-get upgrade -y; apt-get autoremove --purge -y; apt-get clean -y
@@ -199,6 +197,9 @@ parts:
       trust_store="${CRAFT_PART_INSTALL}/etc/ssl/certs/java/"
       mkdir -p "${trust_store}"
       cp /etc/ssl/certs/java/cacerts "${trust_store}"
+    stage-packages:
+      - openjdk-21-jdk
+      - wazuh-indexer
     override-stage: |
       craftctl default
       chmod -R 755 usr/share/wazuh-indexer
@@ -210,3 +211,6 @@ parts:
       # TODO: we should perhaps NOT alter the source script - but until we find a better alternative UX wise we keep it
       echo 'chown snap_daemon:root /var/snap/wazuh-indexer/current/etc/wazuh-indexer/opensearch.keystore' >> "${CRAFT_STAGE}/usr/share/wazuh-indexer/bin/opensearch-keystore"
       sed -i -e 's/^\([^#].*\)/# \1/g' etc/wazuh-indexer/opensearch.yml
+    override-prime: |
+      craftctl default
+      rm -rf usr/share/wazuh-indexer/jdk
