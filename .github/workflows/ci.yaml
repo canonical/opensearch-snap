@@ -261,6 +261,7 @@ jobs:
           OPENSEARCH_LIB: /var/snap/wazuh-indexer/current/usr/share/wazuh-indexer/lib
           OPENSEARCH_PATH_CERTS: /var/snap/wazuh-indexer/current/etc/wazuh-indexer/certificates
         run: |
+          cat ${OPENSEARCH_BIN}"/opensearch-plugin
           sudo -E "${OPENSEARCH_BIN}"/opensearch-plugin remove repository-s3
           sudo -E "${OPENSEARCH_BIN}"/opensearch-keystore remove s3.client.default.access_key
           sudo -E "${OPENSEARCH_BIN}"/opensearch-keystore remove s3.client.default.secret_key
