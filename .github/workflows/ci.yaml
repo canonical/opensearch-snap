@@ -44,13 +44,13 @@ jobs:
         name: Build snap
         uses: snapcore/action-build@v1
         with:
-          snapcraft-channel: 7.x/candidate
+          snapcraft-channel: 8.x/stable
 
       - name: Upload built snap job artifact
         uses: actions/upload-artifact@v3
         with:
-          name: opensearch_snap_amd64
-          path: "opensearch_*.snap"
+          name: wazuh-indexer_snap_amd64
+          path: "wazuh-indexer*.snap"
 
   test:
     name: Test Snap
@@ -71,15 +71,15 @@ jobs:
       - name: Download snap file
         uses: actions/download-artifact@v3
         with:
-          name: opensearch_snap_amd64
+          name: wazuh-indexer_snap_amd64
           path: .
 
       - name: Install snap file
         run: |
           version="$(cat snap/snapcraft.yaml | yq .version)"
           
-          sudo snap remove --purge opensearch
-          sudo snap install opensearch_${version}_amd64.snap --dangerous --jailmode
+          sudo snap remove --purge wazuh-indexer
+          sudo snap install wazuh-indexer_${version}_amd64.snap --dangerous --jailmode
 
       - name: Setup the required system configs
         run: |
@@ -89,17 +89,17 @@ jobs:
 
       - name: Connect required interfaces
         run: |
-          sudo snap connect opensearch:log-observe
-          sudo snap connect opensearch:mount-observe
-          sudo snap connect opensearch:process-control
-          sudo snap connect opensearch:system-observe
-          sudo snap connect opensearch:sys-fs-cgroup-service
-          sudo snap connect opensearch:shmem-perf-analyzer
+          sudo snap connect wazuh-indexer:log-observe
+          sudo snap connect wazuh-indexer:mount-observe
+          sudo snap connect wazuh-indexer:process-control
+          sudo snap connect wazuh-indexer:system-observe
+          sudo snap connect wazuh-indexer:sys-fs-cgroup-service
+          sudo snap connect wazuh-indexer:shmem-perf-analyzer
 
-      - name: Setup and Start OpenSearch
+      - name: Setup and Start Wazuh Indexer
         run: |
           # create the certificates
-          sudo snap run opensearch.setup \
+          sudo snap run wazuh-indexer.setup \
               --node-name cm0 \
               --node-roles cluster_manager,data \
               --tls-priv-key-root-pass root1234 \
@@ -107,20 +107,20 @@ jobs:
               --tls-priv-key-node-pass node1234 \
               --tls-init-setup yes                 # this creates the root and admin certs as well.
 
-          # start opensearch
-          sudo snap start opensearch.daemon
+          # start wazuh-indexer
+          sudo snap start wazuh-indexer.daemon
 
           # wait a bit for it to fully initialize
           sleep 40s
           # create the security index
-          sudo snap run opensearch.security-init --tls-priv-key-admin-pass=admin1234
+          sudo snap run wazuh-indexer.security-init --tls-priv-key-admin-pass=admin1234
           sleep 15s
 
       - name: Ensure the cluster is reachable and node created
         run: |
           sudo snap install yq
           
-          sudo cp /var/snap/opensearch/current/etc/opensearch/certificates/node-cm0.pem ./
+          sudo cp /var/snap/wazuh-indexer/current/etc/wazuh-indexer/certificates/node-cm0.pem ./
           cert=./node-cm0.pem
           
           # Check node name
@@ -140,73 +140,71 @@ jobs:
           # replace the following condition by "${cluster_status}" != "green"  
           if [ "${cluster_status}" == "red" ]; then
               curl --cacert ${cert} -XGET https://localhost:9200/_cat/shards -u 'admin:admin'
-              exit 1
+              exit 2
           fi
 
       - name: Check if Prometheus Exporter and repository plugins are available
         env:
-          OPENSEARCH_JAVA_HOME: /snap/opensearch/current/usr/lib/jvm/java-21-openjdk-amd64
-          OPENSEARCH_BIN: /snap/opensearch/current/usr/share/opensearch/bin
-          OPENSEARCH_PATH_CONF: /var/snap/opensearch/current/etc/opensearch
-          OPENSEARCH_HOME: /var/snap/opensearch/current/usr/share/opensearch
-          OPENSEARCH_LIB: /var/snap/opensearch/current/usr/share/opensearch/lib
-          OPENSEARCH_PATH_CERTS: /var/snap/opensearch/current/etc/opensearch/certificates
+          OPENSEARCH_JAVA_HOME: /snap/wazuh-indexer/current/usr/lib/jvm/java-21-openjdk-amd64
+          OPENSEARCH_BIN: /snap/wazuh-indexer/current/usr/share/wazuh-indexer/bin
+          OPENSEARCH_PATH_CONF: /var/snap/wazuh-indexer/current/etc/wazuh-indexer
+          OPENSEARCH_HOME: /var/snap/wazuh-indexer/current/usr/share/wazuh-indexer
+          OPENSEARCH_LIB: /var/snap/wazuh-indexer/current/usr/share/wazuh-indexer/lib
+          OPENSEARCH_PATH_CERTS: /var/snap/wazuh-indexer/current/etc/wazuh-indexer/certificates
         run: |
           # Prometheus Exporter appears in plugins listing
           prometheus_is_there=$(sudo -E "${OPENSEARCH_BIN}"/opensearch-plugin list | grep prometheus-exporter)
           if [ ! "$prometheus_is_there" ]; then
-            exit 1
+            exit 2
           fi
           # repository-s3 appears in plugins listing
           repository_s3_is_there=$(sudo -E "${OPENSEARCH_BIN}"/opensearch-plugin list | grep repository-s3)
           if [ ! "$repository_s3_is_there" ]; then
-            exit 1
+            exit 3
           fi
           # repository-gcs appears in plugins listing
           repository_gcs_is_there=$(sudo -E "${OPENSEARCH_BIN}"/opensearch-plugin list | grep repository-gcs)
           if [ ! "$repository_gcs_is_there" ]; then
-            exit 1
+            exit 4
           fi
-
           # Prometheus exporter can be queried
-          sudo cp /var/snap/opensearch/current/etc/opensearch/certificates/node-cm0.pem ./
+          sudo cp /var/snap/wazuh-indexer/current/etc/wazuh-indexer/certificates/node-cm0.pem ./
           cert=./node-cm0.pem
           resp=$(curl -I --cacert ${cert} -XGET https://localhost:9200/_prometheus/metrics -u 'admin:admin')
           if [[ "$resp" != *"200 OK"* ]]; then
-            exit 1
+            exit 5
           fi
-
           # Checking that Prometheus configuration is correct
           prometheus_lines=$(sudo grep prometheus ${OPENSEARCH_PATH_CONF}/opensearch.yml | wc -l)
           if [ "$prometheus_lines" != "4" ]; then
-            exit 1
+            exit 6
           fi
 
       - name: Check COS logs slot is available
         run: |
-          snap_slot=$( sudo snap connections opensearch | grep content )
+          snap_slot=$( sudo snap connections wazuh-indexer | grep content )
           if [ ! "$snap_slot" ]; then
             exit 1
           fi 
 
       - name: Configure backup plugin 
         env:
-          OPENSEARCH_JAVA_HOME: /snap/opensearch/current/usr/lib/jvm/java-21-openjdk-amd64
-          OPENSEARCH_BIN: /snap/opensearch/current/usr/share/opensearch/bin
-          OPENSEARCH_PATH_CONF: /var/snap/opensearch/current/etc/opensearch
-          OPENSEARCH_HOME: /var/snap/opensearch/current/usr/share/opensearch
-          OPENSEARCH_LIB: /var/snap/opensearch/current/usr/share/opensearch/lib
-          OPENSEARCH_PATH_CERTS: /var/snap/opensearch/current/etc/opensearch/certificates
+          OPENSEARCH_JAVA_HOME: /snap/wazuh-indexer/current/usr/lib/jvm/java-21-openjdk-amd64
+          OPENSEARCH_BIN: /snap/wazuh-indexer/current/usr/share/wazuh-indexer/bin
+          OPENSEARCH_PATH_CONF: /var/snap/wazuh-indexer/current/etc/wazuh-indexer
+          OPENSEARCH_HOME: /var/snap/wazuh-indexer/current/usr/share/wazuh-indexer
+          OPENSEARCH_LIB: /var/snap/wazuh-indexer/current/usr/share/wazuh-indexer/lib
+          OPENSEARCH_PATH_CERTS: /var/snap/wazuh-indexer/current/etc/wazuh-indexer/certificates
         run: |
           echo "TEST" | sudo tee -a testkey
 
           sudo -E "${OPENSEARCH_BIN}"/opensearch-keystore add-file s3.client.default.access_key ${PWD}/testkey
           sudo -E "${OPENSEARCH_BIN}"/opensearch-keystore add-file s3.client.default.secret_key ${PWD}/testkey
 
-          sudo snap restart opensearch.daemon
+          sudo snap restart wazuh-indexer.daemon
           sleep 20s
 
-          sudo cp /var/snap/opensearch/current/etc/opensearch/certificates/node-cm0.pem ./
+          sudo cp /var/snap/wazuh-indexer/current/etc/wazuh-indexer/certificates/node-cm0.pem ./
           cert=./node-cm0.pem
 
           cluster_resp=$(curl --cacert ${cert} -XGET https://localhost:9200 -u 'admin:admin')
@@ -219,9 +217,9 @@ jobs:
       - name: Upgrade snap
         run: |
           version="$(cat snap/snapcraft.yaml | yq .version)"
-          sudo snap install opensearch_${version}_amd64.snap --dangerous --jailmode
+          sudo snap install wazuh-indexer_${version}_amd64.snap --dangerous --jailmode
 
-          if [ "$(ls /var/snap/opensearch/x2)" ]; then
+          if [ "$(ls /var/snap/wazuh-indexer/x2)" ]; then
               echo "Snap upgraded."
           else
               exit 1
@@ -229,12 +227,12 @@ jobs:
 
       - name: Ensure the cluster is reachable and node created after upgrade
         run: |
-          # start opensearch after upgrade
-          sudo snap restart opensearch.daemon
+          # start wazuh-indexer after upgrade
+          sudo snap restart wazuh-indexer.daemon
           # Give some time for the service to come back up
-          sleep 20s
+          sleep 120s
 
-          sudo cp /var/snap/opensearch/current/etc/opensearch/certificates/node-cm0.pem ./
+          sudo cp /var/snap/wazuh-indexer/current/etc/wazuh-indexer/certificates/node-cm0.pem ./
           cert=./node-cm0.pem
 
           # Check node name
@@ -252,18 +250,18 @@ jobs:
           # replace the following condition by "${cluster_status}" != "green"  
           if [ "${cluster_status}" == "red" ]; then
               curl --cacert ${cert} -XGET https://localhost:9200/_cat/shards -u 'admin:admin'
-              exit 1
+              exit 2
           fi
-
       - name: Remove backup plugin
         env:
-          OPENSEARCH_JAVA_HOME: /snap/opensearch/current/usr/lib/jvm/java-21-openjdk-amd64
-          OPENSEARCH_BIN: /snap/opensearch/current/usr/share/opensearch/bin
-          OPENSEARCH_PATH_CONF: /var/snap/opensearch/current/etc/opensearch
-          OPENSEARCH_HOME: /var/snap/opensearch/current/usr/share/opensearch
-          OPENSEARCH_LIB: /var/snap/opensearch/current/usr/share/opensearch/lib
-          OPENSEARCH_PATH_CERTS: /var/snap/opensearch/current/etc/opensearch/certificates
+          OPENSEARCH_JAVA_HOME: /snap/wazuh-indexer/current/usr/lib/jvm/java-21-openjdk-amd64
+          OPENSEARCH_BIN: /snap/wazuh-indexer/current/usr/share/wazuh-indexer/bin
+          OPENSEARCH_PATH_CONF: /var/snap/wazuh-indexer/current/etc/wazuh-indexer
+          OPENSEARCH_HOME: /var/snap/wazuh-indexer/current/usr/share/wazuh-indexer
+          OPENSEARCH_LIB: /var/snap/wazuh-indexer/current/usr/share/wazuh-indexer/lib
+          OPENSEARCH_PATH_CERTS: /var/snap/wazuh-indexer/current/etc/wazuh-indexer/certificates
         run: |
+          sudo cat "${OPENSEARCH_BIN}"/opensearch-plugin
           sudo -E "${OPENSEARCH_BIN}"/opensearch-plugin remove repository-s3
           sudo -E "${OPENSEARCH_BIN}"/opensearch-keystore remove s3.client.default.access_key
           sudo -E "${OPENSEARCH_BIN}"/opensearch-keystore remove s3.client.default.secret_key

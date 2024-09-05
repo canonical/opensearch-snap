@@ -5,7 +5,7 @@ set -eu
 usage() {
 cat << EOF
 usage: test-dev-cluster.sh --admin-auth-password admin
-Tests if the OpenSearch cluster is well configured.
+Tests if the Wazuh Indexer cluster is well configured.
 --admin-auth-password  (Optional) Password for basic auth with the opensearch rest api, default "admin"
 --help                 Shows help menu
 EOF
@@ -48,19 +48,19 @@ function parse_args () {
 function run_tests () {
     # Check if cluster is healthy (green):
     echo "Running: test-cluster-health-green..."
-    sudo snap run opensearch.test-cluster-health-green --admin-auth-password "${admin_auth_password}"
+    sudo snap run wazuh-indexer.test-cluster-health-green --admin-auth-password "${admin_auth_password}"
 
     echo -e "\n\n---------------\n\n"
 
     # Check if node is up:
     echo "Running: test-node-up..."
-    sudo snap run opensearch.test-node-up --admin-auth-password "${admin_auth_password}"
+    sudo snap run wazuh-indexer.test-node-up --admin-auth-password "${admin_auth_password}"
 
     echo -e "\n\n---------------\n\n"
 
     # Check if the security index is well initialised:
     echo "Running: test-security-index-created..."
-    sudo snap run opensearch.test-security-index-created --admin-auth-password "${admin_auth_password}"
+    sudo snap run wazuh-indexer.test-security-index-created --admin-auth-password "${admin_auth_password}"
 }
 
 

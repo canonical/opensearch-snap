@@ -13,7 +13,7 @@ function create_file_structure () {
     # want to use the * here, so not calling dir_copy_if_not_exists
     # Doing it before OPENSEARCH_PATH_CERTS is created, as it is set as "snap_daemon" user
     mkdir -p "${OPENSEARCH_PATH_CONF}/"
-    copy_files_between_folder "${SNAP}/etc/opensearch/" "${OPENSEARCH_PATH_CONF}/"
+    copy_files_between_folder "${SNAP}/etc/wazuh-indexer/" "${OPENSEARCH_PATH_CONF}/"
 
     declare -a folders=("${OPENSEARCH_HOME}" "${OPENSEARCH_VARLIB}" "${OPENSEARCH_VARLOG}" "${OPENSEARCH_TMPDIR}" "${OPENSEARCH_PATH_CERTS}" "${HOME}")
     for f in "${folders[@]}"; do
@@ -24,8 +24,8 @@ function create_file_structure () {
 
     declare -a common=(modules plugins lib)
     for dir in "${common[@]}"; do
-        add_folder "${SNAP_DATA}/usr/share/opensearch/${dir}" 770
-        cp -r "${SNAP}/usr/share/opensearch/${dir}/"* "${SNAP_DATA}/usr/share/opensearch/${dir}/"
+        add_folder "${SNAP_DATA}/usr/share/wazuh-indexer/${dir}" 770
+        cp -r "${SNAP}/usr/share/wazuh-indexer/${dir}/"* "${SNAP_DATA}/usr/share/wazuh-indexer/${dir}/"
     done
 
     add_folder "${OPENSEARCH_HOME}/extensions" 770
@@ -41,6 +41,9 @@ function set_base_config_props () {
     set_yaml_prop "${OPENSEARCH_PATH_CONF}/opensearch.yml" "path.home" "${OPENSEARCH_HOME}"
 
     replace_in_file "${OPENSEARCH_PATH_CONF}/jvm.options" "=logs/" "=${OPENSEARCH_VARLOG}/"
+    replace_in_file "${OPENSEARCH_PATH_CONF}/jvm.options" "/var/log/wazuh-indexer/" "${OPENSEARCH_VARLOG}/"
+    replace_in_file "${OPENSEARCH_PATH_CONF}/jvm.options" "/var/lib/wazuh-indexer/" "${OPENSEARCH_LIB}/"
+    replace_in_file "${OPENSEARCH_PATH_CONF}/jvm.options" "/etc/wazuh-indexer/" "${OPENSEARCH_PATH_CONF}/"
     echo "-Duser.home=${HOME}" | tee -a "${OPENSEARCH_PATH_CONF}/jvm.options"
 }
 

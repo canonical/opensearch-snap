@@ -30,7 +30,7 @@ jobs:
       - name: Download snap file
         uses: actions/download-artifact@v3
         with:
-          name: opensearch_snap_amd64
+          name: wazuh_indexer_snap_amd64
           path: .
 
       - name: Set snap release channel
@@ -46,5 +46,5 @@ jobs:
         env:
           SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.STORE_LOGIN }}
         with:
-          snap: opensearch_${{env.version}}_amd64.snap
+          snap: wazuh_indexer_${{env.version}}_amd64.snap
           release: ${{env.channel}}
