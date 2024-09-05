@@ -225,14 +225,15 @@ jobs:
               exit 1
           fi
 
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
       - name: Ensure the cluster is reachable and node created after upgrade
         run: |
           # start wazuh-indexer after upgrade
+          snap info wazuh-indexer
           sudo snap restart wazuh-indexer.daemon
           # Give some time for the service to come back up
           sleep 30s
+          sudo snap info wazuh-indexer
+          sudo snap logs wazuh-indexer
 
           sudo cp /var/snap/wazuh-indexer/current/etc/wazuh-indexer/certificates/node-cm0.pem ./
           cert=./node-cm0.pem
