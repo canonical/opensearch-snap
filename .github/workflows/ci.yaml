@@ -225,6 +225,8 @@ jobs:
               exit 1
           fi
 
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
       - name: Ensure the cluster is reachable and node created after upgrade
         run: |
           # start wazuh-indexer after upgrade
