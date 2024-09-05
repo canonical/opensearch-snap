@@ -205,13 +205,14 @@ parts:
       chmod -R 755 usr/share/wazuh-indexer
       sed -i 's/#!\/usr\/bin\/env bash/#!\/usr\/bin\/env bash\nunset OPENSEARCH_HOME\n/' ${CRAFT_STAGE}/usr/share/wazuh-indexer/bin/opensearch-env
       OPENSEARCH_PATH_CONF=${CRAFT_STAGE}/etc/wazuh-indexer ${CRAFT_STAGE}/usr/share/wazuh-indexer/bin/opensearch-plugin install --batch \
-        https://github.com/Aiven-Open/prometheus-exporter-plugin-for-opensearch/releases/download/2.10.0.0/prometheus-exporter-2.10.0.0.zip \
-        https://artifacts.opensearch.org/releases/plugins/repository-s3/2.10.0/repository-s3-2.10.0.zip \
-        https://artifacts.opensearch.org/releases/plugins/repository-gcs/2.10.0/repository-gcs-2.10.0.zip \
-        https://artifacts.opensearch.org/releases/plugins/flow-framework/2.10.0/flow-framework-2.10.0.zip
+        https://github.com/Aiven-Open/prometheus-exporter-plugin-for-opensearch/releases/download/2.10.0.0/prometheus-exporter-2.10.0.0.zip
+      OPENSEARCH_PATH_CONF=${CRAFT_STAGE}/etc/wazuh-indexer ${CRAFT_STAGE}/usr/share/wazuh-indexer/bin/opensearch-plugin install --batch \
+        https://artifacts.opensearch.org/releases/plugins/repository-gcs/2.10.0/repository-gcs-2.10.0.zip
+      OPENSEARCH_PATH_CONF=${CRAFT_STAGE}/etc/wazuh-indexer ${CRAFT_STAGE}/usr/share/wazuh-indexer/bin/opensearch-plugin install --batch \
+        https://artifacts.opensearch.org/releases/plugins/repository-s3/2.10.0/repository-s3-2.10.0.zip
       cp -r ${CRAFT_STAGE}/usr/share/wazuh-indexer/plugins/prometheus-exporter ${CRAFT_PART_INSTALL}/usr/share/wazuh-indexer/plugins/prometheus-exporter
-      cp -r ${CRAFT_STAGE}/usr/share/wazuh-indexer/plugins/repository-s3 ${CRAFT_PART_INSTALL}/usr/share/wazuh-indexer/plugins/repository-s3
       cp -r ${CRAFT_STAGE}/usr/share/wazuh-indexer/plugins/repository-gcs ${CRAFT_PART_INSTALL}/usr/share/wazuh-indexer/plugins/repository-gcs
+      cp -r ${CRAFT_STAGE}/usr/share/wazuh-indexer/plugins/repository-s3 ${CRAFT_PART_INSTALL}/usr/share/wazuh-indexer/plugins/repository-s3
       # It is important to correnct the user permissions for the opensearch.keystore file, after the script is executed.
       # Given we know which user is going to be used for the daemon, we can set this correction in the keystore script.
       # TODO: we should perhaps NOT alter the source script - but until we find a better alternative UX wise we keep it
