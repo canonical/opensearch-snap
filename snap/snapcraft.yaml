@@ -198,7 +198,7 @@ parts:
       version="$(craftctl get version)"
       series="${version%%.*}.x"
       patch="ubuntu0"
-      release_date="20240906131454"
+      release_date="20240906131536"
 
       archive="opensearch-${version}-${patch}-${release_date}-linux-x64.tar.gz"
       url="https://launchpad.net/opensearch-releases/${series}/${version}-${patch}/+download/${archive}"
