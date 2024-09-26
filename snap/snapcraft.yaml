@@ -11,7 +11,7 @@ description: |
 
 grade: stable
 
-confinement: strict
+confinement: devmode
 
 architectures:
   - build-on: amd64
