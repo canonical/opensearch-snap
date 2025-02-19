@@ -30,7 +30,10 @@ plugs:
     interface: system-files
     read:
       - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service
-
+  gpu-2404:
+    interface: content
+    target: $SNAP/gpu-2404
+    default-provider: mesa-2404
 
 slots:
   logs:
@@ -87,6 +90,8 @@ apps:
   daemon:
     daemon: simple
     install-mode: disable
+    command-chain:
+      - bin/gpu-2404-wrapper
     command: opt/opensearch/start.sh
     restart-condition: always
     restart-delay: 20s
@@ -100,6 +105,7 @@ apps:
       - shmem-perf-analyzer
       - system-observe
       - sys-fs-cgroup-service
+      - gpu-2404
     environment:
       LD_LIBRARY_PATH: "${LD_LIBRARY_PATH}:${KNN_LIB_DIR}"
 
@@ -249,7 +255,6 @@ parts:
       - libexpat1
       - zlib1g
 
-
   wrapper-scripts:
     plugin: nil
     source: ./scripts
@@ -259,6 +264,8 @@ parts:
       mkdir -p "${target_dir}"
       cp -r wrappers/. "${target_dir}"
       cp -r helpers/ "${target_dir}/helpers"
+    organize:
+      scripts/wrappers/gpu-2404-custom-wrapper: bin/
 
   opensearch:
     plugin: nil
@@ -311,3 +318,13 @@ parts:
       for res in "${resources[@]}"; do
           rm -rf "${CRAFT_PART_INSTALL}/${res}"
       done
+
+  gpu-2404:
+    after: [opensearch]
+    source: https://github.com/canonical/gpu-snap.git
+    plugin: dump
+    override-prime: |
+      craftctl default
+      ${CRAFT_PART_SRC}/bin/gpu-2404-cleanup mesa-2404
+    prime:
+    - bin/gpu-2404-wrapper

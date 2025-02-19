@@ -1,0 +1,9 @@
+#!/bin/sh
+if snapctl is-connected gpu-2404
+then
+    echo "INFO: the gpu-2404 interface is connected. Running with gpu-2404 wrapper."
+    exec "${SNAP}/gpu-2404/bin/gpu-2404-provider-wrapper" "$@"
+else
+    echo "INFO: the gpu-2404 interface isn't connected. Skipping gpu-2404 wrapper."
+    exec "$@"
+fi
