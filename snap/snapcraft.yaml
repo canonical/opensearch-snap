@@ -146,7 +146,7 @@ apps:
       - network
       - network-bind
     environment:
-      bin_script: opensearch-plugin
+      bin_script: opensearch-plugin.orig
 
   cli:
     command: opt/opensearch/bin-wrapper.sh
@@ -178,7 +178,7 @@ apps:
       - network
       - network-bind
     environment:
-      bin_script: opensearch-keystore
+      bin_script: opensearch-keystore.orig
 
   node:
     command: opt/opensearch/bin-wrapper.sh
@@ -262,6 +262,7 @@ parts:
 
   opensearch:
     plugin: nil
+    after: [wrapper-scripts]
     build-packages:
       - ca-certificates
       - ca-certificates-java
@@ -274,12 +275,12 @@ parts:
       # update deps
       apt-get update; apt-get upgrade -y; apt-get autoremove --purge -y; apt-get clean -y
       update-ca-certificates -f
-      
+
       # setup trust store
       trust_store="${CRAFT_PART_INSTALL}/etc/ssl/certs/java/"
       mkdir -p "${trust_store}"
       cp /etc/ssl/certs/java/cacerts "${trust_store}"
-      
+
       # download opensearch tarball
       version="$(craftctl get version)"
       series="${version%%.*}.x"
@@ -311,3 +312,13 @@ parts:
       for res in "${resources[@]}"; do
           rm -rf "${CRAFT_PART_INSTALL}/${res}"
       done
+
+    override-prime: |
+      # Copy wrappers for bin commands to fix upgrades: https://github.com/canonical/opensearch-operator/issues/537
+      craftctl default
+
+      mv "${CRAFT_PRIME}/usr/share/opensearch/bin/opensearch-plugin" "${CRAFT_PRIME}/usr/share/opensearch/bin/opensearch-plugin.orig"
+      mv "${CRAFT_PRIME}/usr/share/opensearch/bin/opensearch-keystore" "${CRAFT_PRIME}/usr/share/opensearch/bin/opensearch-keystore.orig"
+
+      cp "${CRAFT_STAGE}/opt/opensearch/plugin-wrapper.sh" "${CRAFT_PRIME}/usr/share/opensearch/bin/opensearch-plugin"
+      cp "${CRAFT_STAGE}/opt/opensearch/keystore-wrapper.sh" "${CRAFT_PRIME}/usr/share/opensearch/bin/opensearch-keystore"
