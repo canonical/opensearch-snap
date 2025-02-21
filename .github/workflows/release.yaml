@@ -53,7 +53,7 @@ jobs:
 
       - name: Upload snapcraft logs
         if: ${{ failure() && steps.publish.outcome == 'failure' }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: snapcraft-release-logs
           path: ~/.local/state/snapcraft/log/
