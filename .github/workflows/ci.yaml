@@ -251,3 +251,36 @@ jobs:
           sudo opensearch.plugin remove repository-s3
           sudo opensearch.keystore remove s3.client.default.access_key
           sudo opensearch.keystore remove s3.client.default.secret_key
+          
+  publish:
+    name: publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs:
+      - test
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Download snap file
+        uses: actions/download-artifact@v4
+        with:
+          name: opensearch_snap_amd64
+          path: .
+
+      - name: Set snap release channel
+        run: |
+          version="$(cat snap/snapcraft.yaml | yq .version)"
+          channel="${version%%.*}/${{env.RELEASE}}"
+          
+          echo "version=${version}" >> $GITHUB_ENV
+          echo "channel=${channel}" >> $GITHUB_ENV
+
+      - name: Publish snap to Store
+        id: publish
+        uses: snapcore/action-publish@v1
+        env:
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.STORE_LOGIN }}
+        with:
+          snap: opensearch_${{env.version}}_amd64.snap
+          release: qat

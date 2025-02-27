@@ -17,10 +17,8 @@ confinement: strict # use 'strict' once you have the right plugs and slots
 platforms:
   amd64:
 
-
 system-usernames:
   snap_daemon: shared
-
 
 plugs:
   shmem-perf-analyzer:
@@ -30,7 +28,8 @@ plugs:
     interface: system-files
     read:
       - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service
-
+  intel-qat:
+    interface: intel-qat
 
 slots:
   logs:
@@ -38,7 +37,6 @@ slots:
     source:
       read:
         - $SNAP_COMMON/var/log/opensearch
-
 
 hooks:
   install:
@@ -52,7 +50,6 @@ hooks:
   configure:
     environment:
       OPS_ROOT: ${SNAP_CURRENT}/opt/opensearch
-
 
 environment:
   SNAP_CURRENT: /snap/opensearch/current
@@ -82,7 +79,6 @@ environment:
 
   KNN_LIB_DIR: ${OPENSEARCH_PLUGINS}/opensearch-knn/lib
 
-
 apps:
   daemon:
     daemon: simple
@@ -100,6 +96,7 @@ apps:
       - shmem-perf-analyzer
       - system-observe
       - sys-fs-cgroup-service
+      - intel-qat
     environment:
       LD_LIBRARY_PATH: "${LD_LIBRARY_PATH}:${KNN_LIB_DIR}"
 
@@ -248,7 +245,7 @@ parts:
       - libcrypt1
       - libexpat1
       - zlib1g
-
+      - qatzip
 
   wrapper-scripts:
     plugin: nil
