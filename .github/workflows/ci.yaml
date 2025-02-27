@@ -271,7 +271,7 @@ jobs:
       - name: Set snap release channel
         run: |
           version="$(cat snap/snapcraft.yaml | yq .version)"
-          channel="${version%%.*}/${{env.RELEASE}}"
+          channel="${version%%.*}/${{env.RELEASE}}/test-qat"
           
           echo "version=${version}" >> $GITHUB_ENV
           echo "channel=${channel}" >> $GITHUB_ENV
@@ -283,4 +283,4 @@ jobs:
           SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.STORE_LOGIN }}
         with:
           snap: opensearch_${{env.version}}_amd64.snap
-          release: ${{env.channel}}/test-qat
+          release: ${{env.channel}}
