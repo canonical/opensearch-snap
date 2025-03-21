@@ -141,7 +141,7 @@ apps:
       bin_script: opensearch
 
   plugin:
-    command: opt/opensearch/bin-wrapper.sh
+    command: opt/opensearch/cmd-wrapper.sh
     plugs:
       - network
       - network-bind
@@ -149,7 +149,7 @@ apps:
       bin_script: opensearch-plugin.orig
 
   cli:
-    command: opt/opensearch/bin-wrapper.sh
+    command: opt/opensearch/cmd-wrapper.sh
     plugs:
       - network
       - network-bind
@@ -157,7 +157,7 @@ apps:
       bin_script: opensearch-cli
 
   env:
-    command: opt/opensearch/bin-wrapper.sh
+    command: opt/opensearch/cmd-wrapper.sh
     plugs:
       - network
       - network-bind
@@ -165,7 +165,7 @@ apps:
       bin_script: opensearch-env
 
   env-from-file:
-    command: opt/opensearch/bin-wrapper.sh
+    command: opt/opensearch/cmd-wrapper.sh
     plugs:
       - network
       - network-bind
@@ -173,7 +173,7 @@ apps:
       bin_script: opensearch-env-from-file
 
   keystore:
-    command: opt/opensearch/bin-wrapper.sh
+    command: opt/opensearch/cmd-wrapper.sh
     plugs:
       - network
       - network-bind
@@ -181,7 +181,7 @@ apps:
       bin_script: opensearch-keystore.orig
 
   node:
-    command: opt/opensearch/bin-wrapper.sh
+    command: opt/opensearch/cmd-wrapper.sh
     plugs:
       - network
       - network-bind
@@ -189,7 +189,7 @@ apps:
       bin_script: opensearch-node
 
   shard:
-    command: opt/opensearch/bin-wrapper.sh
+    command: opt/opensearch/cmd-wrapper.sh
     plugs:
       - network
       - network-bind
@@ -197,7 +197,7 @@ apps:
       bin_script: opensearch-shard
 
   upgrade:
-    command: opt/opensearch/bin-wrapper.sh
+    command: opt/opensearch/cmd-wrapper.sh
     plugs:
       - network
       - network-bind
@@ -205,7 +205,7 @@ apps:
       bin_script: opensearch-upgrade
 
   performance-analyzer-agent:
-    command: opt/opensearch/bin-wrapper.sh
+    command: opt/opensearch/cmd-wrapper.sh
     plugs:
       - network
       - network-bind
@@ -213,7 +213,7 @@ apps:
       bin_script: opensearch-performance-analyzer/performance-analyzer-agent
 
   performance-analyzer-agent-cli:
-    command: opt/opensearch/bin-wrapper.sh
+    command: opt/opensearch/cmd-wrapper.sh
     plugs:
       - network
       - network-bind
