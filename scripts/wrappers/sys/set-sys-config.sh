@@ -40,9 +40,7 @@ function set_ulimits () {
 
     # 3. Set the locked-in memory size to unlimited
     # ulimit -l 1964328 -- default in local machine
-    # if snapctl is-connected "process-control"; then
-    # ulimit -l unlimited
-    # fi
+    ulimit -l unlimited
 }
 
 
