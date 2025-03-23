@@ -5,10 +5,10 @@ set -eux
 # Changes for QAT support
 if lspci -k | grep -q qat_4xxx; then
     # shellcheck disable=SC2016
-    sed -i '/grant codeBase "${codebase.qat-java}" {/,/};/ {
-      /};/ i\
-    permission org.opensearch.secure_sm.ThreadPermission "modifyArbitraryThread";
-    }' "${OPENSEARCH_PLUGINS}/opensearch-custom-codecs/plugin-security.policy"
+    "${SNAP}"/usr/bin/setpriv --reuid snap_daemon -- bash -c 'sed -i "/grant codeBase \\\"\${codebase.qat-java}\\\" {/,/};/ {
+    /};/ i\\
+    permission org.opensearch.secure_sm.ThreadPermission \\"modifyArbitraryThread\\";
+    }" "${OPENSEARCH_PLUGINS}/opensearch-custom-codecs/plugin-security.policy"'
 
     # add the QAT group to the snap_daemon user
     usermod -a -G qat snap_daemon

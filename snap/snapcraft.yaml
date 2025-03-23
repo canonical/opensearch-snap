@@ -38,6 +38,8 @@ slots:
 
 hooks:
   post-refresh:
+    environment:
+      OPS_ROOT: ${SNAP_CURRENT}/opt/opensearch
   install:
     plugs:
       - network
