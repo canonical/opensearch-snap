@@ -1,7 +1,7 @@
 name: wazuh-indexer
 base: core22
 
-version: '4.8.2'
+version: '4.9.2'
 
 summary: OpenSearch with additional changes for easier use alongside Wazuh.
 description: |
@@ -199,7 +199,7 @@ parts:
       cp /etc/ssl/certs/java/cacerts "${trust_store}"
     stage-packages:
       - openjdk-21-jdk
-      - wazuh-indexer
+      - wazuh-indexer=4.9.2-1
     override-stage: |
       craftctl default
       chmod -R 755 usr/share/wazuh-indexer
@@ -216,7 +216,9 @@ parts:
       # Given we know which user is going to be used for the daemon, we can set this correction in the keystore script.
       # TODO: we should perhaps NOT alter the source script - but until we find a better alternative UX wise we keep it
       echo 'chown snap_daemon:root /var/snap/wazuh-indexer/current/etc/wazuh-indexer/opensearch.keystore' >> "${CRAFT_STAGE}/usr/share/wazuh-indexer/bin/opensearch-keystore"
-      sed -i -e 's/^\([^#].*\)/# \1/g' etc/wazuh-indexer/opensearch.yml
+      sed -i -e 's/^\([^#].*\)/# \1/g' ${CRAFT_STAGE}/etc/wazuh-indexer/opensearch.yml
+      echo '' >> "${CRAFT_STAGE}/etc/wazuh-indexer/opensearch.yml"
+      echo 'compatibility.override_main_response_version: true' >> "${CRAFT_STAGE}/etc/wazuh-indexer/opensearch.yml"
     override-prime: |
       craftctl default
       rm -rf usr/share/wazuh-indexer/jdk
