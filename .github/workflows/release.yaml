@@ -21,14 +21,14 @@ jobs:
       - ci-tests
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install required dependencies
         run: |
           sudo snap install yq
 
       - name: Download snap file
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: wazuh-indexer_snap_amd64
           path: .

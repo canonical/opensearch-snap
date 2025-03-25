@@ -17,7 +17,7 @@ jobs:
       snap-file: ${{ steps.build-snap.outputs.snap }}
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -47,7 +47,7 @@ jobs:
           snapcraft-channel: 8.x/stable
 
       - name: Upload built snap job artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: wazuh-indexer_snap_amd64
           path: "wazuh-indexer*.snap"
@@ -60,16 +60,16 @@ jobs:
       - build
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Upgrade snapd
+      
+      - name: Install required dependencies
         run: |
-          sudo snap refresh snapd
+          sudo snap install yq
 
       - name: Download snap file
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: wazuh-indexer_snap_amd64
           path: .
