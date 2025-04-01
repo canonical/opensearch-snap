@@ -245,7 +245,7 @@ parts:
       - libcrypt1
       - libexpat1
       - zlib1g
-      - qatzip
+      - libqatzip3
 
   wrapper-scripts:
     plugin: nil
