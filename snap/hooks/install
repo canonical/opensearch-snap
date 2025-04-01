@@ -63,3 +63,12 @@ for f in "${folders[@]}"; do
     chown -R snap_daemon "${f}/"*
     chgrp root "${f}/"*
 done
+
+# Changes for QAT support
+if lspci -k | grep -q qat_4xxx; then
+    # shellcheck disable=SC2016
+    "${SNAP}"/usr/bin/setpriv --reuid snap_daemon -- bash -c 'sed -i "/grant codeBase \\\"\${codebase.qat-java}\\\" {/,/};/ {
+    /};/ i\\
+    permission org.opensearch.secure_sm.ThreadPermission \\"modifyArbitraryThread\\";
+    }" "${OPENSEARCH_PLUGINS}/opensearch-custom-codecs/plugin-security.policy"'
+fi
