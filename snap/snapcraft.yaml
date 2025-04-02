@@ -100,6 +100,7 @@ apps:
       - shmem-perf-analyzer
       - system-observe
       - sys-fs-cgroup-service
+      - intel-qat
     environment:
       LD_LIBRARY_PATH: "${LD_LIBRARY_PATH}:${KNN_LIB_DIR}"
 
@@ -248,6 +249,7 @@ parts:
       - libcrypt1
       - libexpat1
       - zlib1g
+      - libqatzip3
 
 
   wrapper-scripts:
