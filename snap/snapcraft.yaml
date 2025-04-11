@@ -284,8 +284,8 @@ parts:
       # download opensearch tarball
       version="$(craftctl get version)"
       series="${version%%.*}.x"
-      patch="ubuntu0"
-      release_date="20250409183335"
+      patch="ubuntu1"
+      release_date="20250411151204"
 
       archive="opensearch-${version}-${patch}-${release_date}-linux-x64.tar.gz"
       url="https://launchpad.net/opensearch-releases/${series}/${version}-${patch}/+download/${archive}"
