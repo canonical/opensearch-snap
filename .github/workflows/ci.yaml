@@ -21,30 +21,9 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install required dependencies
-        run: |
-          sudo snap install yq
-
-      - name: Upgrade linux deps
-        run: |
-          sudo apt-get update
-          
-          # install security updates
-          sudo apt-get -s dist-upgrade \
-            | grep "^Inst" \
-            | grep -i securi \
-            | awk -F " " {'print $2'} \
-            | xargs sudo apt-get install -y
-          
-          sudo apt-get autoremove -y
-          sudo apt-get clean -y
-          sudo snap refresh snapd
-
       - id: build-snap
         name: Build snap
         uses: snapcore/action-build@v1
-        with:
-          snapcraft-channel: 8.x/stable
 
       - name: Upload built snap job artifact
         uses: actions/upload-artifact@v4
@@ -167,6 +146,7 @@ jobs:
           if [ ! "$repository_gcs_is_there" ]; then
             exit 4
           fi
+
           # Prometheus exporter can be queried
           sudo cp /var/snap/wazuh-indexer/current/etc/wazuh-indexer/certificates/node-cm0.pem ./
           cert=./node-cm0.pem
@@ -196,10 +176,10 @@ jobs:
           OPENSEARCH_LIB: /var/snap/wazuh-indexer/current/usr/share/wazuh-indexer/lib
           OPENSEARCH_PATH_CERTS: /var/snap/wazuh-indexer/current/etc/wazuh-indexer/certificates
         run: |
-          echo "TEST" | sudo tee -a testkey
+          echo "TEST" | sudo tee -a ${OPENSEARCH_PATH_CONF}/testkey
 
-          sudo -E "${OPENSEARCH_BIN}"/opensearch-keystore add-file s3.client.default.access_key ${PWD}/testkey
-          sudo -E "${OPENSEARCH_BIN}"/opensearch-keystore add-file s3.client.default.secret_key ${PWD}/testkey
+          sudo -E "${OPENSEARCH_BIN}"/opensearch-keystore add-file s3.client.default.access_key ${OPENSEARCH_PATH_CONF}/testkey
+          sudo -E "${OPENSEARCH_BIN}"/opensearch-keystore add-file s3.client.default.secret_key ${OPENSEARCH_PATH_CONF}/testkey
 
           sudo snap restart wazuh-indexer.daemon
           sleep 20s

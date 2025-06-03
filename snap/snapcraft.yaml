@@ -1,7 +1,7 @@
 name: wazuh-indexer
-base: core22
+base: core24
 
-version: '4.9.2'
+version: '4.11.0'
 
 summary: OpenSearch with additional changes for easier use alongside Wazuh.
 description: |
@@ -13,8 +13,8 @@ grade: stable
 
 confinement: strict
 
-architectures:
-  - build-on: amd64
+platforms:
+  amd64:
 
 system-usernames:
   snap_daemon: shared
@@ -120,15 +120,6 @@ apps:
   setup:
     command: opt/opensearch/setup.sh
 
-  plugin-add:
-    command: opt/opensearch/plugins/add.sh
-
-  plugins-list:
-    command: opt/opensearch/plugins/list.sh
-
-  plugins-remove:
-    command: opt/opensearch/plugins/remove.sh
-
   test-cluster-health-green:
     command: opt/opensearch/tests/test-cluster-health-green.sh
     plugs:
@@ -146,6 +137,99 @@ apps:
     plugs:
       - network
       - network-bind
+
+  opensearch-bin:
+    command: opt/opensearch/bin-wrapper.sh
+    plugs:
+      - network
+      - network-bind
+    environment:
+      bin_script: opensearch
+
+  plugin:
+    command: opt/opensearch/bin-wrapper.sh
+    plugs:
+      - network
+      - network-bind
+    environment:
+      bin_script: opensearch-plugin.orig
+
+  cli:
+    command: opt/opensearch/bin-wrapper.sh
+    plugs:
+      - network
+      - network-bind
+    environment:
+      bin_script: opensearch-cli
+
+  env:
+    command: opt/opensearch/bin-wrapper.sh
+    plugs:
+      - network
+      - network-bind
+    environment:
+      bin_script: opensearch-env
+
+  env-from-file:
+    command: opt/opensearch/bin-wrapper.sh
+    plugs:
+      - network
+      - network-bind
+    environment:
+      bin_script: opensearch-env-from-file
+
+  keystore:
+    command: opt/opensearch/bin-wrapper.sh
+    plugs:
+      - network
+      - network-bind
+    environment:
+      bin_script: opensearch-keystore.orig
+
+  node:
+    command: opt/opensearch/bin-wrapper.sh
+    plugs:
+      - network
+      - network-bind
+    environment:
+      bin_script: opensearch-node
+
+  shard:
+    command: opt/opensearch/bin-wrapper.sh
+    plugs:
+      - network
+      - network-bind
+    environment:
+      bin_script: opensearch-shard
+
+  upgrade:
+    command: opt/opensearch/bin-wrapper.sh
+    plugs:
+      - network
+      - network-bind
+    environment:
+      bin_script: opensearch-upgrade
+
+  performance-analyzer-agent:
+    command: opt/opensearch/bin-wrapper.sh
+    plugs:
+      - network
+      - network-bind
+    environment:
+      bin_script: opensearch-performance-analyzer/performance-analyzer-agent
+
+  performance-analyzer-agent-cli:
+    command: opt/opensearch/bin-wrapper.sh
+    plugs:
+      - network
+      - network-bind
+    environment:
+      bin_script: opensearch-performance-analyzer/performance-analyzer-agent-cli
+
+  keytool:
+    command: usr/lib/jvm/java-21-openjdk-amd64/bin/keytool
+    plugs:
+      - mount-observe
 
 parts:
   dependencies:
@@ -170,6 +254,7 @@ parts:
       - libexpat1
       - zlib1g
 
+
   wrapper-scripts:
     plugin: nil
     source: ./scripts
@@ -182,6 +267,7 @@ parts:
 
   wazuh-indexer:
     plugin: nil
+    after: [wrapper-scripts]
     build-packages:
       - ca-certificates
       - ca-certificates-java
@@ -198,17 +284,17 @@ parts:
       mkdir -p "${trust_store}"
       cp /etc/ssl/certs/java/cacerts "${trust_store}"
     stage-packages:
-      - openjdk-21-jdk
-      - wazuh-indexer=4.9.2-1
+      - openjdk-21-jdk-headless
+      - wazuh-indexer=4.11.0-1
     override-stage: |
       craftctl default
       chmod -R 755 usr/share/wazuh-indexer
       OPENSEARCH_PATH_CONF=${CRAFT_STAGE}/etc/wazuh-indexer ${CRAFT_STAGE}/usr/share/wazuh-indexer/bin/opensearch-plugin install --batch \
-        https://github.com/Aiven-Open/prometheus-exporter-plugin-for-opensearch/releases/download/2.13.0.0/prometheus-exporter-2.13.0.0.zip
+        https://github.com/Aiven-Open/prometheus-exporter-plugin-for-opensearch/releases/download/2.16.0.0/prometheus-exporter-2.16.0.0.zip
       OPENSEARCH_PATH_CONF=${CRAFT_STAGE}/etc/wazuh-indexer ${CRAFT_STAGE}/usr/share/wazuh-indexer/bin/opensearch-plugin install --batch \
-        https://artifacts.opensearch.org/releases/plugins/repository-gcs/2.13.0/repository-gcs-2.13.0.zip
+        https://artifacts.opensearch.org/releases/plugins/repository-gcs/2.16.0/repository-gcs-2.16.0.zip
       OPENSEARCH_PATH_CONF=${CRAFT_STAGE}/etc/wazuh-indexer ${CRAFT_STAGE}/usr/share/wazuh-indexer/bin/opensearch-plugin install --batch \
-        https://artifacts.opensearch.org/releases/plugins/repository-s3/2.13.0/repository-s3-2.13.0.zip
+        https://artifacts.opensearch.org/releases/plugins/repository-s3/2.16.0/repository-s3-2.16.0.zip
       cp -r ${CRAFT_STAGE}/usr/share/wazuh-indexer/plugins/prometheus-exporter ${CRAFT_PART_INSTALL}/usr/share/wazuh-indexer/plugins/prometheus-exporter
       cp -r ${CRAFT_STAGE}/usr/share/wazuh-indexer/plugins/repository-gcs ${CRAFT_PART_INSTALL}/usr/share/wazuh-indexer/plugins/repository-gcs
       cp -r ${CRAFT_STAGE}/usr/share/wazuh-indexer/plugins/repository-s3 ${CRAFT_PART_INSTALL}/usr/share/wazuh-indexer/plugins/repository-s3
