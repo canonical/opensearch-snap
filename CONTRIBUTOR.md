@@ -8,7 +8,7 @@ Steps to install it locally:
 snapcraft --debug
 
 # install the snap
-sudo snap install wazuh_indexer_4.8.2_amd64.snap --dangerous --jailmode
+sudo snap install wazuh_indexer_4.11.0_amd64.snap --dangerous --jailmode
 ```
 
 ### Environment configuration:

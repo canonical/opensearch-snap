@@ -119,7 +119,7 @@ jobs:
           # replace the following condition by "${cluster_status}" != "green"  
           if [ "${cluster_status}" == "red" ]; then
               curl --cacert ${cert} -XGET https://localhost:9200/_cat/shards -u 'admin:admin'
-              exit 2
+              exit 1
           fi
 
       - name: Check if Prometheus Exporter and repository plugins are available
@@ -132,32 +132,38 @@ jobs:
           OPENSEARCH_PATH_CERTS: /var/snap/wazuh-indexer/current/etc/wazuh-indexer/certificates
         run: |
           # Prometheus Exporter appears in plugins listing
-          prometheus_is_there=$(sudo -E "${OPENSEARCH_BIN}"/opensearch-plugin list | grep prometheus-exporter)
+          prometheus_is_there=$(sudo wazuh-indexer.plugin list | grep prometheus-exporter)
           if [ ! "$prometheus_is_there" ]; then
-            exit 2
+            exit 1
           fi
           # repository-s3 appears in plugins listing
-          repository_s3_is_there=$(sudo -E "${OPENSEARCH_BIN}"/opensearch-plugin list | grep repository-s3)
+          repository_s3_is_there=$(sudo wazuh-indexer.plugin list | grep repository-s3)
           if [ ! "$repository_s3_is_there" ]; then
-            exit 3
+            exit 1
           fi
           # repository-gcs appears in plugins listing
-          repository_gcs_is_there=$(sudo -E "${OPENSEARCH_BIN}"/opensearch-plugin list | grep repository-gcs)
+          repository_gcs_is_there=$(sudo wazuh-indexer.plugin list | grep repository-gcs)
           if [ ! "$repository_gcs_is_there" ]; then
-            exit 4
+            exit 1
           fi
+          # repository-azure appears in plugins listing
+          repository_azure_is_there=$(sudo wazuh-indexer.plugin list | grep repository-azure)
+          if [ ! "$repository_azure_is_there" ]; then
+            exit 1
+          fi
+
 
           # Prometheus exporter can be queried
           sudo cp /var/snap/wazuh-indexer/current/etc/wazuh-indexer/certificates/node-cm0.pem ./
           cert=./node-cm0.pem
           resp=$(curl -I --cacert ${cert} -XGET https://localhost:9200/_prometheus/metrics -u 'admin:admin')
           if [[ "$resp" != *"200 OK"* ]]; then
-            exit 5
+            exit 1
           fi
           # Checking that Prometheus configuration is correct
           prometheus_lines=$(sudo grep prometheus ${OPENSEARCH_PATH_CONF}/opensearch.yml | wc -l)
           if [ "$prometheus_lines" != "4" ]; then
-            exit 6
+            exit 1
           fi
 
       - name: Check COS logs slot is available
@@ -178,8 +184,8 @@ jobs:
         run: |
           echo "TEST" | sudo tee -a ${OPENSEARCH_PATH_CONF}/testkey
 
-          sudo -E "${OPENSEARCH_BIN}"/opensearch-keystore add-file s3.client.default.access_key ${OPENSEARCH_PATH_CONF}/testkey
-          sudo -E "${OPENSEARCH_BIN}"/opensearch-keystore add-file s3.client.default.secret_key ${OPENSEARCH_PATH_CONF}/testkey
+          sudo wazuh-indexer.keystore add-file s3.client.default.access_key ${OPENSEARCH_PATH_CONF}/testkey
+          sudo wazuh-indexer.keystore add-file s3.client.default.secret_key ${OPENSEARCH_PATH_CONF}/testkey
 
           sudo snap restart wazuh-indexer.daemon
           sleep 20s
@@ -210,7 +216,7 @@ jobs:
           # start wazuh-indexer after upgrade
           sudo snap restart wazuh-indexer.daemon
           # Give some time for the service to come back up
-          sleep 120s
+          sleep 20s
 
           sudo cp /var/snap/wazuh-indexer/current/etc/wazuh-indexer/certificates/node-cm0.pem ./
           cert=./node-cm0.pem
@@ -230,7 +236,7 @@ jobs:
           # replace the following condition by "${cluster_status}" != "green"  
           if [ "${cluster_status}" == "red" ]; then
               curl --cacert ${cert} -XGET https://localhost:9200/_cat/shards -u 'admin:admin'
-              exit 2
+              exit 1
           fi
       - name: Remove backup plugin
         env:
@@ -241,7 +247,6 @@ jobs:
           OPENSEARCH_LIB: /var/snap/wazuh-indexer/current/usr/share/wazuh-indexer/lib
           OPENSEARCH_PATH_CERTS: /var/snap/wazuh-indexer/current/etc/wazuh-indexer/certificates
         run: |
-          sudo cat "${OPENSEARCH_BIN}"/opensearch-plugin
-          sudo -E "${OPENSEARCH_BIN}"/opensearch-plugin remove repository-s3
-          sudo -E "${OPENSEARCH_BIN}"/opensearch-keystore remove s3.client.default.access_key
-          sudo -E "${OPENSEARCH_BIN}"/opensearch-keystore remove s3.client.default.secret_key
+          sudo wazuh-indexer.plugin remove repository-s3
+          sudo wazuh-indexer.keystore remove s3.client.default.access_key
+          sudo wazuh-indexer.keystore remove s3.client.default.secret_key

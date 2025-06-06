@@ -18,7 +18,7 @@ analytics suite that makes it easy to ingest, search, visualize, and analyze dat
 
 or:
 ```
-sudo snap install wazuh-indexer --channel=latest/edge
+sudo snap install wazuh-indexer --channel=4.11/edge
 sudo snap connect wazuh-indexer:process-control
 ```
 
@@ -97,19 +97,6 @@ curl --cacert node-cm0.pem -XGET https://admin:admin@localhost:9200/_cluster/hea
   "task_max_waiting_in_queue_millis": 0,
   "active_shards_percent_as_number": 100
 }
-```
-
-## Running OpenSearch CLI commands not exposed by the snap:
-In some cases, users may need to run cli commands that are not exposed by the Wazuh Indexer snap. To achieve this, those commands must be run as the `snap_daemon` user with the required environment variables passed: 
-
-```
-$ sudo -u snap_daemon \
-	    OPENSEARCH_JAVA_HOME=/snap/wazuh-indexer/current/usr/lib/jvm/java-21-openjdk-amd64 \
-	    OPENSEARCH_PATH_CONF=/var/snap/wazuh-indexer/current/etc/wazuh-indexer \
-	    OPENSEARCH_HOME=/var/snap/wazuh-indexer/current/usr/share/wazuh-indexer \
-	    OPENSEARCH_LIB=/var/snap/wazuh-indexer/current/usr/share/wazuh-indexer/lib \
-	    OPENSEARCH_PATH_CERTS=/var/snap/wazuh-indexer/current/etc/wazuh-indexer/certificates \
-	    /snap/wazuh-indexer/current/usr/share/wazuh-indexer/bin/<command> [options]
 ```
 
 ## License

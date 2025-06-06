@@ -107,7 +107,7 @@ apps:
       - system-observe
       - sys-fs-cgroup-service
     environment:
-      LD_LIBRARY_PATH: "${LD_LIBRARY_PATH}:${KNN_LIB_DIR}:"
+      LD_LIBRARY_PATH: "${LD_LIBRARY_PATH}:${KNN_LIB_DIR}"
 
   security-init:
     command: opt/opensearch/security-init.sh
@@ -249,6 +249,7 @@ parts:
       - libxtst6
       - libpsm-infinipath1
       - libboost-all-dev
+      - libasound2
       - libpsm2-2-compat
       - libcrypt1
       - libexpat1
@@ -271,9 +272,9 @@ parts:
     build-packages:
       - ca-certificates
       - ca-certificates-java
-      - openjdk-21-jdk
-      - openssl
       - ssl-cert
+      - openssl
+      - openjdk-21-jre-headless
     override-build: |
       # update deps
       apt-get update; apt-get upgrade -y; apt-get autoremove --purge -y; apt-get clean -y
@@ -295,16 +296,22 @@ parts:
         https://artifacts.opensearch.org/releases/plugins/repository-gcs/2.16.0/repository-gcs-2.16.0.zip
       OPENSEARCH_PATH_CONF=${CRAFT_STAGE}/etc/wazuh-indexer ${CRAFT_STAGE}/usr/share/wazuh-indexer/bin/opensearch-plugin install --batch \
         https://artifacts.opensearch.org/releases/plugins/repository-s3/2.16.0/repository-s3-2.16.0.zip
+      OPENSEARCH_PATH_CONF=${CRAFT_STAGE}/etc/wazuh-indexer ${CRAFT_STAGE}/usr/share/wazuh-indexer/bin/opensearch-plugin install --batch \
+        https://artifacts.opensearch.org/releases/plugins/repository-azure/2.16.0/repository-azure-2.16.0.zip
       cp -r ${CRAFT_STAGE}/usr/share/wazuh-indexer/plugins/prometheus-exporter ${CRAFT_PART_INSTALL}/usr/share/wazuh-indexer/plugins/prometheus-exporter
       cp -r ${CRAFT_STAGE}/usr/share/wazuh-indexer/plugins/repository-gcs ${CRAFT_PART_INSTALL}/usr/share/wazuh-indexer/plugins/repository-gcs
       cp -r ${CRAFT_STAGE}/usr/share/wazuh-indexer/plugins/repository-s3 ${CRAFT_PART_INSTALL}/usr/share/wazuh-indexer/plugins/repository-s3
-      # It is important to correnct the user permissions for the opensearch.keystore file, after the script is executed.
-      # Given we know which user is going to be used for the daemon, we can set this correction in the keystore script.
-      # TODO: we should perhaps NOT alter the source script - but until we find a better alternative UX wise we keep it
-      echo 'chown snap_daemon:root /var/snap/wazuh-indexer/current/etc/wazuh-indexer/opensearch.keystore' >> "${CRAFT_STAGE}/usr/share/wazuh-indexer/bin/opensearch-keystore"
+      cp -r ${CRAFT_STAGE}/usr/share/wazuh-indexer/plugins/repository-azure ${CRAFT_PART_INSTALL}/usr/share/wazuh-indexer/plugins/repository-azure
       sed -i -e 's/^\([^#].*\)/# \1/g' ${CRAFT_STAGE}/etc/wazuh-indexer/opensearch.yml
       echo '' >> "${CRAFT_STAGE}/etc/wazuh-indexer/opensearch.yml"
       echo 'compatibility.override_main_response_version: true' >> "${CRAFT_STAGE}/etc/wazuh-indexer/opensearch.yml"
     override-prime: |
+      # Copy wrappers for bin commands to fix upgrades: https://github.com/canonical/opensearch-operator/issues/537
       craftctl default
+
+      mv "${CRAFT_PRIME}/usr/share/wazuh-indexer/bin/opensearch-plugin" "${CRAFT_PRIME}/usr/share/wazuh-indexer/bin/opensearch-plugin.orig"
+      mv "${CRAFT_PRIME}/usr/share/wazuh-indexer/bin/opensearch-keystore" "${CRAFT_PRIME}/usr/share/wazuh-indexer/bin/opensearch-keystore.orig"
+
+      cp "${CRAFT_STAGE}/opt/opensearch/plugin-wrapper.sh" "${CRAFT_PRIME}/usr/share/wazuh-indexer/bin/opensearch-plugin"
+      cp "${CRAFT_STAGE}/opt/opensearch/keystore-wrapper.sh" "${CRAFT_PRIME}/usr/share/wazuh-indexer/bin/opensearch-keystore"
       rm -rf usr/share/wazuh-indexer/jdk
