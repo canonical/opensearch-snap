@@ -37,6 +37,22 @@ function set_defaults () {
     fi
 }
 
+# Since the daemon is running under snap_daemon:snap_daemon
+# It cannot access the QAT VFIO devices that are owned by
+# root:qat.
+# One solution would be adding the group qat to the user
+# snap_daemon but as of now, snapd does not allow to do that.
+# The solution is to give the group snap_daemon this access
+# by ACL.
+# All VFIO devices owned by the group qat will be configured
+# to allow RW access for snap_daemon group.
+function configure_qat() {
+    find /dev/vfio/ -maxdepth 1 -exec sh -c '
+      stat -c "%U %G" "$1" |
+      awk -F " " "\$2!=\"qat\"{exit 1}"
+   ' sh {} \; -exec ${SNAP}/usr/bin/setfacl -m group:snap_daemon:rw {} \;
+}
+
 function start_opensearch () {
     exit_if_missing_perm "log-observe"
     exit_if_missing_perm "mount-observe"
@@ -44,6 +60,8 @@ function start_opensearch () {
     exit_if_missing_perm "system-observe"
 
     warn_if_missing_perm "process-control"
+
+    configure_qat
 
     # start
     "${SNAP}"/usr/bin/setpriv \

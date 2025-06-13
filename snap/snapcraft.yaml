@@ -250,6 +250,7 @@ parts:
       - libexpat1
       - zlib1g
       - libqatzip3
+      - acl
 
 
   wrapper-scripts:
