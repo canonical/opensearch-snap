@@ -47,10 +47,11 @@ function set_defaults () {
 # All VFIO devices owned by the group qat will be configured
 # to allow RW access for snap_daemon group.
 function configure_qat() {
-    find /dev/vfio/ -maxdepth 1 -exec sh -c '
-      stat -c "%U %G" "$1" |
-      awk -F " " "\$2!=\"qat\"{exit 1}"
-   ' sh {} \; -exec ${SNAP}/usr/bin/setfacl -m group:snap_daemon:rw {} \;
+    qat_group="qat"
+    if $(getent group "${qat_group}" >/dev/null); then
+      find /dev/vfio/ -maxdepth 1 -group "${qat_group}" \
+        -exec ${SNAP}/usr/bin/setfacl -m group:snap_daemon:rw {} \;
+    fi
 }
 
 function start_opensearch () {
