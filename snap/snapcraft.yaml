@@ -301,7 +301,7 @@ parts:
       mv "${CRAFT_PART_INSTALL}"/config/* "${CRAFT_PART_INSTALL}/etc/opensearch/"
 
       declare -a resources=(
-          bin lib modules plugins performance-analyzer-rca manifest.yml NOTICE.txt LICENSE.txt README.md
+          bin lib modules plugins manifest.yml NOTICE.txt LICENSE.txt README.md
       )
       for res in "${resources[@]}"; do
           mv "${CRAFT_PART_INSTALL}/${res}" "${CRAFT_PART_INSTALL}/usr/share/opensearch/"
