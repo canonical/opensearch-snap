@@ -20,7 +20,6 @@ or:
 ```
 sudo snap install wazuh-indexer --channel=4.11/edge
 sudo snap connect wazuh-indexer:process-control
-```
 
 ### Environment configuration:
 OpenSearch has a set of [pre-requisites](https://opensearch.org/docs/latest/opensearch/install/important-settings/) to function properly, they can be set as follows:

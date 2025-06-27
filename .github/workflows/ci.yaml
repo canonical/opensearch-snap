@@ -152,7 +152,6 @@ jobs:
             exit 1
           fi
 
-
           # Prometheus exporter can be queried
           sudo cp /var/snap/wazuh-indexer/current/etc/wazuh-indexer/certificates/node-cm0.pem ./
           cert=./node-cm0.pem

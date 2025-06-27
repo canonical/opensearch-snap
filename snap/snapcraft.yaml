@@ -11,7 +11,7 @@ description: |
 
 grade: stable
 
-confinement: strict
+confinement: strict # use 'strict' once you have the right plugs and slots
 
 platforms:
   amd64:
@@ -106,6 +106,7 @@ apps:
       - shmem-perf-analyzer
       - system-observe
       - sys-fs-cgroup-service
+      - intel-qat
     environment:
       LD_LIBRARY_PATH: "${LD_LIBRARY_PATH}:${KNN_LIB_DIR}"
 
@@ -254,6 +255,9 @@ parts:
       - libcrypt1
       - libexpat1
       - zlib1g
+      - libqatzip3
+      - acl
+
 
 
   wrapper-scripts:
@@ -275,6 +279,9 @@ parts:
       - ssl-cert
       - openssl
       - openjdk-21-jre-headless
+    stage-packages:
+      - openjdk-21-jdk-headless
+      - wazuh-indexer=4.11.0-1
     override-build: |
       # update deps
       apt-get update; apt-get upgrade -y; apt-get autoremove --purge -y; apt-get clean -y
@@ -284,9 +291,6 @@ parts:
       trust_store="${CRAFT_PART_INSTALL}/etc/ssl/certs/java/"
       mkdir -p "${trust_store}"
       cp /etc/ssl/certs/java/cacerts "${trust_store}"
-    stage-packages:
-      - openjdk-21-jdk-headless
-      - wazuh-indexer=4.11.0-1
     override-stage: |
       craftctl default
       chmod -R 755 usr/share/wazuh-indexer
@@ -312,6 +316,23 @@ parts:
       mv "${CRAFT_PRIME}/usr/share/wazuh-indexer/bin/opensearch-plugin" "${CRAFT_PRIME}/usr/share/wazuh-indexer/bin/opensearch-plugin.orig"
       mv "${CRAFT_PRIME}/usr/share/wazuh-indexer/bin/opensearch-keystore" "${CRAFT_PRIME}/usr/share/wazuh-indexer/bin/opensearch-keystore.orig"
 
-      cp "${CRAFT_STAGE}/opt/opensearch/plugin-wrapper.sh" "${CRAFT_PRIME}/usr/share/wazuh-indexer/bin/opensearch-plugin"
-      cp "${CRAFT_STAGE}/opt/opensearch/keystore-wrapper.sh" "${CRAFT_PRIME}/usr/share/wazuh-indexer/bin/opensearch-keystore"
-      rm -rf usr/share/wazuh-indexer/jdk
+      mkdir -p "${CRAFT_PART_INSTALL}/usr/share/opensearch"
+
+      mkdir -p "${CRAFT_PART_INSTALL}/etc/opensearch/"
+      mv "${CRAFT_PART_INSTALL}"/config/* "${CRAFT_PART_INSTALL}/etc/opensearch/"
+
+      declare -a resources=(
+          bin lib modules plugins manifest.yml NOTICE.txt LICENSE.txt README.md
+      )
+      for res in "${resources[@]}"; do
+          mv "${CRAFT_PART_INSTALL}/${res}" "${CRAFT_PART_INSTALL}/usr/share/opensearch/"
+      done
+      chmod -R 755 "${CRAFT_PART_INSTALL}/usr/share/opensearch/bin"
+
+      # Final clean-up
+      rm "${archive}"
+
+      declare -a resources=(logs opensearch-tar-install.sh config)
+      for res in "${resources[@]}"; do
+          rm -rf "${CRAFT_PART_INSTALL}/${res}"
+      done
