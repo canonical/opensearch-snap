@@ -40,7 +40,7 @@ function set_ulimits () {
 
     # 3. Set the locked-in memory size to unlimited
     # ulimit -l 1964328 -- default in local machine
-    ulimit -l unlimited
+    ulimit -l unlimited || true
 }
 
 

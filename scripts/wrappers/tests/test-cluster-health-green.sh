@@ -58,10 +58,10 @@ set_defaults
 # Check cluster health
 endpoint="https://localhost:9200/_cluster/health"
 
-health_resp=$(curl -sk -XGET "${endpoint}" -u "admin:${admin_auth_password}")
+health_resp=$(${SNAP_CURRENT}/usr/bin/curl -sk -XGET "${endpoint}" -u "admin:${admin_auth_password}")
 echo -e "Cluster Health Response: \n ${health_resp}"
 
-cluster_status=$(echo "${health_resp}" | yq -r .status)
+cluster_status=$(echo "${health_resp}" | ${SNAP_CURRENT}/bin/yq -r .status)
 if [ "${cluster_status}" != "green" ]; then
     exit 1
 fi
