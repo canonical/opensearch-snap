@@ -58,7 +58,7 @@ set_defaults
 # Check cluster health
 endpoint="https://localhost:9200/.opendistro_security"
 
-sec_index_resp=$(curl -k -I -s -o /dev/null -w "%{http_code}" "${endpoint}" -u "admin:${admin_auth_password}")
+sec_index_resp=$(${SNAP_CURRENT}/usr/bin/curl -k -I -s -o /dev/null -w "%{http_code}" "${endpoint}" -u "admin:${admin_auth_password}")
 echo -e "Security index response: \n ${sec_index_resp}"
 
 if [ "${sec_index_resp}" != "200" ]; then
