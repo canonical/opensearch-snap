@@ -80,4 +80,3 @@ for f in "${folders[@]}"; do
     chown -R snap_daemon "${f}/"*
     chgrp root "${f}/"*
 done
-
