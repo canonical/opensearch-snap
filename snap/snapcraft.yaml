@@ -295,7 +295,7 @@ parts:
       curl -L -o "${archive}" "${url}"
       tar -xzvf "${archive}" -C "${CRAFT_PART_INSTALL}/" --strip-components=1
 
-      # remove plugins
+      # remove non-core plugins
       JAVA_PATH="$(dirname $(readlink -f $(which java)))"
       export JAVA_HOME="${JAVA_PATH%/*}"
       
