@@ -295,15 +295,6 @@ parts:
       curl -L -o "${archive}" "${url}"
       tar -xzvf "${archive}" -C "${CRAFT_PART_INSTALL}/" --strip-components=1
 
-      # remove non-core plugins
-      JAVA_PATH="$(dirname $(readlink -f $(which java)))"
-      export JAVA_HOME="${JAVA_PATH%/*}"
-      
-      remove_plugins=(prometheus-exporter repository-azure repository-gcs repository-s3)
-      for plugin in "${remove_plugins[@]}"; do
-        "${CRAFT_PART_INSTALL}"/bin/opensearch-plugin remove "${plugin}"
-      done
-
       mkdir -p "${CRAFT_PART_INSTALL}/usr/share/opensearch"
 
       mkdir -p "${CRAFT_PART_INSTALL}/etc/opensearch/"
