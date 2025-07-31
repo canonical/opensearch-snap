@@ -309,12 +309,6 @@ parts:
       mkdir -p "${CRAFT_PART_INSTALL}/etc/opensearch/"
       mv "${CRAFT_PART_INSTALL}"/config/* "${CRAFT_PART_INSTALL}/etc/opensearch/"
 
-      AGENT_JAR_PATH="/snap/opensearch/current/agent/opensearch-agent.jar"
-      JVM_OPTIONS_FILE="${CRAFT_PART_INSTALL}/etc/opensearch/jvm.options"
-
-      # Replace -javaagent path
-      sed -i "s|^21-:-javaagent:.*|21-:-javaagent:${AGENT_JAR_PATH}|" "$JVM_OPTIONS_FILE"
-
       declare -a resources=(
           bin lib modules plugins manifest.yml NOTICE.txt LICENSE.txt README.md
       )
