@@ -10,6 +10,8 @@ description: |
     Developers build with OpenSearch for use cases such as application search, 
     log analytics, data observability, data ingestion, and more.
 
+license: 'Apache-2.0'
+
 grade: stable # must be 'stable' to release into candidate/stable channels
 
 confinement: strict # use 'strict' once you have the right plugs and slots
