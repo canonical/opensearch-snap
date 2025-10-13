@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+set -eux
+
+source "${OPS_ROOT}"/helpers/snap-logger.sh "hook-post-refresh"
+
+backup_opensearch_home() {
+    local target="${SNAP_DATA}/opensearch_home_backup"
+    rm -rf "${target}"
+    mkdir -p "${target}"
+    cp -r "${OPENSEARCH_HOME}/." "${target}/"
+}
+
+replace_stale_jars() {
+    declare -a common=(modules plugins lib)
+    for dir in "${common[@]}"; do
+        find "${OPENSEARCH_HOME}/${dir}" -mindepth 1 -maxdepth 1 -exec rm -rf {} +
+        cp -r "${SNAP}/usr/share/opensearch/${dir}/"* \
+            "${OPENSEARCH_HOME}/${dir}/"
+    done
+}
+
+change_owner() {
+    local owner="$1"
+    declare -a folders=("${SNAP_DATA}")
+    for f in "${folders[@]}"; do
+        chown -R "${owner}" "${f}/"*
+        chgrp root "${f}/"*
+    done
+}
+
+change_owner root
+backup_opensearch_home
+replace_stale_jars
+change_owner snap_daemon

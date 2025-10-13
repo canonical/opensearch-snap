@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+set -eux
+
+source "${OPS_ROOT}/helpers/snap-logger.sh" "hook-pre-refresh"
+
+restore_previous_home_if_present() {
+    local backup="${SNAP_DATA}/opensearch_home_backup"
+    [ -d "${backup}" ] || return 0
+
+    rm -rf ${OPENSEARCH_HOME}
+    mkdir -p "${OPENSEARCH_HOME}"
+    cp -r "${backup}/." "${OPENSEARCH_HOME}/"
+}
+
+change_owner() {
+    local owner="$1"
+    declare -a folders=("${SNAP_DATA}")
+    for f in "${folders[@]}"; do
+        chown -R "${owner}" "${f}/"*
+        chgrp root "${f}/"*
+    done
+}
+change_owner root
+restore_previous_home_if_present
+change_owner snap_daemon
