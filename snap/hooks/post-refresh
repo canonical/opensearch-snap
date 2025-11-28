@@ -4,32 +4,35 @@ set -eux
 
 source "${OPS_ROOT}"/helpers/snap-logger.sh "hook-post-refresh"
 
-backup_opensearch_home() {
-    local target="${SNAP_DATA}/opensearch_home_backup"
-    rm -rf "${target}"
-    mkdir -p "${target}"
-    cp -r "${OPENSEARCH_HOME}/." "${target}/"
+set_previous_revision() {
+    for candidate in "${SNAP_DATA}"/../*; do
+        revision=$(basename "${candidate}")
+
+        # skip 'common', 'current' and current revision
+        [[ "${revision}" == "common" ]] && continue
+        [[ "${revision}" == "current" ]] && continue
+        [[ "${revision}" == "${SNAP_REVISION}" ]] && continue
+
+        revision_opensearch_home="${candidate}/usr/share/opensearch"
+
+        [[ -d "${revision_opensearch_home}" ]] || continue
+        if diff -qr "${OPENSEARCH_HOME}" "$revision_opensearch_home" >/dev/null 2>&1; then
+            snapctl set last-revision=${revision}
+            return 0
+        fi
+    done
 }
 
 replace_stale_jars() {
     declare -a common=(modules plugins lib)
     for dir in "${common[@]}"; do
-        find "${OPENSEARCH_HOME}/${dir}" -mindepth 1 -maxdepth 1 -exec rm -rf {} +
-        cp -r "${SNAP}/usr/share/opensearch/${dir}/"* \
-            "${OPENSEARCH_HOME}/${dir}/"
+        "${SNAP}"/usr/bin/rsync -a --delete "${SNAP}/usr/share/opensearch/${dir}/" "${OPENSEARCH_HOME}/${dir}/"
     done
 }
 
-change_owner() {
-    local owner="$1"
-    declare -a folders=("${SNAP_DATA}")
-    for f in "${folders[@]}"; do
-        chown -R "${owner}" "${f}/"*
-        chgrp root "${f}/"*
-    done
-}
-
-change_owner root
-backup_opensearch_home
-replace_stale_jars
-change_owner snap_daemon
+set_previous_revision
+setpriv \
+    --clear-groups \
+    --reuid snap_daemon \
+    --regid snap_daemon -- \
+    bash -c "$(declare -f replace_stale_jars); replace_stale_jars"

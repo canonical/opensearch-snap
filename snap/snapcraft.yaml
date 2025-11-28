@@ -251,6 +251,7 @@ parts:
       - zlib1g
       - libqatzip3
       - acl
+      - rsync
 
 
   wrapper-scripts:
