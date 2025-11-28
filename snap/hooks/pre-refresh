@@ -4,7 +4,19 @@ set -eux
 source "${OPS_ROOT}/helpers/snap-logger.sh" "hook-pre-refresh"
 
 restore_previous_home_if_present() {
-    last_revision=$(snapctl get last-revision)
+    # set last_revision as most recently modified dir in $SNAP
+    last_revision=$(
+        find "${SNAP}"/.. \
+            -mindepth 1 -maxdepth 1 \
+            -type d \
+            ! -name current \
+            ! -name "$SNAP_REVISION" \
+            -printf '%T@ %P\n' |
+            sort -nr |
+            head -n1 |
+            awk '{print $2}'
+    )
+
     local prev_opensearch_home="${SNAP_DATA}/../${last_revision}/usr/share/opensearch"
     [ -d "${prev_opensearch_home}" ] || return 0
 
@@ -16,5 +28,3 @@ setpriv \
     --reuid snap_daemon \
     --regid snap_daemon -- \
     bash -c "$(declare -f restore_previous_home_if_present); restore_previous_home_if_present"
-
-snapctl unset last-revision

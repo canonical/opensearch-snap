@@ -4,25 +4,6 @@ set -eux
 
 source "${OPS_ROOT}"/helpers/snap-logger.sh "hook-post-refresh"
 
-set_previous_revision() {
-    for candidate in "${SNAP_DATA}"/../*; do
-        revision=$(basename "${candidate}")
-
-        # skip 'common', 'current' and current revision
-        [[ "${revision}" == "common" ]] && continue
-        [[ "${revision}" == "current" ]] && continue
-        [[ "${revision}" == "${SNAP_REVISION}" ]] && continue
-
-        revision_opensearch_home="${candidate}/usr/share/opensearch"
-
-        [[ -d "${revision_opensearch_home}" ]] || continue
-        if diff -qr "${OPENSEARCH_HOME}" "$revision_opensearch_home" >/dev/null 2>&1; then
-            snapctl set last-revision=${revision}
-            return 0
-        fi
-    done
-}
-
 replace_stale_jars() {
     declare -a common=(modules plugins lib)
     for dir in "${common[@]}"; do
@@ -30,7 +11,6 @@ replace_stale_jars() {
     done
 }
 
-set_previous_revision
 setpriv \
     --clear-groups \
     --reuid snap_daemon \
