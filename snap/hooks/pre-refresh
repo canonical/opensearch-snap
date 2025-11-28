@@ -4,7 +4,7 @@ set -eux
 source "${OPS_ROOT}/helpers/snap-logger.sh" "hook-pre-refresh"
 
 restore_previous_home_if_present() {
-    # set last_revision as most recently modified dir in $SNAP
+    # set last_revision as most recently modified dir in $SNAP/..
     last_revision=$(
         find "${SNAP}"/.. \
             -mindepth 1 -maxdepth 1 \
