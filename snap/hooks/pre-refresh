@@ -21,11 +21,12 @@ restore_previous_home_if_present() {
     local prev_opensearch_home="${SNAP_DATA}/../${last_revision}/usr/share/opensearch"
     [ -d "${prev_opensearch_home}" ] || return 0
 
-    "${SNAP}"/usr/bin/rsync -a --delete "${prev_opensearch_home}/" "${OPENSEARCH_HOME}/"
+    setpriv \
+        --clear-groups \
+        --reuid snap_daemon \
+        --regid snap_daemon -- \
+        "${SNAP}"/usr/bin/rsync -a --delete \
+        "${prev_opensearch_home}/" "${OPENSEARCH_HOME}/"
 }
 
-setpriv \
-    --clear-groups \
-    --reuid snap_daemon \
-    --regid snap_daemon -- \
-    bash -c "$(declare -f restore_previous_home_if_present); restore_previous_home_if_present"
+restore_previous_home_if_present

@@ -7,12 +7,14 @@ source "${OPS_ROOT}"/helpers/snap-logger.sh "hook-post-refresh"
 replace_stale_jars() {
     declare -a common=(modules plugins lib)
     for dir in "${common[@]}"; do
-        "${SNAP}"/usr/bin/rsync -a --delete "${SNAP}/usr/share/opensearch/${dir}/" "${OPENSEARCH_HOME}/${dir}/"
+        setpriv \
+            --clear-groups \
+            --reuid snap_daemon \
+            --regid snap_daemon -- \
+            "${SNAP}/usr/bin/rsync" -a --delete \
+            "${SNAP}/usr/share/opensearch/${dir}/" \
+            "${OPENSEARCH_HOME}/${dir}/"
     done
 }
 
-setpriv \
-    --clear-groups \
-    --reuid snap_daemon \
-    --regid snap_daemon -- \
-    bash -c "$(declare -f replace_stale_jars); replace_stale_jars"
+replace_stale_jars
