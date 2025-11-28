@@ -10,6 +10,7 @@ restore_previous_home_if_present() {
             -mindepth 1 -maxdepth 1 \
             -type d \
             ! -name current \
+            ! -name common \
             ! -name "$SNAP_REVISION" \
             -printf '%T@ %P\n' |
             sort -nr |
