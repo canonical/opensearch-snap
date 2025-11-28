@@ -78,5 +78,5 @@ create_editable_cacerts_trust_store
 declare -a folders=("${SNAP_DATA}")
 for f in "${folders[@]}"; do
     chown -R snap_daemon "${f}/"*
-    chgrp root "${f}/"*
+    chgrp -R root "${f}/"*
 done
