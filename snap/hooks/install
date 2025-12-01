@@ -52,14 +52,31 @@ function set_prometheus_exporter_config_props() {
     set_yaml_prop "${OPENSEARCH_PATH_CONF}/opensearch.yml" "prometheus.nodes.filter" "_local"
 }
 
+function create_editable_cacerts_trust_store() {
+    # Copy the read only JDK provided cacerts into a writeable one
+    "${SNAP}"/usr/lib/jvm/java-21-openjdk-amd64/bin/keytool \
+        -importkeystore                                     \
+        -srckeystore  "${SNAP}/etc/ssl/certs/java/cacerts"  \
+        -destkeystore "${SNAP_DATA}"/etc/opensearch/certificates/cacerts.p12 \
+        -srcstoretype   JKS              \
+        -deststoretype  PKCS12           \
+        -srcstorepass   changeit         \
+        -deststorepass  changeit         \
+        -noprompt
+
+    echo "-Djavax.net.ssl.trustStore=/var/snap/opensearch/current/etc/opensearch/certificates/cacerts.p12" | tee -a "${OPENSEARCH_PATH_CONF}/jvm.options"
+    echo "-Djavax.net.ssl.trustStorePassword=changeit" | tee -a "${OPENSEARCH_PATH_CONF}/jvm.options"
+}
+
 
 create_file_structure
 set_base_config_props
 set_prometheus_exporter_config_props
+create_editable_cacerts_trust_store
 
 #  "${SNAP_COMMON}"
 declare -a folders=("${SNAP_DATA}")
 for f in "${folders[@]}"; do
     chown -R snap_daemon "${f}/"*
-    chgrp root "${f}/"*
+    chgrp -R root "${f}/"*
 done
