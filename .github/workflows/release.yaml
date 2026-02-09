@@ -8,6 +8,7 @@ on:
     branches:
       - '2/edge'
   workflow_call:
+  workflow_dispatch:
 
 jobs:
   ci-tests:
