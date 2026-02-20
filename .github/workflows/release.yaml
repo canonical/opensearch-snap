@@ -8,6 +8,7 @@ on:
     branches:
       - '3/edge'
   workflow_call:
+  workflow_dispatch:
 
 jobs:
   ci-tests:
@@ -17,7 +18,7 @@ jobs:
   publish:
     name: publish
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     needs:
       - ci-tests
     steps:
