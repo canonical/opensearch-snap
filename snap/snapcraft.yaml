@@ -275,7 +275,6 @@ parts:
       - ssl-cert
       - openssl
       - openjdk-21-jre-headless
-    stage-snaps:
       - jq
     stage-packages:
       - openjdk-21-jdk-headless
