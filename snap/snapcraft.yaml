@@ -1,7 +1,7 @@
 name: opensearch # you probably want to 'snapcraft register <name>'
 base: core24 # the base snap is the execution environment for this snap
 
-version: '2.19.4' # just for humans, typically '1.2+git' or '1.3.2'
+version: '2.19.5' # just for humans, typically '1.2+git' or '1.3.2'
 
 summary: 'OpenSearch: community-driven, Apache 2.0-licensed search and analytics suite.'
 description: |
@@ -275,6 +275,7 @@ parts:
       - ssl-cert
       - openssl
       - openjdk-21-jre-headless
+      - jq
     stage-packages:
       - openjdk-21-jdk-headless
     override-build: |
@@ -291,11 +292,15 @@ parts:
       version="$(craftctl get version)"
       series="${version%%.*}.x"
       patch="ubuntu0"
-      release_date="20251126142159"
+      release_date="20260621202602"
 
       archive="opensearch-${version}-${patch}-${release_date}-linux-x64.tar.gz"
-      url="https://launchpad.net/opensearch-releases/${series}/${version}-${patch}/+download/${archive}"
-      curl -L -o "${archive}" "${url}"
+      url="https://api.launchpad.net/1.0/opensearch-releases/${series}/${version}-${patch}/files"
+      curl -sk "${url}" \
+        | jq -r '.entries[].file_link' \
+        | sort \
+        | xargs -n1 curl -skL | tar -xzvf - --strip-components=2
+      # The archive is output/lp-${Version}/${archive}
       tar -xzvf "${archive}" -C "${CRAFT_PART_INSTALL}/" --strip-components=1
 
       mkdir -p "${CRAFT_PART_INSTALL}/usr/share/opensearch"
