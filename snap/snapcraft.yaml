@@ -30,6 +30,7 @@ plugs:
     interface: system-files
     read:
       - /sys/fs/cgroup/system.slice/snap.opensearch.daemon.service
+      - /sys/fs/cgroup/cgroup.controllers
 
 
 slots:
@@ -190,6 +191,7 @@ apps:
       - system-observe
       - sys-fs-cgroup-service
       - mount-observe
+      - hardware-observe
     environment:
       bin_script: opensearch-node
 
