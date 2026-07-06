@@ -188,6 +188,11 @@ apps:
     plugs:
       - network
       - network-bind
+      - process-control
+      - system-observe
+      - sys-fs-cgroup-service
+      - mount-observe
+      - hardware-observe
     environment:
       bin_script: opensearch-node
 
