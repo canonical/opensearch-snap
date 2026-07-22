@@ -4,58 +4,34 @@ env:
   RELEASE: edge
 
 on:
-  push:
-    branches:
-      - '2/edge'
-  workflow_call:
-  workflow_dispatch:
+  pull_request:
 
 jobs:
-  ci-tests:
-    name: Build and Run Tests
-    uses: ./.github/workflows/ci.yaml
+  build-snaps:
+    name: Build snap | 2.19.4
+    strategy:
+      fail-fast: false
+    uses: canonical/data-platform-workflows/.github/workflows/build_snap.yaml@v49.0.2
+    with:
+      path-to-snap-project-directory: .
+      artifact-prefix: packed-snap-opensearch
+    permissions:
+      actions: read # Needed for GitHub API call to get workflow version
+      contents: read
 
-  publish:
-    name: publish
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
+  publish-snaps:
+    name: Publish snap to PR branch | OpenSearch 2.19.4
     needs:
-      - ci-tests
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - name: Install required dependencies
-        run: |
-          sudo snap install yq
-
-      - name: Download snap file
-        uses: actions/download-artifact@v4
-        with:
-          name: opensearch_snap_amd64
-          path: .
-
-      - name: Set snap release channel
-        run: |
-          version="$(cat snap/snapcraft.yaml | yq .version)"
-          channel="${version%%.*}/${{env.RELEASE}}"
-          
-          echo "version=${version}" >> $GITHUB_ENV
-          echo "channel=${channel}" >> $GITHUB_ENV
-
-      - name: Publish snap to Store
-        id: publish
-        uses: snapcore/action-publish@v1
-        env:
-          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.STORE_LOGIN }}
-        with:
-          snap: opensearch_${{env.version}}_amd64.snap
-          release: ${{env.channel}}
-
-      - name: Upload snapcraft logs
-        if: ${{ failure() && steps.publish.outcome == 'failure' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: snapcraft-release-logs
-          path: ~/.local/state/snapcraft/log/
-          if-no-files-found: error
+      - build-snaps
+    strategy:
+      fail-fast: false
+    uses: canonical/data-platform-workflows/.github/workflows/release_snap_pr.yaml@v49.0.2
+    with:
+      track: 2
+      path-to-snap-project-directory: .
+      artifact-prefix: packed-snap-opensearch
+    secrets:
+      snap-store-token: ${{ secrets.STORE_LOGIN }}
+    permissions:
+      actions: read   # Needed for GitHub API call to get workflow version
+      contents: read
