@@ -74,7 +74,7 @@ set_base_config_props
 set_prometheus_exporter_config_props
 create_editable_cacerts_trust_store
 
-declare -a folders=("${SNAP_DATA}", "${SNAP_COMMON}")
+declare -a folders=("${SNAP_DATA}" "${SNAP_COMMON}")
 for f in "${folders[@]}"; do
     chown -R snap_daemon "${f}/"*
     chgrp -R root "${f}/"*
