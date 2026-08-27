@@ -1,7 +1,7 @@
 name: opensearch # you probably want to 'snapcraft register <name>'
-base: core24 # the base snap is the execution environment for this snap
+base: core26 # the base snap is the execution environment for this snap
 
-version: '3.1.0' # just for humans, typically '1.2+git' or '1.3.2'
+version: '3.7.0' # just for humans, typically '1.2+git' or '1.3.2'
 
 summary: 'OpenSearch: community-driven, Apache 2.0-licensed search and analytics suite.'
 description: |
@@ -288,11 +288,21 @@ parts:
       version="$(craftctl get version)"
       series="${version%%.*}.x"
       patch="ubuntu0"
-      release_date="20250730162625"
+      release_date="20260711113051"
 
       archive="opensearch-${version}-${patch}-${release_date}-linux-x64.tar.gz"
-      url="https://launchpad.net/opensearch-releases/${series}/${version}-${patch}/+download/${archive}"
-      curl -L -o "${archive}" "${url}"
+      url_base="https://launchpad.net/opensearch-releases/${series}/${version}-amd64-${patch}/+download"
+
+      # download every split part
+      for part in a{a..z}; do
+        part_url="${url_base}/${archive}.${part}"
+        if ! curl -fL -o "${archive}.${part}" "${part_url}"; then
+          rm -f "${archive}.${part}"
+          break
+        fi
+      done
+      cat "${archive}".* > "${archive}"
+
       tar -xzvf "${archive}" -C "${CRAFT_PART_INSTALL}/" --strip-components=1
 
       # remove non-core plugins
@@ -318,7 +328,7 @@ parts:
       chmod -R 755 "${CRAFT_PART_INSTALL}/usr/share/opensearch/bin"
 
       # Final clean-up
-      rm "${archive}"
+      rm -f "${archive}" "${archive}".*
 
       declare -a resources=(logs opensearch-tar-install.sh config)
       for res in "${resources[@]}"; do

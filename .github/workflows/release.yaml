@@ -2,6 +2,8 @@ name: Publish to Snap Store
 
 env:
   RELEASE: edge
+  # TODO: remove this on next push to 3/edge
+  RELEASE_BRANCH: testupgrades
 
 on:
   push:
@@ -39,7 +41,10 @@ jobs:
         run: |
           version="$(cat snap/snapcraft.yaml | yq .version)"
           channel="${version%%.*}/${{env.RELEASE}}"
-          
+          if [ -n "${{env.RELEASE_BRANCH}}" ]; then
+            channel="${channel}/${{env.RELEASE_BRANCH}}"
+          fi
+
           echo "version=${version}" >> $GITHUB_ENV
           echo "channel=${channel}" >> $GITHUB_ENV
 
